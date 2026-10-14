@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
-import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import 'health_safety_intake_screen.dart';
+import 'widget/profile_bottom_button.dart';
+import 'widget/profile_chip.dart';
+import 'widget/profile_section_card.dart';
+import 'widget/profile_text_area.dart';
 
 class GoalsStartingPointScreen extends StatefulWidget {
   const GoalsStartingPointScreen({super.key});
@@ -152,66 +155,23 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
           ],
         ),
       ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              children: [
-                _buildBaselineMeasurements(),
-                const SizedBox(height: 24),
-                _buildExperienceSection(),
-              ],
-            ),
-          ),
-          _buildBottomBar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, 4),
-            blurRadius: 20,
-            spreadRadius: -2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 10),
-              CommonText(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "Playfair_Display",
-                  color: const Color(0xFF1D1B1A),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...children,
+          _buildBaselineMeasurements(),
+          const SizedBox(height: 24),
+          _buildExperienceSection(),
+          const SizedBox(height: 24),
+          ProfileBottomButton(
+            onTap: _onSaveAndContinue,
+          )
         ],
       ),
     );
   }
 
   Widget _buildBaselineMeasurements() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Baseline Measurements",
       icon: appIcons.measurement,
       children: [
@@ -375,7 +335,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   }
 
   Widget _buildExperienceSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Experience & Foundations",
       icon: appIcons.book,
       children: [
@@ -389,12 +349,15 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         const SizedBox(height: 24),
 
         // Approaches
-        _buildRequiredLabel("Approaches you have tried"),
+        buildRequiredLabel(
+          "Approaches you have tried",
+          color: Color(0xFF1D1B1A),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _approachesList.map((e) => _buildChip(
+          children: _approachesList.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedApproaches.contains(e),
             onTap: () {
@@ -420,12 +383,20 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         const SizedBox(height: 24),
 
         // Learnings
-        _buildRequiredLabel(isRequired: false, "What did you understand or learn from those experiences?"),
+        buildRequiredLabel(
+          "What did you understand or learn from those experiences?",
+          isRequired: false,
+
+        ),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _learnedController,
           hint: "e.g. Learned that extreme restriction leads to fatigue and binge cycles...",
           error: _learnedError,
+          onChanged: (v) {
+            setState(() {});
+            if (_learnedError != null) _validate();
+          },
         ),
         const SizedBox(height: 8),
         CommonText(
@@ -435,12 +406,15 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         const SizedBox(height: 24),
 
         // Confident areas
-        _buildRequiredLabel("Which areas do you already feel confident about?"),
+        buildRequiredLabel(
+          "Which areas do you already feel confident about?",
+          color: Color(0xFF1D1B1A),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _confidentList.map((e) => _buildChip(
+          children: _confidentList.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedConfident.contains(e),
             selectedBgColor: const Color(0xFFD8E5BF),
@@ -468,144 +442,38 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         const SizedBox(height: 24),
 
         // Confusing
-        _buildRequiredLabel("What still feels confusing or difficult?"),
+        buildRequiredLabel(
+          "What still feels confusing or difficult?",
+          color: Color(0xFF1D1B1A),
+        ),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _confusingController,
           hint: "e.g. Balancing evening meals when working late...",
           error: _confusingError,
+          onChanged: (v) {
+            setState(() {});
+            if (_confusingError != null) _validate();
+          },
         ),
         const SizedBox(height: 24),
 
         // What helped
-        _buildRequiredLabel("What helped, what made you stop, and what contributed to progress returning?"),
+        buildRequiredLabel(
+          "What helped, what made you stop, and what contributed to progress returning?",
+          color: Color(0xFF1D1B1A),
+        ),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _helpedController,
           hint: "e.g. Having accountability and structured groceries helped most...",
           error: _helpedError,
+          onChanged: (v) {
+            setState(() {});
+            if (_helpedError != null) _validate();
+          },
         ),
       ],
-    );
-  }
-
-  Widget _buildRequiredLabel(String text, {bool isRequired = true}) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF1D1B1A),
-          fontWeight: FontWeight.w600,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          if(isRequired) TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    Color? selectedBgColor,
-    Color? selectedTextColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? (selectedBgColor ?? const Color(0xFFFFDADB)) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: CommonText(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? (selectedTextColor ?? const Color(0xFF3A0910)) : const Color(0xFF534343),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextArea({required TextEditingController controller, required String hint, String? error}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: appColors.textFieldBgColor,
-        borderRadius: BorderRadius.circular(16),
-        border: error != null ? Border.all(color: appColors.red) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: controller,
-            maxLines: 4,
-            minLines: 3,
-            keyboardType: TextInputType.multiline,
-            style: TextStyle(
-              fontSize: 14,
-              color: const Color(0xFF1D1B1A),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: TextStyle(
-                fontSize: 14,
-                color: const Color(0xFF9A8687), // Updated hint color to match design slightly better
-                fontFamily: fontFamilyPlusJakartaSans,
-              ),
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
-            ),
-            onChanged: (v) {
-              setState(() {});
-              if (error != null) _validate();
-            },
-          ),
-          if (error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: CommonText(
-                error,
-                style: TextStyle(color: appColors.red, fontSize: 12),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding(context) > 0 ? bottomPadding(context) : 24),
-      decoration: BoxDecoration(
-        color: appColors.bgColor.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, -4),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: CommonButton(
-        name: "Save & Continue to Health & Safety",
-        icon: Icons.arrow_forward_rounded,
-        isIconFirst: false,
-        imageSize: 16,
-        btnColor: appColors.primary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        onTap: _onSaveAndContinue,
-      ),
     );
   }
 }

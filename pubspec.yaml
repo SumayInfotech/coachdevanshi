@@ -43,6 +43,7 @@ dependencies:
   shimmer: ^4.0.0
   image_picker: ^1.2.3
   pinput: ^6.0.2
+  country_code_picker: ^3.4.1
 
 dev_dependencies:
   flutter_test:

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
-import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
+import 'widget/profile_bottom_button.dart';
+import 'widget/profile_chip.dart';
+import 'widget/profile_section_card.dart';
+import 'widget/profile_text_area.dart';
 
 class MindsetSustainabilityScreen extends StatefulWidget {
   const MindsetSustainabilityScreen({super.key});
@@ -96,7 +99,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   void _onSaveAndReview() {
     if (_validate()) {
       appLog("Mindset & Sustainability Form Validated!");
-      navigation.pop(context); // Usually goes to a review screen next
+      navigation.pop(context);
     }
   }
 
@@ -165,148 +168,29 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           const SizedBox(height: 24),
           _buildReflectionsSection(),
           const SizedBox(height: 24),
-          _buildBottomBar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: CommonText(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
-                    color: const Color(0xFF1D1B1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRequiredLabel(String text, {String? subtext}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(
-              fontSize: 13,
-              fontFamily: fontFamilyPlusJakartaSans,
-              color: Color(0xFF1D1B1A),
-              fontWeight: FontWeight.w600,
-              height: 20 / 13,
-            ),
-            children: [
-              TextSpan(text: "$text "),
-              TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-            ],
-          ),
-        ),
-        if (subtext != null) ...[
-          const SizedBox(height: 2),
-          CommonText(subtext, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF9A8687))),
-        ]
-      ],
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: CommonText(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? const Color(0xFF3A0910) : const Color(0xFF534343),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextArea({required TextEditingController controller, required String hint, String? error}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: appColors.textFieldBgColor,
-        borderRadius: BorderRadius.circular(12),
-        border: error != null ? Border.all(color: appColors.red) : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: controller,
-            maxLines: 4,
-            minLines: 3,
-            style: TextStyle(fontSize: 14, color: const Color(0xFF1D1B1A), fontFamily: fontFamilyPlusJakartaSans),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: hint,
-              hintStyle: TextStyle(fontSize: 14, color: const Color(0xFF857373)),
-              isDense: true,
-            ),
-            onChanged: (v) {
-              setState(() {});
-              if (error != null) _validate();
-            },
-          ),
+          ProfileBottomButton(
+            onTap: _onSaveAndReview,
+          )
         ],
       ),
     );
   }
 
   Widget _buildMindsetSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Goal-Oriented Mindset",
       icon: appIcons.mindset,
       children: [
-        _buildRequiredLabel("Which statements sound most like you when you are working toward a goal?", subtext: "(Select up to 3)"),
+        buildRequiredLabel(
+          "Which statements sound most like you when you are working toward a goal?",
+          subtext: "(Select up to 3)",
+          color: Color(0xFF1D1B1A)
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _mindsetOptions.map((e) => _buildChip(
+          children: _mindsetOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedMindsets.contains(e),
             onTap: () {
@@ -332,16 +216,23 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   }
 
   Widget _buildSlowProgressSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Navigating Slow Progress",
       icon: appIcons.navigating,
       children: [
-        _buildRequiredLabel("When progress is slower than you hoped, what tends to happen in your head — and what do you usually do next?"),
+        buildRequiredLabel(
+          "When progress is slower than you hoped, what tends to happen in your head — and what do you usually do next?",
+          color: Color(0xFF1D1B1A)
+        ),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _slowProgressController,
           hint: "e.g., I start questioning whether anything is working and feel tempted to restart from scratch or restrict more heavily...",
           error: _slowProgressError,
+          onChanged: (v) {
+            setState(() {});
+            if (_slowProgressError != null) _validate();
+          },
         ),
         if (_slowProgressError != null)
           Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_slowProgressError!, style: TextStyle(color: appColors.red, fontSize: 12))),
@@ -350,11 +241,14 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   }
 
   Widget _buildBoundariesSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Starting Points & Boundaries",
       icon: appIcons.flag,
       children: [
-        _buildRequiredLabel("What is one change you could genuinely start this week, and one thing you are not ready to change yet?"),
+        buildRequiredLabel(
+          "What is one change you could genuinely start this week, and one thing you are not ready to change yet?",
+          color: Color(0xFF1D1B1A)
+        ),
         const SizedBox(height: 16),
         CommonText("One change you could genuinely start this week", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
         const SizedBox(height: 6),
@@ -387,16 +281,23 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   }
 
   Widget _buildVisionSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Your Vision of Success",
       icon: appIcons.stars,
       children: [
-        _buildRequiredLabel("If coaching worked well for you, what would feel different in your body, your routine and your life?"),
+        buildRequiredLabel(
+          "If coaching worked well for you, what would feel different in your body, your routine and your life?",
+          color: Color(0xFF1D1B1A)
+        ),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _visionController,
           hint: "e.g., Waking up with steady energy without afternoon crashes, feeling calm around food choices...",
           error: _visionError,
+          onChanged: (v) {
+            setState(() {});
+            if (_visionError != null) _validate();
+          },
         ),
         if (_visionError != null)
           Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_visionError!, style: TextStyle(color: appColors.red, fontSize: 12))),
@@ -405,43 +306,17 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   }
 
   Widget _buildReflectionsSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Open Reflections",
       icon: appIcons.edit,
       children: [
         CommonText("Is there anything important about your health, body, food or lifestyle that we have not asked?", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
         const SizedBox(height: 12),
-        _buildTextArea(
+        ProfileTextArea(
           controller: _reflectionsController,
           hint: "e.g., Any past experiences with diets, specific daily rhythms, travel schedules...",
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding(context) > 0 ? bottomPadding(context) : 24),
-      decoration: BoxDecoration(
-        color: appColors.bgColor.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, -4),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: CommonButton(
-        name: "Save & Review",
-        icon: Icons.arrow_forward_rounded,
-        isIconFirst: false,
-        imageSize: 16,
-        btnColor: appColors.primary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        onTap: _onSaveAndReview,
-      ),
     );
   }
 }

@@ -311,30 +311,12 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
     );
   }
 
-  Widget _buildRequiredLabel(String text, {bool isRequired = true}) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF534343),
-          fontWeight: FontWeight.w600,
-          height: 20 / 13,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          if (isRequired) TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDateSection() {
     return _buildSectionCard(
       title: "Photo Date",
       icon: appIcons.calender,
       children: [
-        _buildRequiredLabel("Date of record for body composition markers"),
+        buildRequiredLabel("Date of record for body composition markers"),
         const SizedBox(height: 8),
         CommonTextField(
           label: '',

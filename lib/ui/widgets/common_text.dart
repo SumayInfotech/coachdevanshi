@@ -62,3 +62,30 @@ Widget mandatoryText({
     ),
   );
 }
+
+Widget buildRequiredLabel(String text, {String? subtext, bool isRequired = true, Color? color, double? height}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: 13,
+            fontFamily: fontFamilyPlusJakartaSans,
+            color: color ?? Color(0xFF534343),
+            fontWeight: FontWeight.w600,
+            height: height ?? 20 / 13,
+          ),
+          children: [
+            TextSpan(text: "$text "),
+            if(isRequired) TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
+          ],
+        ),
+      ),
+      if (subtext != null) ...[
+        const SizedBox(height: 2),
+        CommonText(subtext, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF9A8687))),
+      ]
+    ],
+  );
+}

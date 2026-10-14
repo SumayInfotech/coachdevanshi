@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,6 +23,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  
+  String selectedCountryCode = "+91";
 
   String? nameError;
   String? phoneError;
@@ -59,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (validation()) {
       navigation.pushSlideAnimation(
         context,
-        OtpVerificationScreen(phoneNumber: "+91 ${_phoneController.text}", fromSignUp: true),
+        OtpVerificationScreen(phoneNumber: "$selectedCountryCode ${_phoneController.text}", fromSignUp: true),
       );
     }
   }
@@ -200,19 +203,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         LengthLimitingTextInputFormatter(10),
                       ],
                       prefixIcon: Padding(
-                        padding: const EdgeInsets.only(left: 14, right: 10),
+                        padding: const EdgeInsets.only(left: 4, right: 10),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const CommonText(
-                              "+91",
-                              style: TextStyle(
+                            CountryCodePicker(
+                              onChanged: (countryCode) {
+                                selectedCountryCode = countryCode.dialCode ?? "+91";
+                              },
+                              initialSelection: 'IN',
+                              favorite: const ['+91', 'IN'],
+                              showCountryOnly: false,
+                              showOnlyCountryWhenClosed: false,
+                              alignLeft: false,
+                              flagWidth: 25,
+                              padding: EdgeInsets.zero,
+                              textStyle: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF1D1B1A),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Container(
                               height: 24,
                               width: 1,

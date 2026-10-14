@@ -219,24 +219,6 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
     );
   }
 
-  Widget _buildRequiredLabel(String text, {bool isRequired = true}) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF534343),
-          fontWeight: FontWeight.w600,
-          height: 20 / 13,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          if (isRequired) TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildToggleRow(String labelLeft, String labelRight, bool isLeftSelected, ValueChanged<bool> onChanged) {
     return Row(
       children: [
@@ -308,7 +290,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       title: "Measurement Date",
       icon: appIcons.calender,
       children: [
-        _buildRequiredLabel("Date of record"),
+        buildRequiredLabel("Date of record"),
         const SizedBox(height: 8),
         CommonTextField(
           label: '',
@@ -354,7 +336,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       title: "Chest",
       icon: appIcons.measurement,
       children: [
-        _buildRequiredLabel("Measure around the fullest part of your chest with relaxed breathing."),
+        buildRequiredLabel("Measure around the fullest part of your chest with relaxed breathing."),
         const SizedBox(height: 8),
         CommonTextField(
           label: '',
@@ -378,7 +360,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       title: "Abdomen at Navel",
       icon: appIcons.abdomen,
       children: [
-        _buildRequiredLabel("Measure horizontally across your navel/belly button without pulling the tape tight."),
+        buildRequiredLabel("Measure horizontally across your navel/belly button without pulling the tape tight."),
         const SizedBox(height: 8),
         CommonTextField(
           label: '',
@@ -402,7 +384,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       title: "Hip",
       icon: appIcons.hip, // using related material icon
       children: [
-        _buildRequiredLabel("Measure around the widest point of your hips and buttocks."),
+        buildRequiredLabel("Measure around the widest point of your hips and buttocks."),
         const SizedBox(height: 8),
         CommonTextField(
           label: '',

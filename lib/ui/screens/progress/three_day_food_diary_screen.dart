@@ -379,7 +379,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
     );
   }
 
-  Widget _buildRequiredLabel(String text) {
+  /*Widget _buildRequiredLabel(String text) {
     return RichText(
       text: TextSpan(
         style: const TextStyle(
@@ -395,7 +395,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
         ],
       ),
     );
-  }
+  }*/
 
   Widget _buildDateRecordCard() {
     return Container(
@@ -417,7 +417,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
             children: [
               Icon(Icons.calendar_today_outlined, color: appColors.primary, size: 16),
               const SizedBox(width: 8),
-              _buildRequiredLabel("Date of Record"),
+              buildRequiredLabel("Date of Record"),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -490,7 +490,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildRequiredLabel("Time Taken"),
+          buildRequiredLabel("Time Taken"),
           const SizedBox(height: 6),
           CommonTextField(
             label: '',
@@ -504,7 +504,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
             onTap: () => _selectTime(timeController),
           ),
           const SizedBox(height: 16),
-          _buildRequiredLabel("Food & Beverage Items"),
+          buildRequiredLabel("Food & Beverage Items"),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

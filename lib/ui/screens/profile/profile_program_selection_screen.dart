@@ -1,13 +1,15 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
-import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
 import 'goals_starting_point_screen.dart';
+import 'widget/profile_bottom_button.dart';
+import 'widget/profile_section_card.dart';
 
 class ProfileProgramSelectionScreen extends StatefulWidget {
   const ProfileProgramSelectionScreen({super.key});
@@ -30,9 +32,12 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   String? _dobError;
   String? _cityError;
   String? _dailyRhythmError;
+  String? _journeyError;
+
+  String selectedCountryCode = "+91";
 
   String _selectedGender = 'Female';
-  String _selectedJourney = 'Rooted Recovery for New Moms';
+  String? _selectedJourney;
   String _selectedCountry = 'India';
 
   bool _validate() {
@@ -73,13 +78,19 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
       _dailyRhythmError = null;
     }
 
+    if (_selectedJourney == null) {
+      _journeyError = "Please select a coaching journey";
+      isValid = false;
+    } else {
+      _journeyError = null;
+    }
+
     setState(() {});
     return isValid;
   }
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      // Navigate to next screen
       appLog("Form Validated! Ready to proceed.");
       navigation.pushReplaceFadeAnimation(context, GoalsStartingPointScreen());
     }
@@ -139,73 +150,29 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                children: [
-                  _buildPersonalDetailsSection(),
-                  const SizedBox(height: 24),
-                  _buildBiologicalContextSection(),
-                  const SizedBox(height: 24),
-                  _buildLocationSection(),
-                  const SizedBox(height: 24),
-                  _buildDailyLifeSection(),
-                  const SizedBox(height: 24),
-                  _buildCoachingJourneySection(),
-                ],
-              ),
-            ),
-            _buildBottomBar(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 10),
-              CommonText(
-                title,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "Playfair_Display",
-                  color: const Color(0xFF1D1B1A),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...children,
+          _buildPersonalDetailsSection(),
+          const SizedBox(height: 24),
+          _buildBiologicalContextSection(),
+          const SizedBox(height: 24),
+          _buildLocationSection(),
+          const SizedBox(height: 24),
+          _buildDailyLifeSection(),
+          const SizedBox(height: 24),
+          _buildCoachingJourneySection(),
+          const SizedBox(height: 24),
+          ProfileBottomButton(
+            onTap: _onSaveAndContinue,
+          )
         ],
       ),
     );
   }
 
   Widget _buildPersonalDetailsSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Personal Details",
       icon: appIcons.personalDetail,
       children: [
@@ -268,21 +235,28 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
             LengthLimitingTextInputFormatter(10),
           ],
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(left: 14, right: 10),
+            padding: const EdgeInsets.only(left: 4, right: 4),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CommonText(
-                  "🇮🇳 +91",
-                  style: TextStyle(
+                CountryCodePicker(
+                  onChanged: (countryCode) {
+                    selectedCountryCode = countryCode.dialCode ?? "+91";
+                  },
+                  initialSelection: 'IN',
+                  favorite: const ['+91', 'IN'],
+                  showCountryOnly: false,
+                  showOnlyCountryWhenClosed: false,
+                  flagWidth: 25,
+                  alignLeft: false,
+                  padding: EdgeInsets.zero,
+                  textStyle: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF1D1B1A),
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 16),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 Container(height: 24, width: 1, color: const Color(0xFFE7E1DF)),
               ],
             ),
@@ -296,12 +270,27 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           label: "Date of Birth",
           controller: _dobController,
           isRequired: true,
+          readOnly: true,
           hint: "MM / DD / YYYY",
           error: _dobError,
           borderColor: Colors.transparent,
+          fillColor: appColors.textFieldBgColor,
           prefixIcon: const Icon(Icons.calendar_today_rounded, color: Color(0xFF857373), size: 20),
-          onChanged: (v) {
-            if (_dobError != null) _validate();
+          onTap: () async {
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            if (pickedDate != null) {
+              String formattedDate =
+                  "${pickedDate.month.toString().padLeft(2, '0')} / ${pickedDate.day.toString().padLeft(2, '0')} / ${pickedDate.year}";
+              setState(() {
+                _dobController.text = formattedDate;
+                if (_dobError != null) _validate();
+              });
+            }
           },
         ),
       ],
@@ -309,7 +298,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildBiologicalContextSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Biological Context",
       icon: appIcons.progress, // using a relevant icon
       children: [
@@ -357,7 +346,9 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     );
   }
 
-  Widget _buildSelectionPill({required String label, required IconData icon, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildSelectionPill({
+    required String label, required IconData icon, required bool isSelected, required VoidCallback onTap
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -403,7 +394,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildLocationSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Location",
       icon: appIcons.world,
       children: [
@@ -506,7 +497,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildDailyLifeSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Daily Life & Schedule",
       icon: appIcons.dailyLifeSchedule,
       children: [
@@ -606,7 +597,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildCoachingJourneySection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Coaching Journey",
       icon: appIcons.coachingJourney,
       children: [
@@ -629,7 +620,10 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           subtitle: "Sustainable metabolic tuning & mindful body recomp",
           icon: appIcons.fatInchLoss,
           isSelected: _selectedJourney == "Fat Loss and Inch Loss",
-          onTap: () => setState(() => _selectedJourney = "Fat Loss and Inch Loss"),
+          onTap: () => setState(()  {
+            _selectedJourney = "Fat Loss and Inch Loss";
+            if(_journeyError != null) _validate();
+          }),
         ),
         const SizedBox(height: 12),
         _buildJourneyPill(
@@ -637,7 +631,10 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           subtitle: "Nourishing caloric density & strength optimization",
           icon: appIcons.healthyWeightGain,
           isSelected: _selectedJourney == "Healthy Weight Gain",
-          onTap: () => setState(() => _selectedJourney = "Healthy Weight Gain"),
+          onTap: () => setState(()  {
+            _selectedJourney = "Healthy Weight Gain";
+            if(_journeyError != null) _validate();
+          }),
         ),
         const SizedBox(height: 12),
         _buildJourneyPill(
@@ -645,7 +642,10 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           subtitle: "Postpartum restorative nourishment & gentle hormonal balance",
           icon: appIcons.rootedRecovery,
           isSelected: _selectedJourney == "Rooted Recovery for New Moms",
-          onTap: () => setState(() => _selectedJourney = "Rooted Recovery for New Moms"),
+          onTap: () => setState(()  {
+            _selectedJourney = "Rooted Recovery for New Moms";
+            if(_journeyError != null) _validate();
+          }),
         ),
         const SizedBox(height: 12),
         _buildJourneyPill(
@@ -653,7 +653,10 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           subtitle: "Long-term nutritional intuition & energy stability",
           icon: appIcons.maintenance,
           isSelected: _selectedJourney == "Maintenance and Lifestyle Management",
-          onTap: () => setState(() => _selectedJourney = "Maintenance and Lifestyle Management"),
+          onTap: () => setState(()  {
+            _selectedJourney = "Maintenance and Lifestyle Management";
+            if(_journeyError != null) _validate();
+          }),
         ),
         const SizedBox(height: 12),
         _buildJourneyPill(
@@ -661,13 +664,22 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           subtitle: "Microbiome rebalancing & anti-inflammatory food protocols",
           icon: appIcons.progress,
           isSelected: _selectedJourney == "Gut Reset",
-          onTap: () => setState(() => _selectedJourney = "Gut Reset"),
+          onTap: () => setState(()  {
+            _selectedJourney = "Gut Reset";
+            if(_journeyError != null) _validate();
+          }),
         ),
+        const SizedBox(height: 12),
+        if (_journeyError != null)
+          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_journeyError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
     );
   }
 
-  Widget _buildJourneyPill({required String title, required String subtitle, required String icon, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildJourneyPill({
+    required String title, required String subtitle, required String icon,
+    required bool isSelected, required VoidCallback onTap
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -731,32 +743,6 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomPadding(context) > 0 ? bottomPadding(context) : 24),
-      decoration: BoxDecoration(
-        color: appColors.bgColor.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, -4),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: CommonButton(
-        name: "Save & Continue to Goals & Starting Point",
-        icon: Icons.arrow_forward_rounded,
-        isIconFirst: false,
-        imageSize: 16,
-        btnColor: appColors.primary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        onTap: _onSaveAndContinue,
       ),
     );
   }

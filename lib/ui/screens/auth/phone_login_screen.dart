@@ -1,4 +1,5 @@
 import 'package:coach_devanshi_doshi/ui/screens/auth/sign_up_screen.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,12 +20,13 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
+  String selectedCountryCode = "+91";
 
   void _sendCode() {
     if(validation()){
       navigation.pushSlideAnimation(
         context,
-        OtpVerificationScreen(phoneNumber: "+91 ${_phoneController.text}"),
+        OtpVerificationScreen(phoneNumber: "$selectedCountryCode ${_phoneController.text}"),
       );
     }
   }
@@ -105,19 +107,28 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                       ],
                       error: phoneError,
                       prefixIcon: Padding(
-                        padding: const EdgeInsets.only(left: 14, right: 10),
+                        padding: const EdgeInsets.only(left: 4, right: 10),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              "+91",
-                              style: TextStyle(
+                            CountryCodePicker(
+                              onChanged: (countryCode) {
+                                selectedCountryCode = countryCode.dialCode ?? "+91";
+                              },
+                              initialSelection: 'IN',
+                              favorite: const ['+91', 'IN'],
+                              showCountryOnly: false,
+                              showOnlyCountryWhenClosed: false,
+                              alignLeft: false,
+                              flagWidth: 25,
+                              padding: EdgeInsets.zero,
+                              textStyle: const TextStyle(
                                 fontSize: 14,
                                 color: Color(0xFF2B2B2B),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 4),
                             Container(
                               height: 24,
                               width: 1,

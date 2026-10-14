@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
-import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
 import 'lifestyle_coaching_fit_screen.dart';
+import 'widget/profile_bottom_button.dart';
+import 'widget/profile_chip.dart';
+import 'widget/profile_radio_option.dart';
+import 'widget/profile_section_card.dart';
 
 class FoodDigestionIntakeScreen extends StatefulWidget {
   const FoodDigestionIntakeScreen({super.key});
@@ -237,132 +240,10 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           const SizedBox(height: 24),
           _buildDigestiveSection(),
           const SizedBox(height: 24),
-          _buildBottomBar(),
+          ProfileBottomButton(
+            onTap: _onSaveAndContinue,
+          )
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: CommonText(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
-                    color: const Color(0xFF1D1B1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRequiredLabel(String text) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF534343),
-          fontWeight: FontWeight.w600,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    Color? selectedBgColor,
-    Color? selectedTextColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? (selectedBgColor ?? const Color(0xFFFFDADB)) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: CommonText(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? (selectedTextColor ?? const Color(0xFF3A0910)) : const Color(0xFF534343),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRadioOption({required String label, required bool isSelected, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: CommonText(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                  color: const Color(0xFF1D1B1A),
-                ),
-              ),
-            ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? appColors.primary : appColors.white,
-                border: isSelected ? null : Border.all(color: const Color(0xFFE7E1DF)),
-              ),
-              child: isSelected ? Icon(Icons.check, size: 12, color: appColors.white) : null,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -376,7 +257,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 6,
           runSpacing: 6,
-          children: options.map((e) => _buildChip(
+          children: options.map((e) => ProfileChip(
             label: e,
             isSelected: selectedValue == e,
             onTap: () => onSelected(e),
@@ -388,13 +269,13 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildEatingPatternSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Eating Pattern",
       icon: appIcons.eating,
       children: [
-        _buildRequiredLabel("Which eating pattern best describes you?"),
+        buildRequiredLabel("Which eating pattern best describes you?"),
         const SizedBox(height: 12),
-        ..._eatingPatternOptions.map((e) => _buildRadioOption(
+        ..._eatingPatternOptions.map((e) => ProfileRadioOption(
           label: e,
           isSelected: _selectedEatingPattern == e,
           onTap: () {
@@ -411,16 +292,16 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildFastingSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Cultural & Fasting Practices",
       icon: appIcons.cultural,
       children: [
-        _buildRequiredLabel("Are there any religious, cultural or fasting practices your plan should accommodate?"),
+        buildRequiredLabel("Are there any religious, cultural or fasting practices your plan should accommodate?"),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _fastingOptions.map((e) => _buildChip(
+          children: _fastingOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedFasting.contains(e),
             onTap: () {
@@ -430,8 +311,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   _selectedFasting.add(e);
                 } else {
                   _selectedFasting.remove("None");
-                  if (_selectedFasting.contains(e)) _selectedFasting.remove(e);
-                  else _selectedFasting.add(e);
+                  if (_selectedFasting.contains(e)) {
+                    _selectedFasting.remove(e);
+                  } else {
+                    _selectedFasting.add(e);
+                  }
                 }
                 if (_fastingError != null) _validate();
               });
@@ -470,11 +354,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       );
     }
 
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Weekday Meal Rhythms",
       icon: appIcons.clock,
       children: [
-        _buildRequiredLabel("What does a usual weekday of eating look like?"),
+        buildRequiredLabel("What does a usual weekday of eating look like?"),
         const SizedBox(height: 12),
         buildRhythmInput("First food or drink after waking", "e.g., Warm water with lemon...", _firstFoodController),
         buildRhythmInput("Breakfast", "e.g., Poha or eggs with chai", _breakfastController),
@@ -490,7 +374,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildWeekendRoutineSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Weekend Routine",
       icon: appIcons.sofa,
       children: [
@@ -550,11 +434,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       );
     }
 
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Foods That Matter",
       icon: appIcons.heart,
       children: [
-        _buildRequiredLabel("Tell us the foods that matter in your plan"),
+        buildRequiredLabel("Tell us the foods that matter in your plan"),
         const SizedBox(height: 12),
         buildFoodsInput("Foods you enjoy and eat often", "e.g., Paneer, lentils, dark chocolate", _foodsEnjoyController),
         buildFoodsInput("Foods you dislike or avoid", "e.g., Bitter gourd, excessive oil", _foodsDislikeController),
@@ -566,18 +450,18 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildFoodEnvironmentSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Food Environment",
       icon: appIcons.foodEnvironment,
       children: [
-        _buildRequiredLabel("What does your food environment look like?"),
+        buildRequiredLabel("What does your food environment look like?"),
         const SizedBox(height: 16),
         CommonText("Who usually cooks", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _whoCooksOptions.map((e) => _buildChip(
+          children: _whoCooksOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedWhoCooks == e,
             onTap: () => setState(() { _selectedWhoCooks = e; if (_whoCooksError != null) _validate(); }),
@@ -599,7 +483,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _supportOptions.map((e) => _buildChip(
+          children: _supportOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedSupport == e,
             onTap: () => setState(() => _selectedSupport = e),
@@ -643,11 +527,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildDailyIntakeSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Daily Intake Overview",
       icon: appIcons.dailyIntake,
       children: [
-        _buildRequiredLabel("On a usual day, what is your approximate intake?"),
+        buildRequiredLabel("On a usual day, what is your approximate intake?"),
         const SizedBox(height: 16),
         _buildIntakeRow("Fruit", ["None", "1 serving", "2 servings", "3+"], _intakeFruit, (v) => setState(() { _intakeFruit = v; if (_intakeError != null) _validate(); })),
         _buildIntakeRow("Vegetables", ["None", "1 serving", "2 servings", "3+"], _intakeVeg, (v) => setState(() { _intakeVeg = v; if (_intakeError != null) _validate(); })),
@@ -661,16 +545,16 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildSubstanceSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Substance Habits",
       icon: appIcons.substance,
       children: [
-        _buildRequiredLabel("Do you currently use alcohol, cigarettes, vaping products or recreational substances?"),
+        buildRequiredLabel("Do you currently use alcohol, cigarettes, vaping products or recreational substances?"),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _substanceOptions.map((e) => _buildChip(
+          children: _substanceOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedSubstances.contains(e),
             selectedBgColor: e == "No" ? const Color(0xFFD8E5BF) : null,
@@ -683,8 +567,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                 } else {
                   _selectedSubstances.remove("No");
                   _selectedSubstances.remove("Prefer not to answer");
-                  if (_selectedSubstances.contains(e)) _selectedSubstances.remove(e);
-                  else _selectedSubstances.add(e);
+                  if (_selectedSubstances.contains(e)) {
+                    _selectedSubstances.remove(e);
+                  } else {
+                    _selectedSubstances.add(e);
+                  }
                 }
                 if (_substanceError != null) _validate();
               });
@@ -698,16 +585,16 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   }
 
   Widget _buildDigestiveSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Digestive Health",
       icon: appIcons.progress,
       children: [
-        _buildRequiredLabel("Do you currently experience any digestive concerns?"),
+        buildRequiredLabel("Do you currently experience any digestive concerns?"),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _digestionOptions.map((e) => _buildChip(
+          children: _digestionOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedDigestion.contains(e),
             selectedBgColor: e == "None" ? const Color(0xFFD8E5BF) : null,
@@ -719,8 +606,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   _selectedDigestion.add(e);
                 } else {
                   _selectedDigestion.remove("None");
-                  if (_selectedDigestion.contains(e)) _selectedDigestion.remove(e);
-                  else _selectedDigestion.add(e);
+                  if (_selectedDigestion.contains(e)) {
+                    _selectedDigestion.remove(e);
+                  } else {
+                    _selectedDigestion.add(e);
+                  }
                 }
                 if (_digestionError != null) _validate();
               });
@@ -730,32 +620,6 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         if (_digestionError != null)
           Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_digestionError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.only(bottom: bottomPadding(context) > 0 ? bottomPadding(context) : 24),
-      decoration: BoxDecoration(
-        color: appColors.bgColor.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, -4),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: CommonButton(
-        name: "Save & Continue to Lifestyle & Coaching Fit",
-        icon: Icons.arrow_forward_rounded,
-        isIconFirst: false,
-        imageSize: 16,
-        btnColor: appColors.primary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        onTap: _onSaveAndContinue,
-      ),
     );
   }
 }

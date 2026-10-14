@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
-import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
 import 'mindset_sustainability_screen.dart';
+import 'widget/profile_bottom_button.dart';
+import 'widget/profile_chip.dart';
+import 'widget/profile_radio_option.dart';
+import 'widget/profile_section_card.dart';
 
 class LifestyleCoachingFitScreen extends StatefulWidget {
   const LifestyleCoachingFitScreen({super.key});
@@ -256,130 +259,10 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
           const SizedBox(height: 24),
           _buildReadinessSection(),
           const SizedBox(height: 24),
-          _buildBottomBar(),
+          ProfileBottomButton(
+            onTap: _onSaveAndContinue,
+          )
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: CommonText(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
-                    color: const Color(0xFF1D1B1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRequiredLabel(String text, {bool isRequired = true}) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF534343),
-          fontWeight: FontWeight.w600,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          if (isRequired) TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: CommonText(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? const Color(0xFF3A0910) : const Color(0xFF534343),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRadioOption({required String label, required bool isSelected, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: CommonText(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-                  color: const Color(0xFF1D1B1A),
-                ),
-              ),
-            ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? appColors.primary : appColors.white,
-                border: isSelected ? null : Border.all(color: const Color(0xFFE7E1DF)),
-              ),
-              child: isSelected ? Icon(Icons.check, size: 12, color: appColors.white) : null,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -434,11 +317,11 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       );
     }
 
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Sleep & Morning Rhythms",
       icon: appIcons.halfOutlineMoon,
       children: [
-        _buildRequiredLabel("What are your usual sleep and wake times, and how many hours do you typically sleep?"),
+        buildRequiredLabel("What are your usual sleep and wake times, and how many hours do you typically sleep?"),
         const SizedBox(height: 12),
         buildTimeInput("Bedtime", "e.g., 10:45 PM", _bedtimeController),
         buildTimeInput("Wake time", "e.g., 6:30 AM", _wakeTimeController),
@@ -452,7 +335,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _nightWakingOptions.map((e) => _buildChip(
+          children: _nightWakingOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedNightWaking == e,
             onTap: () {
@@ -469,7 +352,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         const SizedBox(height: 16),
         CommonText("First hour after waking", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
         const SizedBox(height: 8),
-        ..._firstHourOptions.map((e) => _buildRadioOption(
+        ..._firstHourOptions.map((e) => ProfileRadioOption(
           label: e,
           isSelected: _selectedFirstHour == e,
           onTap: () {
@@ -535,13 +418,13 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       );
     }
 
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Activity & Movement",
       icon: appIcons.homeStepsIcon,
       children: [
-        _buildRequiredLabel("Which description best matches your usual daily activity?"),
+        buildRequiredLabel("Which description best matches your usual daily activity?"),
         const SizedBox(height: 12),
-        ..._dailyActivityOptions.map((e) => _buildRadioOption(
+        ..._dailyActivityOptions.map((e) => ProfileRadioOption(
           label: e,
           isSelected: _selectedDailyActivity == e,
           onTap: () {
@@ -560,7 +443,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _avgStepsOptions.map((e) => _buildChip(
+          children: _avgStepsOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedAvgSteps == e,
             onTap: () {
@@ -597,7 +480,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   }
 
   Widget _buildStressSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Stress & Decompression",
       icon: appIcons.heart,
       children: [
@@ -615,7 +498,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _stressChangeOptions.map((e) => _buildChip(
+          children: _stressChangeOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedStressChanges.contains(e),
             onTap: () {
@@ -663,7 +546,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   }
 
   Widget _buildReadinessSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Readiness & Coaching Partnership",
       icon: appIcons.compass,
       children: [
@@ -726,7 +609,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _interruptionsOptions.map((e) => _buildChip(
+          children: _interruptionsOptions.map((e) => ProfileChip(
             label: e,
             isSelected: _selectedInterruptions.contains(e),
             onTap: () {
@@ -748,32 +631,6 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         if (_interruptionsError != null)
           Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_interruptionsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: EdgeInsets.only(bottom: bottomPadding(context) > 0 ? bottomPadding(context) : 24),
-      decoration: BoxDecoration(
-        color: appColors.bgColor.withValues(alpha: 0.9),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF292726).withValues(alpha: 0.04),
-            offset: const Offset(0, -4),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: CommonButton(
-        name: "Save & Continue to Mindset & Sustainability",
-        icon: Icons.arrow_forward_rounded,
-        isIconFirst: false,
-        imageSize: 16,
-        btnColor: appColors.primary,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        onTap: _onSaveAndContinue,
-      ),
     );
   }
 }
