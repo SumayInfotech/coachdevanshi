@@ -1,3 +1,4 @@
+import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -6,12 +7,10 @@ import '../../../widgets/common_text.dart';
 
 class GreetingBanner extends StatelessWidget {
   final String? dateText;
-  final String userName;
 
   const GreetingBanner({
     super.key,
     this.dateText,
-    this.userName = "Ananya",
   });
 
   @override
@@ -34,15 +33,20 @@ class GreetingBanner extends StatelessWidget {
           fontFamily: fontFamilyPlusJakartaSans,
         ),
         const SizedBox(height: 2),
-        CommonText(
-          "Good morning, $userName",
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1D1B1A),
-            height: 1.4,
-          ),
-          fontFamily: 'serif',
+        ValueListenableBuilder(
+          valueListenable: userData,
+          builder: (context, user, _) {
+            return CommonText(
+              "Good morning, ${user?.name?.split(" ").first}",
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1D1B1A),
+                height: 1.4,
+              ),
+              fontFamily: 'serif',
+            );
+          }
         ),
       ],
     );

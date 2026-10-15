@@ -8,7 +8,6 @@ import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
-import '../bottom_bar_screen.dart';
 import '../profile/widget/profile_section_card.dart';
 
 class ReproductiveLifeStageScreen extends StatefulWidget {
@@ -130,26 +129,16 @@ class _ReproductiveLifeStageScreenState extends State<ReproductiveLifeStageScree
     super.dispose();
   }
 
-  void _onBack() {
-    bottomPageController.jumpToPage(BottomBarScreenIndex.home);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (didPop) return;
-        _onBack();
-      },
-      child: Scaffold(
-        backgroundColor: appColors.bgColor,
-        appBar: CommonAppBar(
-          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-          centerTitle: true,
-          leading: buildInkWell(
-            onTap: _onBack,
-            child: Container(
+    return Scaffold(
+      backgroundColor: appColors.bgColor,
+      appBar: CommonAppBar(
+        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+        centerTitle: true,
+        leading: buildInkWell(
+          onTap: () => navigation.pop(context),
+          child: Container(
             alignment: Alignment.center,
             child: Icon(
               Icons.arrow_back,
@@ -189,10 +178,10 @@ class _ReproductiveLifeStageScreenState extends State<ReproductiveLifeStageScree
             fontWeight: FontWeight.w600,
             radius: 999,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: bottomPadding(context)),
         ],
       ),
-    ));
+    );
   }
 
   Widget _buildMenstrualPattern() {

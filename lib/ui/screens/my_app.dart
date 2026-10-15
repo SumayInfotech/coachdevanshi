@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/blocs/bloc_list.dart';
 import '../../core/constants/utils.dart';
 import '../../main.dart';
 import 'splash/splash_screen.dart';
@@ -24,28 +26,31 @@ class _MyAppState extends State<MyApp> {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
 
-    return MaterialApp(
-      title: appName,
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: fontFamilyPlusJakartaSans,
-        colorScheme: .fromSeed(seedColor: appColors.primary),
-        scaffoldBackgroundColor: appColors.white,
-        textSelectionTheme: TextSelectionThemeData(
-          cursorColor: appColors.primary,
-          selectionColor: appColors.primary.withValues(alpha: 0.25),
-          selectionHandleColor: appColors.primary,
+    return MultiProvider(
+      providers: blocProviders(),
+      child: MaterialApp(
+        title: appName,
+        navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          fontFamily: fontFamilyPlusJakartaSans,
+          colorScheme: .fromSeed(seedColor: appColors.primary),
+          scaffoldBackgroundColor: appColors.white,
+          textSelectionTheme: TextSelectionThemeData(
+            cursorColor: appColors.primary,
+            selectionColor: appColors.primary.withValues(alpha: 0.25),
+            selectionHandleColor: appColors.primary,
+          ),
         ),
+        home: SplashScreen(),
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: .linear(1.0)),
+            child: child!,
+          );
+        },
       ),
-      home: SplashScreen(),
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: .linear(1.0)),
-          child: child!,
-        );
-      },
     );
   }
 }

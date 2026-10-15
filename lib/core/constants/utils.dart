@@ -388,7 +388,8 @@ Future<dynamic> commonDialog({
   String cancelBtnText = "Cancel",
   VoidCallback? onCancel,
   Color? iconColor,
-  required String image,
+  String? image,
+  IconData? icon,
   Color? confirmBtnColor,
   Color? confirmTextColor,
   Color? iconBgColor,
@@ -456,11 +457,14 @@ Future<dynamic> commonDialog({
                           width: 1.5,
                         ),
                       ),
-                      child: Image.asset(
+                      child: image != null ? Image.asset(
                         image,
                         color: effectiveIconColor,
                         fit: BoxFit.contain,
-                      ),
+                      ) : icon != null ? Icon(
+                        icon,
+                        color: effectiveIconColor,
+                      ) : const SizedBox.shrink(),
                     ),
                     const SizedBox(height: 15),
 

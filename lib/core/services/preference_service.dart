@@ -15,12 +15,10 @@ class AppPreferences {
   static late SharedPreferences _prefs;
 
   /// Keys
+  static const String isIntro = 'isIntro';
   static const String isLogin = 'isLogin';
   static const String accessToken = 'accessToken';
   static const String fcmToken = 'fcmToken';
-  static const String userName = 'userName';
-  static const String userJson = 'userJson';
-  static const String userProfileImage = 'userProfileImage';
   static const String isNotificationEnabled = 'isNotificationEnabled';
 
   /// Initialize
@@ -94,7 +92,13 @@ class AppPreferences {
   // ===========================
 
   static Future<bool> remove({required String key}) => _prefs.remove(key);
-  static Future<bool> clearPreferences() => _prefs.clear();
+  static Future<bool> clearAllPreferences() => _prefs.clear();
+  static Future<void> clearPreferences() async {
+    await _prefs.remove(isLogin);
+    await _prefs.remove(accessToken);
+    await _prefs.remove(fcmToken);
+    await _prefs.remove(isNotificationEnabled);
+  }
 
   // ===========================
   // NULLABLE BOOL

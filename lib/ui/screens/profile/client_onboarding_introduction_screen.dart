@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
-import 'client_onboarding_screen.dart';
 
 class ClientOnboardingIntroductionScreen extends StatelessWidget {
   const ClientOnboardingIntroductionScreen({super.key});
@@ -82,7 +82,8 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w700,
             onTap: () {
-              navigation.pushSlideAnimation(context, const ClientOnboardingScreen());
+              AppPreferences.setBool(AppPreferences.isIntro, true);
+              bottomPageController.jumpToPage(BottomBarScreenIndex.profile);
             },
           ),
           const SizedBox(height: 16),

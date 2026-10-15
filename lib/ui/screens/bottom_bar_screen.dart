@@ -1,13 +1,20 @@
 import 'dart:io';
 
+import 'package:coach_devanshi_doshi/core/services/loader_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/blocs/auth/profile/profile_bloc.dart';
+import '../../core/constants/urls.dart';
+import '../../core/models/auth/user_model.dart';
+import '../../core/services/preference_service.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
 import 'coach/select_pathway_screen.dart';
 import 'home/home_screen.dart';
 import 'profile/client_onboarding_introduction_screen.dart';
+import 'profile/client_onboarding_screen.dart';
 import 'progress/baseline_progress_screen.dart';
 
 class BottomBarScreenIndex{
@@ -15,7 +22,8 @@ class BottomBarScreenIndex{
   static const int checkIn = 1;
   static const int progress = 2;
   static const int coach = 3;
-  static const int profile = 4;
+  static const int profileIntro = 4;
+  static const int profile = 5;
 }
 
 class BottomBarScreen extends StatefulWidget {
@@ -26,6 +34,12 @@ class BottomBarScreen extends StatefulWidget {
 }
 
 PageController bottomPageController = PageController();
+ValueNotifier<UserData?> userData = ValueNotifier(null);
+
+void callUserAPI({required BuildContext context}) {
+  LoaderService.show(context);
+  BlocProvider.of<ProfileBloc>(context).add(UserProfileEvent(url: Urls.profile));
+}
 
 class _BottomBarScreenState extends State<BottomBarScreen> {
 
@@ -40,65 +54,97 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      callUserAPI(context: context);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: bottomPageController,
-        physics: const NeverScrollableScrollPhysics(),
-        allowImplicitScrolling: false,
-        children: [
-          HomeScreen(),
-          DailyWellnessLogScreen(),
-          BaselineProgressScreen(),
-          SelectPathwayScreen(),
-          ClientOnboardingIntroductionScreen(),
-        ],
-        onPageChanged: (value) {
-          selectedBottomIndex.value = value;
-          setState(() {});
-        },
-      ),
-      bottomNavigationBar: Container(
-        width: MediaQuery.of(context).size.width,
-        height: Platform.isIOS ? 80 : 65,
-        padding: EdgeInsets.only(
-          bottom: Platform.isIOS ? 20 : 0,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if(state is ProfileSuccess) {
+              LoaderService.hide();
+              userData.value = state.model.data?.user;
+            } else if(state is ProfileFailed) {
+              LoaderService.hide();
+            }
+          },
         ),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.paddingOf(context).bottom,
-        ),
-        decoration: BoxDecoration(
-          color: appColors.white,
-          boxShadow: [
-            BoxShadow(
-              color: appColors.black.withValues(alpha: 0.15),
-              blurRadius: 5,
-              spreadRadius: 0,
-            ),
+      ],
+      child: Scaffold(
+        body: PageView(
+          controller: bottomPageController,
+          physics: const NeverScrollableScrollPhysics(),
+          allowImplicitScrolling: false,
+          children: [
+            HomeScreen(),
+            DailyWellnessLogScreen(),
+            BaselineProgressScreen(),
+            SelectPathwayScreen(),
+            ClientOnboardingIntroductionScreen(),
+            ClientOnboardingScreen(),
           ],
+          onPageChanged: (value) {
+            if (value == BottomBarScreenIndex.profileIntro || value == BottomBarScreenIndex.profile) {
+              selectedBottomIndex.value = BottomBarScreenIndex.profile;
+            } else {
+              selectedBottomIndex.value = value;
+            }
+            setState(() {});
+          },
         ),
-        child: ValueListenableBuilder(
-          valueListenable: selectedBottomIndex,
-          builder: (context, selectedIndex, _) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: currentMenu.map((e) {
-                  int index = currentMenu.indexOf(e);
-                  return HomeMenu(
-                    label: e.label,
-                    onTap: () {
-                      bottomPageController.jumpToPage(index);
-                    },
-                    icon: e.icon,
-                    isSelected: selectedIndex == index,
-                  );
-                }).toList(),
+        bottomNavigationBar: Container(
+          width: MediaQuery.of(context).size.width,
+          height: Platform.isIOS ? 80 : 65,
+          padding: EdgeInsets.only(
+            bottom: Platform.isIOS ? 20 : 0,
+          ),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.paddingOf(context).bottom,
+          ),
+          decoration: BoxDecoration(
+            color: appColors.white,
+            boxShadow: [
+              BoxShadow(
+                color: appColors.black.withValues(alpha: 0.15),
+                blurRadius: 5,
+                spreadRadius: 0,
               ),
-            );
-          }
+            ],
+          ),
+          child: ValueListenableBuilder(
+            valueListenable: selectedBottomIndex,
+            builder: (context, selectedIndex, _) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: currentMenu.map((e) {
+                    int index = currentMenu.indexOf(e);
+                    return HomeMenu(
+                      label: e.label,
+                      onTap: () {
+                        if (index == 4) {
+                          bool isIntroDone = AppPreferences.getBool(AppPreferences.isIntro);
+                          bottomPageController.jumpToPage(isIntroDone ? BottomBarScreenIndex.profile : BottomBarScreenIndex.profileIntro);
+                        } else {
+                          bottomPageController.jumpToPage(index);
+                        }
+                      },
+                      icon: e.icon,
+                      isSelected: selectedIndex == index,
+                    );
+                  }).toList(),
+                ),
+              );
+            }
+          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
+import 'package:coach_devanshi_doshi/ui/widgets/show_user_avatar.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
@@ -22,41 +24,17 @@ class HomeHeaderBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Profile Avatar
-          GestureDetector(
-            onTap: onProfileTap,
-            child: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFF8F2F0),
-                border: Border.all(
-                  color: Colors.white,
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Image.asset(
-                  appImages.userAvatarPlaceholder,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Icon(
-                      Icons.person_rounded,
-                      color: appColors.primary,
-                      size: 22,
-                    );
-                  },
-                ),
-              ),
-            ),
+          ValueListenableBuilder(
+            valueListenable: userData,
+            builder: (context, user, _) {
+              return ShowUserAvatar(
+                size: 38,
+                name: user?.name,
+              );
+            }
           ),
+          
+          
           // Title
           const Text(
             "Home",
@@ -67,6 +45,7 @@ class HomeHeaderBar extends StatelessWidget {
               color: Color(0xFF1D1B1A),
             ),
           ),
+
           // Notification Icon
           GestureDetector(
             onTap: onNotificationTap,
