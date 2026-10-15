@@ -46,6 +46,7 @@ class AppIcons {
   String get relevantHealthSafety => "$basePath/relevant-health-safety.png";
   String get foodDigestion => "$basePath/food-digestion.png";
   String get lifestyleCoaching => "$basePath/lifestyle-coaching.png";
+  String get leaf => "$basePath/leaf.png";
   String get pending => "$basePath/pending.png";
   String get complete => "$basePath/complete.png";
   String get medicalNote => "$basePath/medical-note.png";
@@ -100,6 +101,40 @@ class AppIcons {
   String get evening => "$basePath/evening.png";
   String get snacks => "$basePath/snacks.png";
   String get digestive => "$basePath/digestive.png";
+
+
+  /// Coach
+  String get babySmile => "$basePath/baby-smile.png";
+  String get fullCalender => "$basePath/full-calender.png";
+  String get gutReset => "$basePath/gut-reset.png";
+  String get infinite => "$basePath/infinite.png";
+  String get notApplicable => "$basePath/not-applicable.png";
+  String get taskDone => "$basePath/task-done.png";
+  String get up => "$basePath/up.png";
+
+  String get starsFill => "$basePath/stars-fill.png";
+  String get spoon => "$basePath/spoon.png";
+  String get priorDiagnosis => "$basePath/prior-diagnosis.png";
+  String get clockFill => "$basePath/clock-fill.png";
+  String get calenderTime => "$basePath/calender-time.png";
+  String get bowelCadence => "$basePath/bowel-cadence.png";
+
+  String get resetCheck => "$basePath/reset-check.png";
+  String get control => "$basePath/control.png";
+
+  String get sparkle => "$basePath/sparkle.png";
+  String get error => "$basePath/error.png";
+  String get down => "$basePath/down.png";
+  String get cup => "$basePath/cup.png";
+  String get clinicalShield => "$basePath/clinical-shield.png";
+
+  String get drop => "$basePath/drop.png";
+  String get clinicalShieldFill => "$basePath/clinical-shield-fill.png";
+
+  String get achieved => "$basePath/achieved.png";
+  String get partnership => "$basePath/partnership.png";
+  String get sustainable => "$basePath/sustainable.png";
+  String get upStick => "$basePath/up-stick.png";
+  String get pregnancy => "$basePath/pregnancy.png";
+  String get time => "$basePath/time.png";
 }
-
-

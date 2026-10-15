@@ -9,6 +9,7 @@ import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
 import '../bottom_bar_screen.dart';
+import '../profile/widget/profile_section_card.dart';
 import 'track_weekly_progress_screen.dart';
 
 class BaselineProgressScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class BaselineProgressScreen extends StatefulWidget {
 
 class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   final TextEditingController _dateController = TextEditingController(text: "October 24, 2024");
-  final TextEditingController _weightController = TextEditingController();
+  // final TextEditingController _weightController = TextEditingController();
   final TextEditingController _chestController = TextEditingController();
   final TextEditingController _abdomenController = TextEditingController();
   final TextEditingController _hipController = TextEditingController();
@@ -28,12 +29,12 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
 
   DateTime _selectedDate = DateTime.now();
   String? _dateError;
-  String? _weightError;
+  // String? _weightError;
   String? _chestError;
   String? _abdomenError;
   String? _hipError;
 
-  bool _isKgSelected = true;
+  // bool _isKgSelected = true;
   bool _isChestCmSelected = true;
   bool _isAbdomenCmSelected = true;
   bool _isHipCmSelected = true;
@@ -54,12 +55,12 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       _dateError = null;
     }
 
-    if (_weightController.text.trim().isEmpty) {
+    /*if (_weightController.text.trim().isEmpty) {
       _weightError = "Weight is required";
       isValid = false;
     } else {
       _weightError = null;
-    }
+    }*/
 
     if (_chestController.text.trim().isEmpty) {
       _chestError = "Chest measurement is required";
@@ -96,7 +97,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   @override
   void dispose() {
     _dateController.dispose();
-    _weightController.dispose();
+    // _weightController.dispose();
     _chestController.dispose();
     _abdomenController.dispose();
     _hipController.dispose();
@@ -150,8 +151,8 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
               children: [
                 _buildDateSection(),
                 const SizedBox(height: 16),
-                _buildWeightSection(),
-                const SizedBox(height: 16),
+                /*_buildWeightSection(),
+                const SizedBox(height: 16),*/
                 _buildChestSection(),
                 const SizedBox(height: 16),
                 _buildAbdomenSection(),
@@ -176,47 +177,6 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         ],
       ),
     ));
-  }
-
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: CommonText(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
-                    color: const Color(0xFF1D1B1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
   }
 
   Widget _buildToggleRow(String labelLeft, String labelRight, bool isLeftSelected, ValueChanged<bool> onChanged) {
@@ -286,7 +246,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   }
 
   Widget _buildDateSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Measurement Date",
       icon: appIcons.calender,
       children: [
@@ -309,8 +269,8 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
     );
   }
 
-  Widget _buildWeightSection() {
-    return _buildSectionCard(
+  /*Widget _buildWeightSection() {
+    return ProfileSectionCard(
       title: "Weight",
       icon: appIcons.weight,
       children: [
@@ -329,10 +289,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         _buildToggleRow("Kilograms (kg)", "Pounds (lbs)", _isKgSelected, (v) => setState(() => _isKgSelected = v)),
       ],
     );
-  }
+  }*/
 
   Widget _buildChestSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Chest",
       icon: appIcons.measurement,
       children: [
@@ -356,7 +316,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   }
 
   Widget _buildAbdomenSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Abdomen at Navel",
       icon: appIcons.abdomen,
       children: [
@@ -380,7 +340,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   }
 
   Widget _buildHipSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Hip",
       icon: appIcons.hip, // using related material icon
       children: [
@@ -404,7 +364,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   }
 
   Widget _buildNotesSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Notes or Context",
       icon: appIcons.edit,
       children: [

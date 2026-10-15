@@ -9,6 +9,7 @@ import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
+import '../profile/widget/profile_section_card.dart';
 import 'three_day_food_diary_screen.dart';
 
 class TrackWeeklyProgressScreen extends StatefulWidget {
@@ -270,49 +271,8 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
     );
   }
 
-  Widget _buildSectionCard({required String title, required String icon, required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.05),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: CommonText(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
-                    color: const Color(0xFF1D1B1A),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-
   Widget _buildDateSection() {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: "Photo Date",
       icon: appIcons.calender,
       children: [
@@ -343,7 +303,7 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
     File? imageFile,
     String? error,
   }) {
-    return _buildSectionCard(
+    return ProfileSectionCard(
       title: title,
       icon: icon,
       children: [

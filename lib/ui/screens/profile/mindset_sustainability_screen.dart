@@ -5,6 +5,7 @@ import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
+import 'client_consent_screen.dart';
 import 'widget/profile_bottom_button.dart';
 import 'widget/profile_chip.dart';
 import 'widget/profile_section_card.dart';
@@ -99,7 +100,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   void _onSaveAndReview() {
     if (_validate()) {
       appLog("Mindset & Sustainability Form Validated!");
-      navigation.pop(context);
+      navigation.pushReplaceFadeAnimation(context, ClientConsentScreen());
     }
   }
 

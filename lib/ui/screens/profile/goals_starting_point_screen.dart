@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
+import '../../widgets/common_text_field.dart';
 import 'health_safety_intake_screen.dart';
 import 'widget/profile_bottom_button.dart';
 import 'widget/profile_chip.dart';
@@ -19,11 +21,13 @@ class GoalsStartingPointScreen extends StatefulWidget {
 
 class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   final TextEditingController _heightController = TextEditingController(text: "165");
+  final TextEditingController _weightController = TextEditingController();
   final TextEditingController _learnedController = TextEditingController();
   final TextEditingController _confusingController = TextEditingController();
   final TextEditingController _helpedController = TextEditingController();
 
   String? _heightError;
+  String? _weightError;
   String? _learnedError;
   String? _confusingError;
   String? _helpedError;
@@ -31,6 +35,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   String? _confidentError;
 
   bool _isCmSelected = true;
+  bool _isKgSelected = true;
 
   final List<String> _approachesList = [
     "Calorie counting", "Macro tracking", "Portion control", "Intermittent fasting",
@@ -56,6 +61,13 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
       isValid = false;
     } else {
       _heightError = null;
+    }
+
+    if (_weightController.text.trim().isEmpty) {
+      _weightError = "Please enter your weight";
+      isValid = false;
+    } else {
+      _weightError = null;
     }
 
     if (_learnedController.text.trim().isEmpty) {
@@ -107,6 +119,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   @override
   void dispose() {
     _heightController.dispose();
+    _weightController.dispose();
     _learnedController.dispose();
     _confusingController.dispose();
     _helpedController.dispose();
@@ -159,6 +172,8 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
           _buildBaselineMeasurements(),
+          const SizedBox(height: 24),
+          _buildWeightSection(),
           const SizedBox(height: 24),
           _buildExperienceSection(),
           const SizedBox(height: 24),
@@ -225,6 +240,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
                       child: TextField(
                         controller: _heightController,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w500,
@@ -330,6 +346,68 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 16, color: const Color(0xFF1D1B1A)),
+      ),
+    );
+  }
+
+  Widget _buildWeightSection() {
+    return ProfileSectionCard(
+      title: "Weight",
+      icon: appIcons.weight,
+      children: [
+        CommonTextField(
+          label: '',
+          controller: _weightController,
+          hint: "e.g., 64.5",
+          keyboardType: TextInputType.number,
+          fillColor: appColors.textFieldBgColor,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          borderColor: Colors.transparent,
+          error: _weightError,
+          onChanged: (v) { if (_weightError != null) _validate(); },
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildUnitToggleBtn(
+                label: "Kilograms (kg)",
+                isSelected: _isKgSelected,
+                onTap: () => setState(() => _isKgSelected = true),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildUnitToggleBtn(
+                label: "Pounds (lbs)",
+                isSelected: !_isKgSelected,
+                onTap: () => setState(() => _isKgSelected = false),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUnitToggleBtn({required String label, required bool isSelected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: CommonText(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? const Color(0xFF381519) : const Color(0xFF534343),
+          ),
+        ),
       ),
     );
   }

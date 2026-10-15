@@ -556,6 +556,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.only(bottom: 5),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 5,
             childAspectRatio: 1.3,

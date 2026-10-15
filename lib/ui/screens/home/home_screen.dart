@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
+import '../bottom_bar_screen.dart';
 import '../notifications/notifications_screen.dart';
 import 'widgets/greeting_banner.dart';
 import 'widgets/home_header_bar.dart';
@@ -58,8 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     // Today's Actions (Dual Buttons)
                     TodayActionsRow(
-                      onLogMicroCheckIn: () => appLog("Log Micro Check-in button tapped"),
-                      onFillWeeklyCheckIn: () => appLog("Fill Weekly Check-in button tapped"),
+                      onLogMicroCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
+                      onFillWeeklyCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
                     ),
                     const SizedBox(height: 20),
                     // Calendar / Weekly Rhythm Strip
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 20),
                     // Quick Access Grid
                     QuickAccessGrid(
-                      onCheckinTap: () => appLog("Quick Access: Check-in"),
+                      onCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
                       onNotesTap: () => appLog("Quick Access: Notes"),
                       onChatTap: () => appLog("Quick Access: Chat"),
                       onMoreTap: () => appLog("Quick Access: More"),

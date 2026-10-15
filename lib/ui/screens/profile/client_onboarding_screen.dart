@@ -9,6 +9,7 @@ import 'food_digestion_intake_screen.dart';
 import 'goals_starting_point_screen.dart';
 import 'health_safety_intake_screen.dart';
 import 'lifestyle_coaching_fit_screen.dart';
+import 'mindset_sustainability_screen.dart';
 import 'profile_program_selection_screen.dart';
 
 class ClientOnboardingScreen extends StatelessWidget {
@@ -50,7 +51,6 @@ class ClientOnboardingScreen extends StatelessWidget {
             chapterNumber: "CHAPTER 01",
             title: "Profile & Program",
             subtitle: "Gut Reset & Digestive Ease",
-            status: "Complete",
             isComplete: true,
             icon: appIcons.profileProgram,
             iconBgColor: const Color(0xFFD8E5BF),
@@ -64,7 +64,6 @@ class ClientOnboardingScreen extends StatelessWidget {
             chapterNumber: "CHAPTER 02",
             title: "Goals & Starting Point",
             subtitle: "Better digestion & energy vitality",
-            status: "Pending",
             isComplete: false,
             icon: appIcons.goalsStartingPoint,
             iconBgColor: const Color(0xFFFFDADB),
@@ -78,7 +77,6 @@ class ClientOnboardingScreen extends StatelessWidget {
             chapterNumber: "CHAPTER 03",
             title: "Relevant Health & Safety",
             subtitle: "Acid reflux · Physician cleared",
-            status: "Complete",
             isComplete: true,
             icon: appIcons.relevantHealthSafety,
             iconBgColor: const Color(0xFFD8E5BF),
@@ -92,7 +90,6 @@ class ClientOnboardingScreen extends StatelessWidget {
             chapterNumber: "CHAPTER 04",
             title: "Food & Digestion",
             subtitle: "Plant-forward · Structured rhythm",
-            status: "Complete",
             isComplete: true,
             icon: appIcons.foodDigestion,
             iconBgColor: const Color(0xFFFFDADB),
@@ -106,7 +103,6 @@ class ClientOnboardingScreen extends StatelessWidget {
             chapterNumber: "CHAPTER 05",
             title: "Lifestyle & Coaching Fit",
             subtitle: "7.5k steps · 7.5h restorative sleep",
-            status: "Complete",
             isComplete: true,
             icon: appIcons.lifestyleCoaching,
             iconBgColor: const Color(0xFFD8E5BF),
@@ -114,6 +110,19 @@ class ClientOnboardingScreen extends StatelessWidget {
             buttonText: "Edit",
             isPrimaryAction: false,
             onTapButton: () => navigation.pushSlideAnimation(context, LifestyleCoachingFitScreen()),
+          ),
+          const SizedBox(height: 12),
+          _ChapterCard(
+            chapterNumber: "CHAPTER 06",
+            title: "Mindset & Sustainability",
+            subtitle: "Setting realistic weekly commitments",
+            isComplete: true,
+            icon: appIcons.leaf,
+            iconBgColor: const Color(0xFFFFDADB),
+            iconColor: const Color(0xFF3A0910),
+            buttonText: "Edit",
+            isPrimaryAction: false,
+            onTapButton: () => navigation.pushSlideAnimation(context, MindsetSustainabilityScreen()),
           ),
           const SizedBox(height: 32),
           CommonButton(
@@ -268,7 +277,6 @@ class _ChapterCard extends StatelessWidget {
   final String chapterNumber;
   final String title;
   final String subtitle;
-  final String status;
   final bool isComplete;
   final String icon;
   final Color iconBgColor;
@@ -281,7 +289,6 @@ class _ChapterCard extends StatelessWidget {
     required this.chapterNumber,
     required this.title,
     required this.subtitle,
-    required this.status,
     required this.isComplete,
     required this.icon,
     required this.iconBgColor,
@@ -342,7 +349,7 @@ class _ChapterCard extends StatelessWidget {
                     Image.asset(isComplete ? appIcons.complete : appIcons.pending, height: 14, width: 14, color: Color(0xFF5B6749)),
                     const SizedBox(width: 4),
                     CommonText(
-                      status,
+                      isComplete ? "Complete" : "Pending",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -369,7 +376,7 @@ class _ChapterCard extends StatelessWidget {
                 CommonText(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     color: const Color(0xFF6D615C),
                   ),
                 ),

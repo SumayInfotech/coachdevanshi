@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../main.dart';
@@ -29,6 +30,13 @@ const String somethingWentWrong = "Something Went Wrong";
 
 const String longDateFormat = "MMM dd, yyyy";
 double bottomPadding(BuildContext context) => MediaQuery.paddingOf(context).bottom + 20;
+
+/// Formatter that allows only digits and a single dot, with optional digits after the dot.
+/// Valid examples: "1", "1.5", "10.20"
+/// Invalid examples: "1.", "1.1.1", "1.222" (if restricted further), ".."
+FilteringTextInputFormatter digitalWithDot = FilteringTextInputFormatter.allow(
+  RegExp(r'^\d+\.?\d{0,2}'),
+);
 
 /// ---------------------------------------------------
 /// Extension

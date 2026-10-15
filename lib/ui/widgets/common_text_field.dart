@@ -15,6 +15,7 @@ class CommonTextField extends StatelessWidget {
   final bool readOnly;
   final bool isRequired;
   final bool obscureText;
+  final bool isDense;
   final int? maxLines;
   final Color? borderColor;
   final Color? hintColor;
@@ -44,6 +45,7 @@ class CommonTextField extends StatelessWidget {
     this.readOnly = false,
     this.isRequired = true,
     this.obscureText = false,
+    this.isDense = false,
     this.inputFormatters,
     this.filedWidth,
     this.autofillHints,
@@ -111,6 +113,7 @@ class CommonTextField extends StatelessWidget {
                 hint: hint ?? "",
                 hintColor: hintColor,
                 borderColor: borderColor,
+                isDense: isDense,
                 style: style,
                 cursorColor: cursorColor ?? appColors.black,
                 error: error,
@@ -136,6 +139,7 @@ class CommonTextField extends StatelessWidget {
 InputDecoration buildInputDecoration({
   String? hint,
   String? error,
+  required bool isDense,
   String? suffixText,
   String? labelText,
   int? maxLines,
@@ -152,6 +156,7 @@ InputDecoration buildInputDecoration({
   final effectiveHintColor = hintColor ?? appColors.black.withValues(alpha: 0.4);
 
   return InputDecoration(
+    isDense: isDense,
     hintText: hint,
     hintStyle: TextStyle(
       color: effectiveHintColor,

@@ -379,24 +379,6 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
     );
   }
 
-  /*Widget _buildRequiredLabel(String text) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
-          fontSize: 13,
-          fontFamily: fontFamilyPlusJakartaSans,
-          color: Color(0xFF534343),
-          fontWeight: FontWeight.w600,
-          height: 20 / 13,
-        ),
-        children: [
-          TextSpan(text: "$text "),
-          TextSpan(text: "*", style: TextStyle(color: appColors.primary, fontWeight: FontWeight.normal)),
-        ],
-      ),
-    );
-  }*/
-
   Widget _buildDateRecordCard() {
     return Container(
       padding: const EdgeInsets.all(16),

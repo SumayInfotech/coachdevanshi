@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../../core/constants/utils.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
+import 'check-in/daily_wellness_log_screen.dart';
+import 'coach/select_pathway_screen.dart';
 import 'home/home_screen.dart';
 import 'profile/client_onboarding_introduction_screen.dart';
 import 'progress/baseline_progress_screen.dart';
@@ -47,9 +48,9 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
         allowImplicitScrolling: false,
         children: [
           HomeScreen(),
-          errorTextWidget(title: "Under Development Check-in"),
+          DailyWellnessLogScreen(),
           BaselineProgressScreen(),
-          errorTextWidget(title: "Under Development Coach"),
+          SelectPathwayScreen(),
           ClientOnboardingIntroductionScreen(),
         ],
         onPageChanged: (value) {

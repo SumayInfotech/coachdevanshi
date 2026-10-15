@@ -29,8 +29,12 @@ class ProfileSectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset(icon, height: 20, width: 20, color: appColors.primary),
+              Padding(
+                padding: const EdgeInsets.only(top: 7),
+                child: Image.asset(icon, height: 20, width: 20, color: appColors.primary),
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: CommonText(
@@ -40,6 +44,7 @@ class ProfileSectionCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     fontFamily: "Playfair_Display",
                     color: const Color(0xFF1D1B1A),
+                    letterSpacing: 0
                   ),
                 ),
               ),
