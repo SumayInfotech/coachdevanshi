@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "43351019791",
+    "project_id": "coach-devanshi",
+    "storage_bucket": "coach-devanshi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43351019791:android:954a256baac151d98dee7a",
+        "android_client_info": {
+          "package_name": "com.coach_devanshi_doshi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "43351019791-65j5r7r3ali9g4ib8tefpfnjbgqfohvc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.coach_devanshi_doshi",
+            "certificate_hash": "78842a99676fd9ae5a018f90d3ec506eedd8c380"
+          }
+        },
+        {
+          "client_id": "43351019791-tbgrcorgcrhibga8t0kb0d3auft6vu8p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6mO5WeQHC8wMfgYR8Sl4f7HNxJUvVrig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "43351019791-tbgrcorgcrhibga8t0kb0d3auft6vu8p.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "43351019791-hq2tqguma1qp6jmsssuoajtk81f5s90t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.coachDevanshiDoshi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

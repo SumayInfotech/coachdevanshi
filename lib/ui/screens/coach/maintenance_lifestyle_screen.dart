@@ -110,11 +110,11 @@ class _MaintenanceLifestyleScreenState extends State<MaintenanceLifestyleScreen>
         ),
         title: const CommonText(
           "Maintenance and Lifestyle Management",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             letterSpacing: 0.24,
           ),
         ),

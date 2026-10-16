@@ -1,3 +1,5 @@
+import 'dart:ui';
+import 'package:coach_devanshi_doshi/ui/screens/profile/client_onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
@@ -6,45 +8,24 @@ import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
-import '../bottom_bar_screen.dart';
 
 class ClientOnboardingIntroductionScreen extends StatelessWidget {
   const ClientOnboardingIntroductionScreen({super.key});
 
-  void _onBack(BuildContext context) {
-    bottomPageController.jumpToPage(BottomBarScreenIndex.home);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _onBack(context);
-      },
-      child: Scaffold(
-        backgroundColor: appColors.bgColor,
-        appBar: CommonAppBar(
-          appBarColor: appColors.transparent,
-          leading: buildInkWell(
-            onTap: () => _onBack(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
-            ),
-          ),
-        ),
+    return Scaffold(
+      backgroundColor: appColors.bgColor,
+      appBar: CommonAppBar(
+        appBarColor: appColors.transparent,
+        isLeading: false,
         title: CommonText(
           "Client Onboarding",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 20,
             color: const Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
           ),
         ),
       ),
@@ -83,7 +64,7 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
             fontWeight: FontWeight.w700,
             onTap: () {
               AppPreferences.setBool(AppPreferences.isIntro, true);
-              bottomPageController.jumpToPage(BottomBarScreenIndex.profile);
+              navigation.push(context, ClientOnboardingScreen(isBack: true));
             },
           ),
           const SizedBox(height: 16),
@@ -91,7 +72,7 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
           SizedBox(height: bottomPadding(context)),
         ],
       ),
-    ));
+    );
   }
 
   Widget _buildHeroBanner() {
@@ -112,14 +93,17 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
         children: [
           // Decorative glow top right
           Positioned(
-            top: -32,
-            right: -32,
-            child: Container(
-              width: 176,
-              height: 176,
-              decoration: const BoxDecoration(
-                color: Color(0x66D8E5BF),
-                shape: BoxShape.circle,
+            top: -40,
+            right: -40,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(
+                width: 176,
+                height: 176,
+                decoration: const BoxDecoration(
+                  color: Color(0x99D8E5BF),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -127,12 +111,15 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
           Positioned(
             bottom: -48,
             left: -48,
-            child: Container(
-              width: 192,
-              height: 192,
-              decoration: const BoxDecoration(
-                color: Color(0x4DFFDADB),
-                shape: BoxShape.circle,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(
+                width: 192,
+                height: 192,
+                decoration: const BoxDecoration(
+                  color: Color(0x80FFDADB),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -174,7 +161,7 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w500,
-                        fontFamily: "Playfair_Display",
+                        fontFamily: fontPlayfairDisplay,
                         color: Color(0xFF292726),
                         height: 34 / 24,
                         letterSpacing: -0.675,
@@ -310,10 +297,10 @@ class _ArticleCard extends StatelessWidget {
           const SizedBox(height: 4),
           CommonText(
             title,
+            fontFamily: fontPlayfairDisplay,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,
-              fontFamily: "Playfair_Display",
               color: const Color(0xFF292726),
               letterSpacing: -0.675,
             ),

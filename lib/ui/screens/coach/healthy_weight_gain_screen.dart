@@ -111,11 +111,11 @@ class _HealthyWeightGainScreenState extends State<HealthyWeightGainScreen> {
         ),
         title: const CommonText(
           "Healthy Weight Gain Protocol",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             letterSpacing: 0.24,
           ),
         ),

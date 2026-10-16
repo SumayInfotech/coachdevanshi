@@ -61,11 +61,11 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
         ),
         title: const CommonText(
           "Client Consent & Agreement",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             letterSpacing: 0.24,
           ),
         ),

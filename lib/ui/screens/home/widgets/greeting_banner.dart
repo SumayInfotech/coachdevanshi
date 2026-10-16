@@ -8,16 +8,11 @@ import '../../../widgets/common_text.dart';
 class GreetingBanner extends StatelessWidget {
   final String? dateText;
 
-  const GreetingBanner({
-    super.key,
-    this.dateText,
-  });
+  const GreetingBanner({super.key, this.dateText});
 
   @override
   Widget build(BuildContext context) {
-    // Formats the current date to "WEEKDAY, MONTH DAY" (e.g., THURSDAY, JUNE 13)
-    final String displayDate =
-        dateText ?? DateFormat('EEEE, MMMM dd').format(DateTime.now());
+    final String displayDate = dateText ?? DateFormat('EEEE, MMMM dd').format(DateTime.now());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +32,7 @@ class GreetingBanner extends StatelessWidget {
           valueListenable: userData,
           builder: (context, user, _) {
             return CommonText(
-              "Good morning, ${user?.name?.split(" ").first}",
+              "Good morning, ${user?.name?.split(" ").first ?? ""}",
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,

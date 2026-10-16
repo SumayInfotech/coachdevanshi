@@ -59,6 +59,31 @@ class AuthRepo extends BaseRepository {
     }
   }
 
+  Future<ApiResponse<dynamic>> socialLogin ({
+    required String url,
+    required Map<String, dynamic> body,
+  }) async {
+    final response = await networkService.request(url: url, requestType: RequestType.post, body: body);
+
+    if (response.data == null) {
+      return ApiResponse.failure(message: response.message);
+    }
+
+    try {
+      /// Convert JSON -> Model
+      UserModel model = UserModel.fromJson(response.data);
+
+      if (model.success == true) {
+        return ApiResponse.success(data: model, message: model.message ?? "");
+      } else {
+        return ApiResponse.failure(message: model.message ?? "");
+      }
+    } catch (e) {
+      appLog(name: "AuthRepo socialLogin Exception", e.toString());
+      return ApiResponse.failure(message: e.toString());
+    }
+  }
+
   Future<ApiResponse<dynamic>> verifyOTP ({
     required String url,
     required Map<String, dynamic> body,

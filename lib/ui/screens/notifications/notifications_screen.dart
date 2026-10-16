@@ -28,11 +28,11 @@ class NotificationsScreen extends StatelessWidget {
         ),
         title: CommonText(
           "Notifications",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 20,
             color: const Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
           ),
         ),
       ),

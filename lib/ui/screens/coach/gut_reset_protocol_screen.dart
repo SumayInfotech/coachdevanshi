@@ -198,11 +198,11 @@ class _GutResetProtocolScreenState extends State<GutResetProtocolScreen> {
         ),
         title: const CommonText(
           "Gut Reset Protocol",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             letterSpacing: 0.24,
           ),
         ),

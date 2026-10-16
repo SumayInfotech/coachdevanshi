@@ -135,11 +135,11 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         ),
         title: CommonText(
           "Baseline And Progress Measurements",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: const Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
           ),
         ),
       ),

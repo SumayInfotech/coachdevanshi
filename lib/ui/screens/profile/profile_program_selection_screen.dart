@@ -1,9 +1,16 @@
-import 'package:country_code_picker/country_code_picker.dart';
+import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/profile/location/location_bloc.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/location_model.dart';
+import '../../../core/repository/profile_repo.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -12,18 +19,25 @@ import 'widget/profile_bottom_button.dart';
 import 'widget/profile_section_card.dart';
 
 class ProfileProgramSelectionScreen extends StatefulWidget {
-  const ProfileProgramSelectionScreen({super.key});
+  final List<LocationData> stateList;
+  const ProfileProgramSelectionScreen({super.key, required this.stateList});
 
   @override
   State<ProfileProgramSelectionScreen> createState() => _ProfileProgramSelectionScreenState();
 }
 
 class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionScreen> {
-  final TextEditingController _emailController = TextEditingController(text: "ananaya.sharma@gmail.com");
+
+  late LocationBloc _cityBloc;
+
+  List<LocationData> cityList = [];
+
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _dailyRhythmController = TextEditingController();
 
@@ -38,7 +52,33 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   String _selectedGender = 'Female';
   String? _selectedJourney;
-  String _selectedCountry = 'India';
+  final String _selectedCountry = 'India';
+  LocationData? _selectedState, _selectedCity;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _cityBloc = LocationBloc(profileRepo: ProfileRepo());
+    setData();
+  }
+
+
+  void setData() {
+    final user = userData.value;
+    _emailController.text = user?.email ?? "";
+    _mobileController.text = user?.mobile ?? "";
+  }
+
+  void callStateAPI({required String stateId}) {
+    LoaderService.show(context);
+    _cityBloc.add(UserLocationEvent(
+      url: Urls.getLocation,
+      body: {
+        "state_id" : stateId
+      }
+    ));
+  }
 
   bool _validate() {
     bool isValid = true;
@@ -96,6 +136,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     }
   }
 
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -108,65 +149,83 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocProvider(
+      providers: [
+        BlocListener<LocationBloc, LocationState>(
+          bloc: _cityBloc,
+          listener: (context, state) {
+            if(state is LocationSuccess) {
+              LoaderService.hide();
+              cityList = state.model.data;
+              setState(() { });
+            } else if(state is LocationFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        )
+      ],
+      child: Scaffold(
+        backgroundColor: appColors.bgColor,
+        appBar: CommonAppBar(
+          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+          centerTitle: true,
+          leading: buildInkWell(
+            onTap: () => navigation.pop(context),
+            child: Container(
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: appColors.neutral,
+              ),
             ),
           ),
+          title: Column(
+            children: [
+              CommonText(
+                "CHAPTER 1 OF 6",
+                style: TextStyle(
+                  fontSize: 11,
+                  color: appColors.primary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.55,
+                ),
+              ),
+              CommonText(
+                "Profile & Program",
+                fontFamily: fontPlayfairDisplay,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: const Color(0xFF1D1B1A),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.24,
+                ),
+              ),
+            ],
+          ),
         ),
-        title: Column(
+        body: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            CommonText(
-              "CHAPTER 1 OF 6",
-              style: TextStyle(
-                fontSize: 11,
-                color: appColors.primary,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.55,
-              ),
-            ),
-            CommonText(
-              "Profile & Program",
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color(0xFF1D1B1A),
-                fontWeight: FontWeight.w500,
-                fontFamily: "Playfair_Display",
-                letterSpacing: 0.24,
-              ),
-            ),
+            _buildPersonalDetailsSection(),
+            const SizedBox(height: 24),
+            _buildBiologicalContextSection(),
+            const SizedBox(height: 24),
+            _buildLocationSection(),
+            const SizedBox(height: 24),
+            _buildDailyLifeSection(),
+            const SizedBox(height: 24),
+            _buildCoachingJourneySection(),
+            const SizedBox(height: 24),
+            ProfileBottomButton(
+              onTap: _onSaveAndContinue,
+            )
           ],
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        children: [
-          _buildPersonalDetailsSection(),
-          const SizedBox(height: 24),
-          _buildBiologicalContextSection(),
-          const SizedBox(height: 24),
-          _buildLocationSection(),
-          const SizedBox(height: 24),
-          _buildDailyLifeSection(),
-          const SizedBox(height: 24),
-          _buildCoachingJourneySection(),
-          const SizedBox(height: 24),
-          ProfileBottomButton(
-            onTap: _onSaveAndContinue,
-          )
-        ],
       ),
     );
   }
@@ -181,7 +240,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           controller: _emailController,
           isRequired: true,
           hint: "",
-          readOnly: true,
+          readOnly: _emailController.text.isNotEmpty,
           borderColor: Colors.transparent,
           prefixIcon: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -229,6 +288,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           hint: "Enter Mobile No.",
           keyboardType: TextInputType.phone,
           error: _mobileError,
+          readOnly: _mobileController.text.isNotEmpty,
           borderColor: Colors.transparent,
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
@@ -412,32 +472,119 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           ),
         ),
         const SizedBox(height: 12),
+        CommonTextField(
+          label: "Country",
+          controller: TextEditingController(text: _selectedCountry),
+          isRequired: false,
+          hint: "",
+          readOnly: true,
+          borderColor: Colors.transparent,
+          // suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
+        ),
+        const SizedBox(height: 12),
         Row(
+          spacing: 12,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: CommonTextField(
-                label: "City",
-                controller: _cityController,
-                isRequired: false,
-                hint: "e.g. Ahmedabad",
-                error: _cityError,
-                borderColor: Colors.transparent,
-                onChanged: (v) {
-                  if (_cityError != null) _validate();
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: mandatoryText(
+                      text: "State",
+                      isRequired: false,
+                    ),
+                  ),
+                  DropdownButtonFormField<LocationData>(
+                    initialValue: _selectedState,
+                    isExpanded: true,
+                    hint: const Text(
+                      "Select State",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: fontFamilyPlusJakartaSans,
+                        color: Color(0xFF857373),
+                      ),
+                    ),
+                    decoration: buildInputDecoration(
+                      isDense: false,
+                      borderColor: Colors.transparent,
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1D1B1A),
+                      fontFamily: fontFamilyPlusJakartaSans,
+                    ),
+                    items: widget.stateList.map((state) {
+                      return DropdownMenuItem<LocationData>(
+                        value: state,
+                        child: Text(state.name ?? ""),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedState = value;
+                        _stateController.clear();
+                      });
+                      if (value?.id != null) {
+                        callStateAPI(stateId: value!.id.toString());
+                      }
+                    },
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
             Expanded(
-              child: CommonTextField(
-                label: "Country",
-                controller: TextEditingController(text: _selectedCountry),
-                isRequired: false,
-                hint: "",
-                readOnly: true,
-                borderColor: Colors.transparent,
-                suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: mandatoryText(
+                      text: "City",
+                      isRequired: false,
+                    ),
+                  ),
+                  DropdownButtonFormField<LocationData>(
+                    initialValue: _selectedCity,
+                    isExpanded: true,
+                    hint: const Text(
+                      "Select City",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: fontFamilyPlusJakartaSans,
+                        color: Color(0xFF857373),
+                      ),
+                    ),
+                    decoration: buildInputDecoration(
+                      isDense: false,
+                      borderColor: Colors.transparent,
+                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1D1B1A),
+                      fontFamily: fontFamilyPlusJakartaSans,
+                    ),
+                    items: cityList.map((state) {
+                      return DropdownMenuItem<LocationData>(
+                        value: state,
+                        child: Text(state.name ?? ""),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCity = value;
+                        _cityController.clear();
+                      });
+                    },
+                  ),
+                ],
               ),
             ),
           ],

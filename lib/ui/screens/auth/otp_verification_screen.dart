@@ -19,6 +19,7 @@ import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
+import '../profile/client_onboarding_introduction_screen.dart';
 import 'connect_activity_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -197,11 +198,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               showSnackBar(context: context, isError: false, message: state.model.message ?? "");
               AppPreferences.setBool(AppPreferences.isLogin, true);
               AppPreferences.setString(AppPreferences.accessToken, state.model.data?.token ?? "");
-              if(widget.fromSignUp) {
-                navigation.pushSlideAnimation(context, ConnectActivityScreen(fromSignUp: widget.fromSignUp));
-              } else {
+
+              if(state.model.data?.user?.isProfileCompleted ?? false) {
                 navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
+              } else {
+                navigation.pushAndRemoveUntilSlideAnimation(context, ClientOnboardingIntroductionScreen());
               }
+
+              // if(widget.fromSignUp) {
+              //   navigation.pushSlideAnimation(context, ConnectActivityScreen(fromSignUp: widget.fromSignUp));
+              // } else {
+              //   navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
+              // }
             } else if(state is VerifyOTPFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);

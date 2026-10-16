@@ -217,11 +217,11 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           ),
           title: const CommonText(
             "Daily Wellness Log",
+            fontFamily: fontPlayfairDisplay,
             style: TextStyle(
               fontSize: 16,
               color: Color(0xFF1D1B1A),
               fontWeight: FontWeight.w600,
-              fontFamily: "Playfair_Display",
               letterSpacing: 0.24,
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +8,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/auth/login/login_bloc.dart';
+import '../../../core/blocs/auth/social_login/social_login_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/repository/auth_repo.dart';
+import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -231,14 +235,48 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                     _buildSocialButton(
                       iconPath: appIcons.google,
                       title: "Google",
-                      onTap: () {},
+                      onTap: () async {
+                        LoaderService.show(context);
+                        final data = await AuthServices.signInWithGoogle();
+                        if(data != null) {
+                          BlocProvider.of<SocialLoginBloc>(context).add(UserSocialLoginEvent(
+                            url: Urls.socialLogin,
+                            body: {
+                              "type": "google",
+                              "name": data.name,
+                              "email": data.email,
+                            }
+                          ));
+                        } else {
+                          LoaderService.hide();
+                          showSnackBar(context: context, isError: true, message: "Sign-in was cancelled. You can try again.");
+                        }
+                      },
                     ),
-                    const SizedBox(width: 12),
-                    _buildSocialButton(
-                      iconPath: appIcons.apple,
-                      title: "Apple",
-                      onTap: () {},
-                    ),
+                    if(Platform.isIOS) ...[
+                      const SizedBox(width: 12),
+                      _buildSocialButton(
+                        iconPath: appIcons.apple,
+                        title: "Apple",
+                        onTap: () async {
+                          LoaderService.show(context);
+                          final data = await AuthServices.signInWithApple();
+                          if(data != null) {
+                            BlocProvider.of<SocialLoginBloc>(context).add(UserSocialLoginEvent(
+                              url: Urls.socialLogin,
+                              body: {
+                                "type": "apple",
+                                "name": data.name,
+                                "email": data.email,
+                              }
+                            ));
+                          } else {
+                            LoaderService.hide();
+                            showSnackBar(context: context, isError: true, message: "Sign-in was cancelled. You can try again.");
+                          }
+                        },
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 60),

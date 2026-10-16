@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_icons.dart';
@@ -10,18 +11,19 @@ import 'core/constants/app_images.dart';
 import 'core/services/app_version_service.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/preference_service.dart';
+import 'firebase_options.dart';
 import 'ui/screens/my_app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // try {
-  //   await Firebase.initializeApp(
-  //     options: DefaultFirebaseOptions.currentPlatform,
-  //   );
-  //   appLog("Firebase Initialize Success");
-  // } catch (e) {
-  //   appLog("Firebase Initialize Failed ::-> ${e.toString()}");
-  // }
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    appLog("Firebase Initialize Success");
+  } catch (e) {
+    appLog("Firebase Initialize Failed ::-> ${e.toString()}");
+  }
   await AppPreferences.init();
   await AppVersionService.init();
   AppColors.instance.init();

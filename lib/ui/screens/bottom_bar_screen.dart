@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/blocs/auth/profile/profile_bloc.dart';
 import '../../core/constants/urls.dart';
 import '../../core/models/auth/user_model.dart';
-import '../../core/services/preference_service.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
@@ -22,8 +21,7 @@ class BottomBarScreenIndex{
   static const int checkIn = 1;
   static const int progress = 2;
   static const int coach = 3;
-  static const int profileIntro = 4;
-  static const int profile = 5;
+  static const int profile = 4;
 }
 
 class BottomBarScreen extends StatefulWidget {
@@ -70,6 +68,9 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             if(state is ProfileSuccess) {
               LoaderService.hide();
               userData.value = state.model.data?.user;
+              // if(!(state.model.data?.user?.isProfileCompleted ?? false)) {
+              //   navigation.pushAndRemoveUntilSlideAnimation(context, ClientOnboardingIntroductionScreen());
+              // }
             } else if(state is ProfileFailed) {
               LoaderService.hide();
             }
@@ -86,15 +87,10 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             DailyWellnessLogScreen(),
             BaselineProgressScreen(),
             SelectPathwayScreen(),
-            ClientOnboardingIntroductionScreen(),
             ClientOnboardingScreen(),
           ],
           onPageChanged: (value) {
-            if (value == BottomBarScreenIndex.profileIntro || value == BottomBarScreenIndex.profile) {
-              selectedBottomIndex.value = BottomBarScreenIndex.profile;
-            } else {
-              selectedBottomIndex.value = value;
-            }
+            selectedBottomIndex.value = value;
             setState(() {});
           },
         ),
@@ -130,12 +126,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                     return HomeMenu(
                       label: e.label,
                       onTap: () {
-                        if (index == 4) {
-                          bool isIntroDone = AppPreferences.getBool(AppPreferences.isIntro);
-                          bottomPageController.jumpToPage(isIntroDone ? BottomBarScreenIndex.profile : BottomBarScreenIndex.profileIntro);
-                        } else {
-                          bottomPageController.jumpToPage(index);
-                        }
+                        bottomPageController.jumpToPage(index);
                       },
                       icon: e.icon,
                       isSelected: selectedIndex == index,

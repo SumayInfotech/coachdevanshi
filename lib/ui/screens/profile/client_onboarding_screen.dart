@@ -1,10 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/auth/logout/logout_bloc.dart';
+import '../../../core/blocs/profile/location/location_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/location_model.dart';
+import '../../../core/repository/profile_repo.dart';
+import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
@@ -19,21 +24,58 @@ import 'lifestyle_coaching_fit_screen.dart';
 import 'mindset_sustainability_screen.dart';
 import 'profile_program_selection_screen.dart';
 
-class ClientOnboardingScreen extends StatelessWidget {
-  const ClientOnboardingScreen({super.key});
+class ClientOnboardingScreen extends StatefulWidget {
+  final bool isBack;
+  const ClientOnboardingScreen({super.key, this.isBack = false});
+
+  @override
+  State<ClientOnboardingScreen> createState() => _ClientOnboardingScreenState();
+}
+
+class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
+
+  late LocationBloc _stateBloc;
+
+  List<LocationData> stateList = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    callStateAPI();
+  }
+
 
   void _onBack(BuildContext context) {
-    bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    if(widget.isBack) {
+      navigation.pop(context);
+    } else {
+      bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    }
   }
+
+  void callStateAPI() {
+    _stateBloc = LocationBloc(profileRepo: ProfileRepo());
+    _stateBloc.add(UserLocationEvent(
+      url: Urls.getLocation,
+      body: {}
+    ));
+  }
+
+  void callOnboardingMastersAPI() {
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
         BlocListener<LogoutBloc, LogoutState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if(state is LogoutSuccess) {
               LoaderService.hide();
+              await AuthServices.signOut();
               AppPreferences.clearPreferences();
               showSnackBar(context: context, isError: false, message: state.model.message ?? "");
               navigation.pushAndRemoveUntilSlideAnimation(context, WelcomeScreen());
@@ -43,9 +85,22 @@ class ClientOnboardingScreen extends StatelessWidget {
             }
           },
         ),
+        BlocListener<LocationBloc, LocationState>(
+          bloc: _stateBloc,
+          listener: (context, state) {
+            if(state is LocationSuccess) {
+              LoaderService.hide();
+              stateList = state.model.data;
+              setState(() { });
+            } else if(state is LocationFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        )
       ],
       child: PopScope(
-        canPop: false,
+        canPop: widget.isBack,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
           _onBack(context);
@@ -67,11 +122,11 @@ class ClientOnboardingScreen extends StatelessWidget {
             ),
             title: CommonText(
               "Client Onboarding",
+              fontFamily: fontPlayfairDisplay,
               style: TextStyle(
                 fontSize: 20,
                 color: const Color(0xFF1D1B1A),
                 fontWeight: FontWeight.w600,
-                fontFamily: "Playfair_Display",
               ),
             ),
           ),
@@ -90,7 +145,9 @@ class ClientOnboardingScreen extends StatelessWidget {
                 iconColor: const Color(0xFF5B6749),
                 buttonText: "Edit",
                 isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, ProfileProgramSelectionScreen()),
+                onTapButton: () => navigation.pushSlideAnimation(context, ProfileProgramSelectionScreen(
+                  stateList: stateList,
+                )),
               ),
               const SizedBox(height: 12),
               _ChapterCard(
@@ -215,31 +272,37 @@ class ClientOnboardingScreen extends StatelessWidget {
         children: [
           // Decorative glow top right
           Positioned(
-            top: -32,
-            right: -32,
-            child: Container(
-              width: 176,
-              height: 176,
-              decoration: const BoxDecoration(
-                color: Color(0x66D8E5BF), // approx 0.4 opacity
-                shape: BoxShape.circle,
+            top: -40,
+            right: -40,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(
+                width: 176,
+                height: 176,
+                decoration: const BoxDecoration(
+                  color: Color(0x99D8E5BF), // increased opacity for better glow effect
+                  shape: BoxShape.circle,
+                ),
               ),
-              // Use ImageFilter or BoxShadow for blur if needed, keeping it simple here
             ),
           ),
           // Decorative glow bottom left
           Positioned(
             bottom: -48,
             left: -48,
-            child: Container(
-              width: 192,
-              height: 192,
-              decoration: const BoxDecoration(
-                color: Color(0x4DFFDADB), // approx 0.3 opacity
-                shape: BoxShape.circle,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: Container(
+                width: 192,
+                height: 192,
+                decoration: const BoxDecoration(
+                  color: Color(0x80FFDADB), // increased opacity for better glow effect
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -420,10 +483,10 @@ class _ChapterCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 CommonText(
                   title,
+                  fontFamily: fontPlayfairDisplay,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
-                    fontFamily: "Playfair_Display",
                     color: const Color(0xFF292726),
                     letterSpacing: -0.5,
                   ),

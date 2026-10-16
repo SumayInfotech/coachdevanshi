@@ -173,11 +173,11 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         ),
         title: const CommonText(
           "Rooted Recovery for New Moms",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             letterSpacing: 0.24,
           ),
         ),

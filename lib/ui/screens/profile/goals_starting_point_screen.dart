@@ -157,11 +157,11 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
             ),
             CommonText(
               "Goals & Starting Point",
+              fontFamily: fontPlayfairDisplay,
               style: TextStyle(
                 fontSize: 16,
                 color: const Color(0xFF1D1B1A),
                 fontWeight: FontWeight.w500,
-                fontFamily: "Playfair_Display",
                 letterSpacing: 0.24,
               ),
             ),
@@ -240,7 +240,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
                       child: TextField(
                         controller: _heightController,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [digitalWithDot],
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w500,
@@ -361,7 +361,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
           hint: "e.g., 64.5",
           keyboardType: TextInputType.number,
           fillColor: appColors.textFieldBgColor,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: [digitalWithDot],
           borderColor: Colors.transparent,
           error: _weightError,
           onChanged: (v) { if (_weightError != null) _validate(); },

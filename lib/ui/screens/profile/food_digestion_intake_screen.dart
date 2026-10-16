@@ -208,11 +208,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             ),
             CommonText(
               "Food & Digestion",
+              fontFamily: fontPlayfairDisplay,
               style: TextStyle(
                 fontSize: 16,
                 color: const Color(0xFF1D1B1A),
                 fontWeight: FontWeight.w500,
-                fontFamily: "Playfair_Display",
                 letterSpacing: 0.24,
               ),
             ),

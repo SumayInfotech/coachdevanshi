@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/constants/utils.dart';
 import '../../main.dart';
@@ -13,6 +14,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   final TextStyle? titleTextStyle;
   final Color? appBarColor;
   final PreferredSizeWidget? bottom;
+  final SystemUiOverlayStyle? systemUiOverlayStyle;
 
   const CommonAppBar({
     super.key,
@@ -25,6 +27,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.titleTextStyle,
     this.bottom,
+    this.systemUiOverlayStyle,
   });
 
   @override
@@ -32,6 +35,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: appBarColor ?? appColors.white,
       surfaceTintColor: Colors.transparent,
+      systemOverlayStyle: systemUiOverlayStyle ?? SystemUiOverlayStyle.dark,
       elevation: 1,
       centerTitle: centerTitle,
       title: title,

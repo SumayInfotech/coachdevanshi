@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/utils.dart';
 import '../../../../main.dart';
 import '../../../widgets/common_text.dart';
 
@@ -39,10 +40,10 @@ class ProfileSectionCard extends StatelessWidget {
               Expanded(
                 child: CommonText(
                   title,
+                  fontFamily: fontPlayfairDisplay,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    fontFamily: "Playfair_Display",
                     color: const Color(0xFF1D1B1A),
                     letterSpacing: 0
                   ),

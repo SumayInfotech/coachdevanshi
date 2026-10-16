@@ -86,11 +86,11 @@ class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
           ),
           title: const CommonText(
             "Select Your Pathway",
+            fontFamily: fontPlayfairDisplay,
             style: TextStyle(
               fontSize: 16,
               color: Color(0xFF1D1B1A),
               fontWeight: FontWeight.w600,
-              fontFamily: "Playfair_Display",
               letterSpacing: 0.24,
             ),
           ),
@@ -181,10 +181,10 @@ class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
       children: [
         const CommonText(
           "Core Coaching Tracks",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             color: Color(0xFF1D1B1A),
           ),
         ),
@@ -243,10 +243,10 @@ class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
       children: [
         const CommonText(
           "Hormonal & Life-Stage Journeys",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
             color: Color(0xFF1D1B1A),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
+import '../../../core/constants/utils.dart';
 import '../../../core/services/preference_service.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
@@ -113,10 +114,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         const SizedBox(height: 20),
                         CommonText(
                           "Devanshi Doshi",
+                          fontFamily: fontPlayfairDisplay,
                           textAlign: .center,
                           style: const TextStyle(
                             fontSize: 36,
-                            fontFamily: 'serif',
                             color: Color(0xFF2B2B2B),
                           ),
                         ),

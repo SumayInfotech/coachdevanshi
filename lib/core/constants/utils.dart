@@ -13,6 +13,7 @@ import '../../ui/widgets/common_text.dart';
 
 const String appName = "Coach Devanshi Doshi";
 const String fontFamilyPlusJakartaSans = "Plus_Jakarta_Sans";
+const String fontPlayfairDisplay = "Playfair_Display";
 
 ValueNotifier<bool> isSearchOpenNotifier = ValueNotifier(false);
 ValueNotifier<String?> searchQueryNotifier = ValueNotifier(null);

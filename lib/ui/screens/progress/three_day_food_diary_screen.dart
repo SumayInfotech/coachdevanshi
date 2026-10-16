@@ -179,11 +179,11 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
         ),
         title: CommonText(
           "Daily Wellness Log",
+          fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,
             color: const Color(0xFF1D1B1A),
             fontWeight: FontWeight.w600,
-            fontFamily: "Playfair_Display",
           ),
         ),
       ),
@@ -462,10 +462,10 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
               const SizedBox(width: 8),
               CommonText(
                 title,
+                fontFamily: fontPlayfairDisplay,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  fontFamily: "Playfair_Display",
                   color: const Color(0xFF1D1B1A),
                 ),
               ),
@@ -541,10 +541,10 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
               const SizedBox(width: 8),
               CommonText(
                 "Snacks & Beverages",
+                fontFamily: fontPlayfairDisplay,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  fontFamily: "Playfair_Display",
                   color: const Color(0xFF1D1B1A),
                 ),
               ),
@@ -601,10 +601,10 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
               Expanded(
                 child: CommonText(
                   "Digestive & Emotional Reflections",
+                  fontFamily: fontPlayfairDisplay,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,
-                    fontFamily: "Playfair_Display",
                     color: const Color(0xFF1D1B1A),
                   ),
                 ),

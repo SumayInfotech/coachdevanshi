@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/utils.dart';
 import '../../../../main.dart';
 import '../../../widgets/common_text.dart';
 
@@ -70,10 +71,10 @@ class PathwayCard extends StatelessWidget {
                       Expanded(
                         child: CommonText(
                           title,
+                          fontFamily: fontPlayfairDisplay,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
-                            fontFamily: "Playfair_Display",
                             color: Color(0xFF1D1B1A),
                           ),
                         ),
