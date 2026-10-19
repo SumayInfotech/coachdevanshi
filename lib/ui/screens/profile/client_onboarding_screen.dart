@@ -4,13 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/auth/logout/logout_bloc.dart';
-import '../../../core/blocs/profile/location/location_bloc.dart';
 import '../../../core/blocs/profile/onboarding_masters/onboarding_masters_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
-import '../../../core/models/profile/location_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
-import '../../../core/repository/profile_repo.dart';
 import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
@@ -36,16 +33,13 @@ class ClientOnboardingScreen extends StatefulWidget {
 
 class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
 
-  late LocationBloc _stateBloc;
-
   ValueNotifier<OnboardingMastersModel?> onboardingMastersModel = ValueNotifier(null);
-  List<LocationData> stateList = [];
 
 
   @override
   void initState() {
     super.initState();
-    callStateAPI();
+    callOnboardingMastersAPI();
   }
 
 
@@ -55,17 +49,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
     } else {
       bottomPageController.jumpToPage(BottomBarScreenIndex.home);
     }
-  }
-
-  void callStateAPI() {
-    _stateBloc = LocationBloc(profileRepo: ProfileRepo());
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      LoaderService.show(context);
-      _stateBloc.add(UserLocationEvent(
-        url: Urls.getLocation,
-        body: {}
-      ));
-    });
   }
 
   void callOnboardingMastersAPI() {
@@ -82,25 +65,12 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
         BlocListener<LogoutBloc, LogoutState>(
           listener: (context, state) async {
             if(state is LogoutSuccess) {
-              LoaderService.hide();
               await AuthServices.signOut();
               AppPreferences.clearPreferences();
               showSnackBar(context: context, isError: false, message: state.model.message ?? "");
+              LoaderService.hide();
               navigation.pushAndRemoveUntilSlideAnimation(context, WelcomeScreen());
             } else if(state is LogoutFailed) {
-              LoaderService.hide();
-              showSnackBar(context: context, isError: true, message: state.message);
-            }
-          },
-        ),
-        BlocListener<LocationBloc, LocationState>(
-          bloc: _stateBloc,
-          listener: (context, state) {
-            if(state is LocationSuccess) {
-              stateList = state.model.data;
-              setState(() { });
-              callOnboardingMastersAPI();
-            } else if(state is LocationFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
             }
@@ -168,7 +138,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                     buttonText: "Edit",
                     isPrimaryAction: false,
                     onTapButton: () => navigation.pushSlideAnimation(context, ProfileProgramSelectionScreen(
-                      stateList: stateList,
                       coachingJourney: onboardingMasters?.data?.coachingJourney ?? [],
                     )),
                   ),

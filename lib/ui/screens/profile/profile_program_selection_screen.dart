@@ -1,4 +1,3 @@
-import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -15,14 +14,13 @@ import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
-import 'goals_starting_point_screen.dart';
+import '../bottom_bar_screen.dart';
 import 'widget/profile_bottom_button.dart';
 import 'widget/profile_section_card.dart';
 
 class ProfileProgramSelectionScreen extends StatefulWidget {
-  final List<LocationData> stateList;
   final List<OnboardingData> coachingJourney;
-  const ProfileProgramSelectionScreen({super.key, required this.stateList, required this.coachingJourney});
+  const ProfileProgramSelectionScreen({super.key, required this.coachingJourney});
 
   @override
   State<ProfileProgramSelectionScreen> createState() => _ProfileProgramSelectionScreenState();
@@ -30,8 +28,10 @@ class ProfileProgramSelectionScreen extends StatefulWidget {
 
 class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionScreen> {
 
+  late LocationBloc _stateBloc;
   late LocationBloc _cityBloc;
 
+  List<LocationData> stateList = [];
   List<LocationData> cityList = [];
 
   final TextEditingController _emailController = TextEditingController();
@@ -63,6 +63,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   void initState() {
     super.initState();
     _cityBloc = LocationBloc(profileRepo: ProfileRepo());
+    callStateAPI();
     setData();
   }
 
@@ -77,7 +78,18 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     setState(() { });
   }
 
-  void callStateAPI({required String stateId}) {
+  void callStateAPI() {
+    _stateBloc = LocationBloc(profileRepo: ProfileRepo());
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      LoaderService.show(context);
+      _stateBloc.add(UserLocationEvent(
+          url: Urls.getLocation,
+          body: {}
+      ));
+    });
+  }
+
+  void callCityAPI({required String stateId}) {
     LoaderService.show(context);
     _cityBloc.add(UserLocationEvent(
       url: Urls.getLocation,
@@ -169,6 +181,19 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocListener<LocationBloc, LocationState>(
+          bloc: _stateBloc,
+          listener: (context, state) {
+            if(state is LocationSuccess) {
+              stateList = state.model.data;
+              setState(() { });
+              LoaderService.hide();
+            } else if(state is LocationFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
         BlocListener<LocationBloc, LocationState>(
           bloc: _cityBloc,
           listener: (context, state) {
@@ -535,7 +560,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       color: Color(0xFF1D1B1A),
                       fontFamily: fontFamilyPlusJakartaSans,
                     ),
-                    items: widget.stateList.map((state) {
+                    items: stateList.map((state) {
                       return DropdownMenuItem<String>(
                         value: state.id.toString(),
                         child: Text(state.name ?? ""),
@@ -547,7 +572,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                         // _stateController.clear();
                       });
                       if (value != null) {
-                        callStateAPI(stateId: value.toString());
+                        callCityAPI(stateId: value.toString());
                       }
                     },
                   ),
