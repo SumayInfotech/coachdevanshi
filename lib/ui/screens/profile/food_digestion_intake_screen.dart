@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -12,7 +13,26 @@ import 'widget/profile_radio_option.dart';
 import 'widget/profile_section_card.dart';
 
 class FoodDigestionIntakeScreen extends StatefulWidget {
-  const FoodDigestionIntakeScreen({super.key});
+  final List<OnboardingData> eatingPattern;
+  final List<OnboardingData> culturalFastingPractices;
+  final List<OnboardingData> foodEnvWhoCooks;
+  final List<OnboardingData> foodEnvSupportLevel;
+  final List<OnboardingData> foodEnvMealsOutPerWeek;
+  final List<OnboardingData> intakeFruit;
+  final List<OnboardingData> intakeVegetables;
+  final List<OnboardingData> intakeWater;
+  final List<OnboardingData> intakeCaffeine;
+  final List<OnboardingData> intakeSugary;
+  final List<OnboardingData> substanceHabits;
+  final List<OnboardingData> digestiveHealth;
+
+  const FoodDigestionIntakeScreen({
+    super.key, required this.eatingPattern, required this.culturalFastingPractices,
+    required this.foodEnvWhoCooks, required this.foodEnvSupportLevel,
+    required this.foodEnvMealsOutPerWeek, required this.intakeFruit,
+    required this.intakeVegetables, required this.intakeWater, required this.intakeCaffeine,
+    required this.intakeSugary, required this.substanceHabits, required this.digestiveHealth
+  });
 
   @override
   State<FoodDigestionIntakeScreen> createState() => _FoodDigestionIntakeScreenState();
@@ -20,15 +40,15 @@ class FoodDigestionIntakeScreen extends StatefulWidget {
 
 class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   // 1. Eating Pattern
-  final List<String> _eatingPatternOptions = ["Vegetarian", "Vegan", "Eggitarian", "Non-vegetarian", "Pescatarian", "Other"];
+  // final List<String> _eatingPatternOptions = ["Vegetarian", "Vegan", "Eggitarian", "Non-vegetarian", "Pescatarian", "Other"];
   String? _selectedEatingPattern;
   String? _eatingPatternError;
 
   // 2. Cultural & Fasting Practices
-  final List<String> _fastingOptions = [
-    "Jain", "No onion or garlic", "Paryushan", "Navratri fasting",
-    "Somvar or another regular fast", "Ramadan", "Other", "None"
-  ];
+  // final List<String> _fastingOptions = [
+  //   "Jain", "No onion or garlic", "Paryushan", "Navratri fasting",
+  //   "Somvar or another regular fast", "Ramadan", "Other", "None"
+  // ];
   final Set<String> _selectedFasting = {};
   String? _fastingError;
 
@@ -52,17 +72,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   String? _foodsMatterError;
 
   // 6. Food Environment
-  final List<String> _whoCooksOptions = ["Self", "Family", "Cook", "Canteen", "Delivery or combination"];
+  // final List<String> _whoCooksOptions = ["Self", "Family", "Cook", "Canteen", "Delivery or combination"];
   String? _selectedWhoCooks;
   String? _whoCooksError;
 
   final TextEditingController _shareMealsController = TextEditingController();
 
-  final List<String> _supportOptions = ["Supportive", "Neutral", "Resistant", "Not applicable"];
+  // final List<String> _supportOptions = ["Supportive", "Neutral", "Resistant", "Not applicable"];
   String? _selectedSupport;
 
   String? _selectedMealsOut;
-  final List<String> _mealsOutOptions = ["0–1", "2–3", "4–6", "7+"];
+  // final List<String> _mealsOutOptions = ["0–1", "2–3", "4–6", "7+"];
 
   // 7. Daily Intake Overview
   String? _intakeFruit;
@@ -73,18 +93,18 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   String? _intakeError;
 
   // 8. Substance Habits
-  final List<String> _substanceOptions = [
-    "No", "Alcohol", "Cigarettes", "Vaping", "Recreational substances", "Prefer not to answer"
-  ];
+  // final List<String> _substanceOptions = [
+  //   "No", "Alcohol", "Cigarettes", "Vaping", "Recreational substances", "Prefer not to answer"
+  // ];
   final Set<String> _selectedSubstances = {};
   String? _substanceError;
 
   // 9. Digestive Health
-  final List<String> _digestionOptions = [
-    "Bloating", "Gas or frequent burping", "Acidity or reflux", "Constipation",
-    "Loose stools", "Alternating constipation and loose stools", "Abdominal pain or cramps",
-    "Nausea", "Feeling sleepy or very heavy after meals", "None"
-  ];
+  // final List<String> _digestionOptions = [
+  //   "Bloating", "Gas or frequent burping", "Acidity or reflux", "Constipation",
+  //   "Loose stools", "Alternating constipation and loose stools", "Abdominal pain or cramps",
+  //   "Nausea", "Feeling sleepy or very heavy after meals", "None"
+  // ];
   final Set<String> _selectedDigestion = {};
   String? _digestionError;
 
@@ -155,8 +175,8 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      appLog("Food & Digestion Form Validated!");
-      navigation.pushReplaceFadeAnimation(context, LifestyleCoachingFitScreen());
+      // navigation.pushReplaceFadeAnimation(context, LifestyleCoachingFitScreen());
+      navigation.pop(context);
     }
   }
 
@@ -248,7 +268,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
     );
   }
 
-  Widget _buildIntakeRow(String label, List<String> options, String? selectedValue, ValueChanged<String> onSelected) {
+  Widget _buildIntakeRow(String label, List<OnboardingData> options, String? selectedValue, ValueChanged<String> onSelected) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,9 +278,9 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           spacing: 6,
           runSpacing: 6,
           children: options.map((e) => ProfileChip(
-            label: e,
-            isSelected: selectedValue == e,
-            onTap: () => onSelected(e),
+            label: e.title ?? "",
+            isSelected: selectedValue == e.uuid,
+            onTap: () => onSelected(e.uuid ?? "0"),
           )).toList(),
         ),
         const SizedBox(height: 16),
@@ -275,12 +295,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       children: [
         buildRequiredLabel("Which eating pattern best describes you?"),
         const SizedBox(height: 12),
-        ..._eatingPatternOptions.map((e) => ProfileRadioOption(
-          label: e,
-          isSelected: _selectedEatingPattern == e,
+        ...widget.eatingPattern.map((e) => ProfileRadioOption(
+          label: e.title ?? "",
+          isSelected: _selectedEatingPattern == e.uuid,
           onTap: () {
             setState(() {
-              _selectedEatingPattern = e;
+              _selectedEatingPattern = e.uuid;
               if (_eatingPatternError != null) _validate();
             });
           },
@@ -301,22 +321,22 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _fastingOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedFasting.contains(e),
+          children: widget.culturalFastingPractices.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedFasting.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (e == "None") {
-                  _selectedFasting.clear();
-                  _selectedFasting.add(e);
-                } else {
-                  _selectedFasting.remove("None");
-                  if (_selectedFasting.contains(e)) {
-                    _selectedFasting.remove(e);
+                // if (e == "None") {
+                //   _selectedFasting.clear();
+                //   _selectedFasting.add(e);
+                // } else {
+                //   _selectedFasting.remove("None");
+                  if (_selectedFasting.contains(e.uuid)) {
+                    _selectedFasting.remove(e.uuid);
                   } else {
-                    _selectedFasting.add(e);
+                    _selectedFasting.add(e.uuid ?? "0");
                   }
-                }
+                // }
                 if (_fastingError != null) _validate();
               });
             }
@@ -461,10 +481,13 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _whoCooksOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedWhoCooks == e,
-            onTap: () => setState(() { _selectedWhoCooks = e; if (_whoCooksError != null) _validate(); }),
+          children: widget.foodEnvWhoCooks.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedWhoCooks == e.uuid,
+            onTap: () => setState(() {
+              _selectedWhoCooks = e.uuid;
+              if (_whoCooksError != null) _validate();
+            }),
           )).toList(),
         ),
         const SizedBox(height: 16),
@@ -483,10 +506,10 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _supportOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedSupport == e,
-            onTap: () => setState(() => _selectedSupport = e),
+          children: widget.foodEnvSupportLevel.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedSupport == e.uuid,
+            onTap: () => setState(() => _selectedSupport = e.uuid),
           )).toList(),
         ),
         const SizedBox(height: 16),
@@ -496,23 +519,23 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(color: appColors.textFieldBgColor, borderRadius: BorderRadius.circular(999)),
           child: Row(
-            children: _mealsOutOptions.map((e) => Expanded(
+            children: widget.foodEnvMealsOutPerWeek.map((e) => Expanded(
               child: GestureDetector(
-                onTap: () => setState(() => _selectedMealsOut = e),
+                onTap: () => setState(() => _selectedMealsOut = e.uuid),
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   decoration: BoxDecoration(
-                    color: _selectedMealsOut == e ? appColors.white : Colors.transparent,
+                    color: _selectedMealsOut == e.uuid ? appColors.white : Colors.transparent,
                     borderRadius: BorderRadius.circular(999),
-                    boxShadow: _selectedMealsOut == e ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
+                    boxShadow: _selectedMealsOut == e.uuid ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
                   ),
                   child: CommonText(
-                    e,
+                    e.title ?? "",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: _selectedMealsOut == e ? appColors.primary : const Color(0xFF534343),
+                      color: _selectedMealsOut == e.uuid ? appColors.primary : const Color(0xFF534343),
                     ),
                   ),
                 ),
@@ -533,11 +556,41 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       children: [
         buildRequiredLabel("On a usual day, what is your approximate intake?"),
         const SizedBox(height: 16),
-        _buildIntakeRow("Fruit", ["None", "1 serving", "2 servings", "3+"], _intakeFruit, (v) => setState(() { _intakeFruit = v; if (_intakeError != null) _validate(); })),
-        _buildIntakeRow("Vegetables", ["None", "1 serving", "2 servings", "3+"], _intakeVeg, (v) => setState(() { _intakeVeg = v; if (_intakeError != null) _validate(); })),
-        _buildIntakeRow("Water", ["Below 1 L", "1–2 L", "2–3 L", "3–4 L", "Above 4 L"], _intakeWater, (v) => setState(() { _intakeWater = v; if (_intakeError != null) _validate(); })),
-        _buildIntakeRow("Caffeinated drinks", ["None", "1", "2", "3+"], _intakeCaffeine, (v) => setState(() { _intakeCaffeine = v; if (_intakeError != null) _validate(); })),
-        _buildIntakeRow("Sugary foods or drinks", ["Rarely", "1–2 weekly", "3–4 weekly", "Daily"], _intakeSugar, (v) => setState(() { _intakeSugar = v; if (_intakeError != null) _validate(); })),
+        _buildIntakeRow(
+          "Fruit", widget.intakeFruit, _intakeFruit,
+          (v) => setState(() {
+            _intakeFruit = v;
+            if (_intakeError != null) _validate();
+          })
+        ),
+        _buildIntakeRow(
+          "Vegetables", widget.intakeVegetables, _intakeVeg,
+          (v) => setState(() {
+            _intakeVeg = v;
+            if (_intakeError != null) _validate();
+          })
+        ),
+        _buildIntakeRow(
+          "Water", widget.intakeWater, _intakeWater,
+          (v) => setState(() {
+            _intakeWater = v;
+            if (_intakeError != null) _validate();
+          })
+        ),
+        _buildIntakeRow(
+          "Caffeinated drinks", widget.intakeCaffeine, _intakeCaffeine,
+          (v) => setState(() {
+            _intakeCaffeine = v;
+            if (_intakeError != null) _validate();
+          })
+        ),
+        _buildIntakeRow(
+          "Sugary foods or drinks", widget.intakeSugary, _intakeSugar,
+          (v) => setState(() {
+            _intakeSugar = v;
+            if (_intakeError != null) _validate();
+          })
+        ),
         if (_intakeError != null)
           Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_intakeError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
@@ -554,25 +607,25 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _substanceOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedSubstances.contains(e),
-            selectedBgColor: e == "No" ? const Color(0xFFD8E5BF) : null,
-            selectedTextColor: e == "No" ? const Color(0xFF5B6749) : null,
+          children: widget.substanceHabits.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedSubstances.contains(e.uuid),
+            // selectedBgColor: e == "No" ? const Color(0xFFD8E5BF) : null,
+            // selectedTextColor: e == "No" ? const Color(0xFF5B6749) : null,
             onTap: () {
               setState(() {
-                if (e == "No" || e == "Prefer not to answer") {
-                  _selectedSubstances.clear();
-                  _selectedSubstances.add(e);
-                } else {
-                  _selectedSubstances.remove("No");
-                  _selectedSubstances.remove("Prefer not to answer");
-                  if (_selectedSubstances.contains(e)) {
-                    _selectedSubstances.remove(e);
+                // if (e == "No" || e == "Prefer not to answer") {
+                //   _selectedSubstances.clear();
+                //   _selectedSubstances.add(e);
+                // } else {
+                //   _selectedSubstances.remove("No");
+                //   _selectedSubstances.remove("Prefer not to answer");
+                  if (_selectedSubstances.contains(e.uuid)) {
+                    _selectedSubstances.remove(e.uuid);
                   } else {
-                    _selectedSubstances.add(e);
+                    _selectedSubstances.add(e.uuid ?? "0");
                   }
-                }
+                // }
                 if (_substanceError != null) _validate();
               });
             }
@@ -594,24 +647,24 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _digestionOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedDigestion.contains(e),
-            selectedBgColor: e == "None" ? const Color(0xFFD8E5BF) : null,
-            selectedTextColor: e == "None" ? const Color(0xFF5B6749) : null,
+          children: widget.digestiveHealth.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedDigestion.contains(e.uuid),
+            // selectedBgColor: e == "None" ? const Color(0xFFD8E5BF) : null,
+            // selectedTextColor: e == "None" ? const Color(0xFF5B6749) : null,
             onTap: () {
               setState(() {
-                if (e == "None") {
-                  _selectedDigestion.clear();
-                  _selectedDigestion.add(e);
-                } else {
-                  _selectedDigestion.remove("None");
-                  if (_selectedDigestion.contains(e)) {
-                    _selectedDigestion.remove(e);
+                // if (e == "None") {
+                //   _selectedDigestion.clear();
+                //   _selectedDigestion.add(e);
+                // } else {
+                //   _selectedDigestion.remove("None");
+                  if (_selectedDigestion.contains(e.uuid)) {
+                    _selectedDigestion.remove(e.uuid);
                   } else {
-                    _selectedDigestion.add(e);
+                    _selectedDigestion.add(e.uuid ?? "0");
                   }
-                }
+                // }
                 if (_digestionError != null) _validate();
               });
             }

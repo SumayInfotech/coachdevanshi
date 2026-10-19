@@ -9,6 +9,7 @@ import '../../../core/blocs/profile/location/location_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/models/profile/location_model.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/repository/profile_repo.dart';
 import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
@@ -20,7 +21,8 @@ import 'widget/profile_section_card.dart';
 
 class ProfileProgramSelectionScreen extends StatefulWidget {
   final List<LocationData> stateList;
-  const ProfileProgramSelectionScreen({super.key, required this.stateList});
+  final List<OnboardingData> coachingJourney;
+  const ProfileProgramSelectionScreen({super.key, required this.stateList, required this.coachingJourney});
 
   @override
   State<ProfileProgramSelectionScreen> createState() => _ProfileProgramSelectionScreenState();
@@ -37,13 +39,14 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _stateController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
+  // final TextEditingController _stateController = TextEditingController();
+  // final TextEditingController _cityController = TextEditingController();
   final TextEditingController _dailyRhythmController = TextEditingController();
 
   String? _fullNameError;
   String? _mobileError;
   String? _dobError;
+  String? _stateError;
   String? _cityError;
   String? _dailyRhythmError;
   String? _journeyError;
@@ -53,7 +56,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   String _selectedGender = 'Female';
   String? _selectedJourney;
   final String _selectedCountry = 'India';
-  LocationData? _selectedState, _selectedCity;
+  String? _selectedState, _selectedCity;
 
 
   @override
@@ -66,8 +69,12 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   void setData() {
     final user = userData.value;
+    _fullNameController.text = user?.name ?? "";
     _emailController.text = user?.email ?? "";
     _mobileController.text = user?.mobile ?? "";
+    _selectedState = user?.stateId;
+    _selectedCity = user?.cityId;
+    setState(() { });
   }
 
   void callStateAPI({required String stateId}) {
@@ -104,7 +111,14 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
       _dobError = null;
     }
 
-    if (_cityController.text.trim().isEmpty) {
+    if (_selectedState == null) {
+      _stateError = "Please enter your State";
+      isValid = false;
+    } else {
+      _stateError = null;
+    }
+
+    if (_selectedCity == null) {
       _cityError = "Please enter your city";
       isValid = false;
     } else {
@@ -131,8 +145,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      appLog("Form Validated! Ready to proceed.");
-      navigation.pushReplaceFadeAnimation(context, GoalsStartingPointScreen());
+    //   navigation.pushReplaceFadeAnimation(context, GoalsStartingPointScreen());
+      navigation.pop(context);
     }
   }
 
@@ -144,7 +158,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     _nicknameController.dispose();
     _mobileController.dispose();
     _dobController.dispose();
-    _cityController.dispose();
+    // _stateController.dispose();
+    // _cityController.dispose();
     _dailyRhythmController.dispose();
     super.dispose();
   }
@@ -497,7 +512,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       isRequired: false,
                     ),
                   ),
-                  DropdownButtonFormField<LocationData>(
+                  DropdownButtonFormField<String>(
                     initialValue: _selectedState,
                     isExpanded: true,
                     hint: const Text(
@@ -511,6 +526,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                     decoration: buildInputDecoration(
                       isDense: false,
                       borderColor: Colors.transparent,
+                      error: _stateError,
                     ),
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
                     style: const TextStyle(
@@ -520,18 +536,18 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       fontFamily: fontFamilyPlusJakartaSans,
                     ),
                     items: widget.stateList.map((state) {
-                      return DropdownMenuItem<LocationData>(
-                        value: state,
+                      return DropdownMenuItem<String>(
+                        value: state.id.toString(),
                         child: Text(state.name ?? ""),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedState = value;
-                        _stateController.clear();
+                        // _stateController.clear();
                       });
-                      if (value?.id != null) {
-                        callStateAPI(stateId: value!.id.toString());
+                      if (value != null) {
+                        callStateAPI(stateId: value.toString());
                       }
                     },
                   ),
@@ -549,7 +565,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       isRequired: false,
                     ),
                   ),
-                  DropdownButtonFormField<LocationData>(
+                  DropdownButtonFormField<String>(
                     initialValue: _selectedCity,
                     isExpanded: true,
                     hint: const Text(
@@ -563,6 +579,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                     decoration: buildInputDecoration(
                       isDense: false,
                       borderColor: Colors.transparent,
+                      error: _cityError,
                     ),
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1D1B1A), size: 18),
                     style: const TextStyle(
@@ -572,15 +589,15 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       fontFamily: fontFamilyPlusJakartaSans,
                     ),
                     items: cityList.map((state) {
-                      return DropdownMenuItem<LocationData>(
-                        value: state,
+                      return DropdownMenuItem<String>(
+                        value: state.id.toString(),
                         child: Text(state.name ?? ""),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedCity = value;
-                        _cityController.clear();
+                        // _cityController.clear();
                       });
                     },
                   ),
@@ -762,61 +779,29 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           ),
         ),
         const SizedBox(height: 12),
-        _buildJourneyPill(
-          title: "Fat Loss and Inch Loss",
-          subtitle: "Sustainable metabolic tuning & mindful body recomp",
-          icon: appIcons.fatInchLoss,
-          isSelected: _selectedJourney == "Fat Loss and Inch Loss",
-          onTap: () => setState(()  {
-            _selectedJourney = "Fat Loss and Inch Loss";
-            if(_journeyError != null) _validate();
-          }),
-        ),
-        const SizedBox(height: 12),
-        _buildJourneyPill(
-          title: "Healthy Weight Gain",
-          subtitle: "Nourishing caloric density & strength optimization",
-          icon: appIcons.healthyWeightGain,
-          isSelected: _selectedJourney == "Healthy Weight Gain",
-          onTap: () => setState(()  {
-            _selectedJourney = "Healthy Weight Gain";
-            if(_journeyError != null) _validate();
-          }),
-        ),
-        const SizedBox(height: 12),
-        _buildJourneyPill(
-          title: "Rooted Recovery for New Moms",
-          subtitle: "Postpartum restorative nourishment & gentle hormonal balance",
-          icon: appIcons.rootedRecovery,
-          isSelected: _selectedJourney == "Rooted Recovery for New Moms",
-          onTap: () => setState(()  {
-            _selectedJourney = "Rooted Recovery for New Moms";
-            if(_journeyError != null) _validate();
-          }),
-        ),
-        const SizedBox(height: 12),
-        _buildJourneyPill(
-          title: "Maintenance and Lifestyle Management",
-          subtitle: "Long-term nutritional intuition & energy stability",
-          icon: appIcons.maintenance,
-          isSelected: _selectedJourney == "Maintenance and Lifestyle Management",
-          onTap: () => setState(()  {
-            _selectedJourney = "Maintenance and Lifestyle Management";
-            if(_journeyError != null) _validate();
-          }),
-        ),
-        const SizedBox(height: 12),
-        _buildJourneyPill(
-          title: "Gut Reset",
-          subtitle: "Microbiome rebalancing & anti-inflammatory food protocols",
-          icon: appIcons.progress,
-          isSelected: _selectedJourney == "Gut Reset",
-          onTap: () => setState(()  {
-            _selectedJourney = "Gut Reset";
-            if(_journeyError != null) _validate();
-          }),
-        ),
-        const SizedBox(height: 12),
+
+        if(widget.coachingJourney.isEmpty)
+          errorTextWidget(title: "No coaching journey found!")
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(bottom: 12),
+            itemCount: widget.coachingJourney.length,
+            itemBuilder: (context, index) {
+              final item = widget.coachingJourney[index];
+              return _buildJourneyPill(
+                title: item.title ?? "",
+                subtitle: item.description ?? "",
+                icon: item.image ?? "",
+                isSelected: _selectedJourney == item.uuid,
+                onTap: () => setState(()  {
+                  _selectedJourney = item.uuid;
+                  if(_journeyError != null) _validate();
+                }),
+              );
+            },
+          ),
         if (_journeyError != null)
           Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_journeyError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
@@ -827,68 +812,72 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     required String title, required String subtitle, required String icon,
     required bool isSelected, required VoidCallback onTap
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-              : null,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isSelected ? appColors.primary : const Color(0xFFD8C1C2),
-                shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
+                : null,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isSelected ? appColors.primary : const Color(0xFFD8C1C2),
+                  shape: BoxShape.circle,
+                ),
+                child: Image.network(icon, color: isSelected ? appColors.white : const Color(0xFF1D1B1A)),
+                // child: Image.asset(icon, color: isSelected ? appColors.white : const Color(0xFF1D1B1A)),
               ),
-              child: Image.asset(icon, color: isSelected ? appColors.white : const Color(0xFF1D1B1A)),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonText(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1D1B1A),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1D1B1A),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  CommonText(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: const Color(0xFF534343),
-                      height: 17.88 / 13,
+                    const SizedBox(height: 4),
+                    CommonText(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: const Color(0xFF534343),
+                        height: 17.88 / 13,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Container(
-              width: 20,
-              height: 20,
-              margin: const EdgeInsets.only(top: 4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? appColors.primary : appColors.white,
-                border: isSelected ? null : Border.all(color: const Color(0xFFE7E1DF)),
+              const SizedBox(width: 14),
+              Container(
+                width: 20,
+                height: 20,
+                margin: const EdgeInsets.only(top: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? appColors.primary : appColors.white,
+                  border: isSelected ? null : Border.all(color: const Color(0xFFE7E1DF)),
+                ),
+                child: isSelected ? Icon(Icons.check, size: 12, color: appColors.white) : null,
               ),
-              child: isSelected ? Icon(Icons.check, size: 12, color: appColors.white) : null,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

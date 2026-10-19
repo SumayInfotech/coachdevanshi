@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -12,7 +13,9 @@ import 'widget/profile_section_card.dart';
 import 'widget/profile_text_area.dart';
 
 class MindsetSustainabilityScreen extends StatefulWidget {
-  const MindsetSustainabilityScreen({super.key});
+  final List<OnboardingData> goalMindset;
+
+  const MindsetSustainabilityScreen({super.key, required this.goalMindset});
 
   @override
   State<MindsetSustainabilityScreen> createState() => _MindsetSustainabilityScreenState();
@@ -20,21 +23,21 @@ class MindsetSustainabilityScreen extends StatefulWidget {
 
 class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScreen> {
   // 1. Goal-Oriented Mindset
-  final List<String> _mindsetOptions = [
-    "I do best with a clear routine",
-    "I need flexibility or I feel restricted",
-    "Numbers and data motivate me",
-    "Too much tracking overwhelms me",
-    "I prefer simple instructions and fewer choices",
-    "I like understanding the reason behind every recommendation",
-    "I can become all-or-nothing after one difficult day",
-    "I am usually self-directed",
-    "Regular accountability keeps me consistent",
-    "I get bored when a routine feels repetitive",
-    "I am hard on myself when I do not do something perfectly",
-    "Small visible wins keep me motivated",
-    "Other"
-  ];
+  // final List<String> _mindsetOptions = [
+  //   "I do best with a clear routine",
+  //   "I need flexibility or I feel restricted",
+  //   "Numbers and data motivate me",
+  //   "Too much tracking overwhelms me",
+  //   "I prefer simple instructions and fewer choices",
+  //   "I like understanding the reason behind every recommendation",
+  //   "I can become all-or-nothing after one difficult day",
+  //   "I am usually self-directed",
+  //   "Regular accountability keeps me consistent",
+  //   "I get bored when a routine feels repetitive",
+  //   "I am hard on myself when I do not do something perfectly",
+  //   "Small visible wins keep me motivated",
+  //   "Other"
+  // ];
   final Set<String> _selectedMindsets = {};
   String? _mindsetError;
 
@@ -191,16 +194,16 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _mindsetOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedMindsets.contains(e),
+          children: widget.goalMindset.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedMindsets.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedMindsets.contains(e)) {
-                  _selectedMindsets.remove(e);
+                if (_selectedMindsets.contains(e.uuid)) {
+                  _selectedMindsets.remove(e.uuid);
                 } else {
                   if (_selectedMindsets.length < 3) {
-                    _selectedMindsets.add(e);
+                    _selectedMindsets.add(e.uuid ?? "0");
                   } else {
                     appLog("Can only select up to 3 options");
                   }

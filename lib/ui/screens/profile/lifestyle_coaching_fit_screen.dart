@@ -2,17 +2,33 @@ import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
-import 'mindset_sustainability_screen.dart';
 import 'widget/profile_bottom_button.dart';
 import 'widget/profile_chip.dart';
 import 'widget/profile_radio_option.dart';
 import 'widget/profile_section_card.dart';
 
 class LifestyleCoachingFitScreen extends StatefulWidget {
-  const LifestyleCoachingFitScreen({super.key});
+  final List<OnboardingData> sleepNightWaking;
+  final List<OnboardingData> sleepFirstHour;
+  final List<OnboardingData> activityLevel;
+  final List<OnboardingData> activityDailySteps;
+  final List<OnboardingData> activityWorkoutsPerWeek;
+  final List<OnboardingData> activityAvailableDays;
+  final List<OnboardingData> stressFirstChanges;
+  final List<OnboardingData> readinessScore;
+  final List<OnboardingData> consistencyInterrupters;
+
+  const LifestyleCoachingFitScreen({
+    super.key, required this.sleepNightWaking, required this.sleepFirstHour,
+    required this.activityLevel, required this.activityDailySteps,
+    required this.activityWorkoutsPerWeek, required this.activityAvailableDays,
+    required this.stressFirstChanges, required this.readinessScore,
+    required this.consistencyInterrupters
+  });
 
   @override
   State<LifestyleCoachingFitScreen> createState() => _LifestyleCoachingFitScreenState();
@@ -25,30 +41,30 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _durationController = TextEditingController();
   String? _sleepError;
 
-  final List<String> _nightWakingOptions = ["Never", "Monthly", "1–2 times weekly", "3+ times weekly", "Most nights"];
+  // final List<String> _nightWakingOptions = ["Never", "Monthly", "1–2 times weekly", "3+ times weekly", "Most nights"];
   String? _selectedNightWaking;
   String? _nightWakingError;
 
-  final List<String> _firstHourOptions = ["Ready to go", "Slow but okay", "Foggy and reluctant", "Need caffeine to function"];
+  // final List<String> _firstHourOptions = ["Ready to go", "Slow but okay", "Foggy and reluctant", "Need caffeine to function"];
   String? _selectedFirstHour;
   String? _firstHourError;
 
   // --- Section 2: Activity & Movement ---
-  final List<String> _dailyActivityOptions = [
-    "Mostly seated with little movement",
-    "Mostly seated but some regular walking",
-    "On my feet for part of the day",
-    "Physically active work or high daily movement",
-    "Activity varies significantly by day"
-  ];
+  // final List<String> _dailyActivityOptions = [
+  //   "Mostly seated with little movement",
+  //   "Mostly seated but some regular walking",
+  //   "On my feet for part of the day",
+  //   "Physically active work or high daily movement",
+  //   "Activity varies significantly by day"
+  // ];
   String? _selectedDailyActivity;
   String? _dailyActivityError;
 
-  final List<String> _avgStepsOptions = ["Not tracked", "Below 3,000", "3,000–4,999", "5,000–7,499", "7,500–9,999", "10,000–12,499", "12,500+"];
+  // final List<String> _avgStepsOptions = ["Not tracked", "Below 3,000", "3,000–4,999", "5,000–7,499", "7,500–9,999", "10,000–12,499", "12,500+"];
   String? _selectedAvgSteps;
   String? _avgStepsError;
 
-  final List<String> _workoutsCountOptions = ["0", "1", "2", "3", "4", "5+"];
+  // final List<String> _workoutsCountOptions = ["0", "1", "2", "3", "4", "5+"];
   String? _selectedWorkoutsCount;
   String? _workoutsCountError;
 
@@ -66,11 +82,11 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _stress3Controller = TextEditingController();
   String? _stressSourcesError;
 
-  final List<String> _stressChangeOptions = [
-    "Food choices or cravings", "Meal timing", "Sleep", "Movement",
-    "Mood or patience", "Digestion", "Check-ins or communication",
-    "Nothing noticeable", "Other"
-  ];
+  // final List<String> _stressChangeOptions = [
+  //   "Food choices or cravings", "Meal timing", "Sleep", "Movement",
+  //   "Mood or patience", "Digestion", "Check-ins or communication",
+  //   "Nothing noticeable", "Other"
+  // ];
   final Set<String> _selectedStressChanges = {};
   String? _stressChangeError;
 
@@ -78,14 +94,14 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   String? _decompressionError;
 
   // --- Section 4: Readiness & Coaching Partnership ---
-  int? _readinessScore;
+  String? _readinessScore;
   String? _readinessError;
 
-  final List<String> _interruptionsOptions = [
-    "Work pressure", "Travel", "Social events", "Family responsibilities",
-    "Poor sleep", "Low energy", "Cravings or emotional eating", "Pain or illness",
-    "Lack of food preparation", "All-or-nothing thinking", "Limited support at home", "Other"
-  ];
+  // final List<String> _interruptionsOptions = [
+  //   "Work pressure", "Travel", "Social events", "Family responsibilities",
+  //   "Poor sleep", "Low energy", "Cravings or emotional eating", "Pain or illness",
+  //   "Lack of food preparation", "All-or-nothing thinking", "Limited support at home", "Other"
+  // ];
   final Set<String> _selectedInterruptions = {};
   String? _interruptionsError;
 
@@ -186,8 +202,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      appLog("Lifestyle & Coaching Fit Validated!");
-      navigation.pushReplaceFadeAnimation(context, MindsetSustainabilityScreen());
+      // navigation.pushReplaceFadeAnimation(context, MindsetSustainabilityScreen());
+      navigation.pop(context);
     }
   }
 
@@ -335,12 +351,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _nightWakingOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedNightWaking == e,
+          children: widget.sleepNightWaking.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedNightWaking == e.uuid,
             onTap: () {
               setState(() {
-                _selectedNightWaking = e;
+                _selectedNightWaking = e.uuid;
                 if (_nightWakingError != null) _validate();
               });
             },
@@ -352,12 +368,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         const SizedBox(height: 16),
         CommonText("First hour after waking", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
         const SizedBox(height: 8),
-        ..._firstHourOptions.map((e) => ProfileRadioOption(
-          label: e,
-          isSelected: _selectedFirstHour == e,
+        ...widget.sleepFirstHour.map((e) => ProfileRadioOption(
+          label: e.title ?? "",
+          isSelected: _selectedFirstHour == e.uuid,
           onTap: () {
             setState(() {
-              _selectedFirstHour = e;
+              _selectedFirstHour = e.uuid;
               if (_firstHourError != null) _validate();
             });
           },
@@ -369,28 +385,28 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   }
 
   Widget _buildActivitySection() {
-    Widget buildNumPicker(String? selected, List<String> options, ValueChanged<String> onSelected) {
+    Widget buildNumPicker(String? selected, List<OnboardingData> options, ValueChanged<String> onSelected) {
       return Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(color: appColors.textFieldBgColor, borderRadius: BorderRadius.circular(999)),
         child: Row(
           children: options.map((e) => Expanded(
             child: GestureDetector(
-              onTap: () => onSelected(e),
+              onTap: () => onSelected(e.uuid ?? "0"),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 decoration: BoxDecoration(
-                  color: selected == e ? appColors.white : Colors.transparent,
+                  color: selected == e.uuid ? appColors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
-                  boxShadow: selected == e ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
+                  boxShadow: selected == e.uuid ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
                 ),
                 child: CommonText(
-                  e,
+                  e.title ?? "",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: selected == e ? appColors.primary : const Color(0xFF534343),
+                    color: selected == e.uuid ? appColors.primary : const Color(0xFF534343),
                   ),
                 ),
               ),
@@ -424,12 +440,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       children: [
         buildRequiredLabel("Which description best matches your usual daily activity?"),
         const SizedBox(height: 12),
-        ..._dailyActivityOptions.map((e) => ProfileRadioOption(
-          label: e,
-          isSelected: _selectedDailyActivity == e,
+        ...widget.activityLevel.map((e) => ProfileRadioOption(
+          label: e.title ?? "",
+          isSelected: _selectedDailyActivity == e.uuid,
           onTap: () {
             setState(() {
-              _selectedDailyActivity = e;
+              _selectedDailyActivity = e.uuid;
               if (_dailyActivityError != null) _validate();
             });
           },
@@ -443,12 +459,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _avgStepsOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedAvgSteps == e,
+          children: widget.activityDailySteps.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedAvgSteps == e.uuid,
             onTap: () {
               setState(() {
-                _selectedAvgSteps = e;
+                _selectedAvgSteps = e.uuid;
                 if (_avgStepsError != null) _validate();
               });
             },
@@ -460,7 +476,13 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         const SizedBox(height: 16),
         CommonText("Current workouts per week", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
         const SizedBox(height: 8),
-        buildNumPicker(_selectedWorkoutsCount, _workoutsCountOptions, (v) => setState(() { _selectedWorkoutsCount = v; if (_workoutsCountError != null) _validate(); })),
+        buildNumPicker(
+          _selectedWorkoutsCount, widget.activityWorkoutsPerWeek,
+          (v) => setState(() {
+            _selectedWorkoutsCount = v;
+            if (_workoutsCountError != null) _validate();
+          })
+        ),
         if (_workoutsCountError != null)
           Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: CommonText(_workoutsCountError!, style: TextStyle(color: appColors.red, fontSize: 12))),
 
@@ -472,7 +494,13 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         const SizedBox(height: 8),
         CommonText("On an ordinary week, how many days could you realistically make time for intentional movement?", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
         const SizedBox(height: 8),
-        buildNumPicker(_selectedRealisticCapacity, _workoutsCountOptions, (v) => setState(() { _selectedRealisticCapacity = v; if (_realisticCapacityError != null) _validate(); })),
+        buildNumPicker(
+          _selectedRealisticCapacity, widget.activityAvailableDays,
+          (v) => setState(() {
+            _selectedRealisticCapacity = v;
+            if (_realisticCapacityError != null) _validate();
+          })
+        ),
         if (_realisticCapacityError != null)
           Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_realisticCapacityError!, style: TextStyle(color: appColors.red, fontSize: 12))),
       ],
@@ -498,15 +526,15 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _stressChangeOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedStressChanges.contains(e),
+          children: widget.stressFirstChanges.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedStressChanges.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedStressChanges.contains(e)) {
-                  _selectedStressChanges.remove(e);
+                if (_selectedStressChanges.contains(e.uuid)) {
+                  _selectedStressChanges.remove(e.uuid);
                 } else {
-                  _selectedStressChanges.add(e);
+                  _selectedStressChanges.add(e.uuid ?? "0");
                 }
                 if (_stressChangeError != null) _validate();
               });
@@ -563,14 +591,14 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             crossAxisSpacing: 6,
             mainAxisSpacing: 6,
           ),
-          itemCount: 10,
+          itemCount: widget.readinessScore.length,
           itemBuilder: (context, index) {
-            int score = index + 1;
-            bool isSelected = _readinessScore == score;
+            final score = widget.readinessScore[index];
+            bool isSelected = _readinessScore == score.uuid;
             return GestureDetector(
               onTap: () {
                 setState(() {
-                  _readinessScore = score;
+                  _readinessScore = score.uuid;
                   if (_readinessError != null) _validate();
                 });
               },
@@ -582,7 +610,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                   boxShadow: isSelected ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
                 ),
                 child: CommonText(
-                  score.toString(),
+                  score.title ?? "",
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
@@ -610,16 +638,16 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _interruptionsOptions.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedInterruptions.contains(e),
+          children: widget.consistencyInterrupters.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedInterruptions.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedInterruptions.contains(e)) {
-                  _selectedInterruptions.remove(e);
+                if (_selectedInterruptions.contains(e.uuid)) {
+                  _selectedInterruptions.remove(e.uuid);
                 } else {
                   if (_selectedInterruptions.length < 3) {
-                    _selectedInterruptions.add(e);
+                    _selectedInterruptions.add(e.uuid ?? "0");
                   } else {
                     appLog("Can only select up to 3 options");
                   }

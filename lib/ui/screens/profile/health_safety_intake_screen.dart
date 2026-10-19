@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -31,7 +32,17 @@ class MedicationEntry {
 }
 
 class HealthSafetyIntakeScreen extends StatefulWidget {
-  const HealthSafetyIntakeScreen({super.key});
+  final List<OnboardingData> medicalDiagnoses;
+  final List<OnboardingData> familyMedicalHistory;
+  final List<OnboardingData> recentClinicalSymptoms;
+  final List<OnboardingData> allergiesIntolerances;
+  final List<OnboardingData> hormonalLifeStage;
+
+  const HealthSafetyIntakeScreen({
+    super.key, required this.medicalDiagnoses, required this.familyMedicalHistory,
+    required this.recentClinicalSymptoms, required this.allergiesIntolerances,
+    required this.hormonalLifeStage
+  });
 
   @override
   State<HealthSafetyIntakeScreen> createState() => _HealthSafetyIntakeScreenState();
@@ -39,20 +50,20 @@ class HealthSafetyIntakeScreen extends StatefulWidget {
 
 class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   // Medical Diagnoses
-  final List<String> _diagnosesList = [
-    "Diabetes or prediabetes", "High blood pressure", "High cholesterol or triglycerides",
-    "Thyroid condition", "PCOS or PCOD", "Endometriosis, fibroids or adenomyosis",
-    "Fatty liver", "Anaemia or nutrient deficiency", "Kidney, heart or autoimmune condition",
-    "Digestive condition", "Anxiety, depression or mental-health condition", "None of the above", "Other"
-  ];
+  // final List<String> _diagnosesList = [
+  //   "Diabetes or prediabetes", "High blood pressure", "High cholesterol or triglycerides",
+  //   "Thyroid condition", "PCOS or PCOD", "Endometriosis, fibroids or adenomyosis",
+  //   "Fatty liver", "Anaemia or nutrient deficiency", "Kidney, heart or autoimmune condition",
+  //   "Digestive condition", "Anxiety, depression or mental-health condition", "None of the above", "Other"
+  // ];
   final Set<String> _selectedDiagnoses = {};
   String? _diagnosesError;
 
   // Family History
-  final List<String> _familyHistoryList = [
-    "Diabetes", "High blood pressure", "High cholesterol", "Heart disease",
-    "Thyroid condition", "Obesity", "None known", "Other"
-  ];
+  // final List<String> _familyHistoryList = [
+  //   "Diabetes", "High blood pressure", "High cholesterol", "Heart disease",
+  //   "Thyroid condition", "Obesity", "None known", "Other"
+  // ];
   final Set<String> _selectedFamilyHistory = {};
   String? _familyHistoryError;
 
@@ -72,11 +83,11 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   String? _restrictionsError;
 
   // Recent Clinical Symptoms
-  final List<String> _symptomsList = [
-    "Chest pain during rest or activity", "Unexplained breathlessness", "Dizziness or fainting",
-    "Uncontrolled blood pressure", "Unexplained rapid weight loss", "Blood in stool",
-    "Persistent vomiting", "Severe abdominal or pelvic pain", "None of the above"
-  ];
+  // final List<String> _symptomsList = [
+  //   "Chest pain during rest or activity", "Unexplained breathlessness", "Dizziness or fainting",
+  //   "Uncontrolled blood pressure", "Unexplained rapid weight loss", "Blood in stool",
+  //   "Persistent vomiting", "Severe abdominal or pelvic pain", "None of the above"
+  // ];
   final Set<String> _selectedSymptoms = {};
   String? _symptomsError;
 
@@ -85,22 +96,22 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   final TextEditingController _allergyDetailsController = TextEditingController();
   String? _allergyError;
   String? _allergyDetailsError;
-  final List<String> _allergyOptions = [
-    "No known allergies",
-    "Yes – medically diagnosed allergy",
-    "Yes – suspected allergy",
-    "Yes – intolerance or food triggers"
-  ];
+  // final List<String> _allergyOptions = [
+  //   "No known allergies",
+  //   "Yes – medically diagnosed allergy",
+  //   "Yes – suspected allergy",
+  //   "Yes – intolerance or food triggers"
+  // ];
 
   // Hormonal Stage
   String? _selectedHormonalStage;
   String? _hormonalStageError;
-  final List<String> _hormonalStages = [
-    "Regular menstrual cycles", "Irregular menstrual cycles", "Trying to conceive",
-    "Pregnant", "Postpartum and breastfeeding", "Postpartum and not breastfeeding",
-    "Perimenopause", "Menopause", "Periods absent due to medication or a health condition",
-    "Hysterectomy or reproductive surgery", "Not applicable", "Prefer not to answer"
-  ];
+  // final List<String> _hormonalStages = [
+  //   "Regular menstrual cycles", "Irregular menstrual cycles", "Trying to conceive",
+  //   "Pregnant", "Postpartum and breastfeeding", "Postpartum and not breastfeeding",
+  //   "Perimenopause", "Menopause", "Periods absent due to medication or a health condition",
+  //   "Hysterectomy or reproductive surgery", "Not applicable", "Prefer not to answer"
+  // ];
 
   bool _validate() {
     bool isValid = true;
@@ -177,8 +188,8 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      appLog("Health & Safety Form Validated!");
-      navigation.pushReplaceFadeAnimation(context, FoodDigestionIntakeScreen());
+      // navigation.pushReplaceFadeAnimation(context, FoodDigestionIntakeScreen());
+      navigation.pop(context);
     }
   }
 
@@ -330,15 +341,15 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _diagnosesList.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedDiagnoses.contains(e),
+          children: widget.medicalDiagnoses.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedDiagnoses.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedDiagnoses.contains(e)) {
-                  _selectedDiagnoses.remove(e);
+                if (_selectedDiagnoses.contains(e.uuid)) {
+                  _selectedDiagnoses.remove(e.uuid);
                 } else {
-                  _selectedDiagnoses.add(e);
+                  _selectedDiagnoses.add(e.uuid ?? "0");
                 }
                 if (_diagnosesError != null) _validate();
               });
@@ -361,15 +372,15 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _familyHistoryList.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedFamilyHistory.contains(e),
+          children: widget.familyMedicalHistory.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedFamilyHistory.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedFamilyHistory.contains(e)) {
-                  _selectedFamilyHistory.remove(e);
+                if (_selectedFamilyHistory.contains(e.uuid)) {
+                  _selectedFamilyHistory.remove(e.uuid);
                 } else {
-                  _selectedFamilyHistory.add(e);
+                  _selectedFamilyHistory.add(e.uuid ?? "0");
                 }
                 if (_familyHistoryError != null) _validate();
               });
@@ -601,24 +612,24 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _symptomsList.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedSymptoms.contains(e),
-            selectedBgColor: e == "None of the above" ? const Color(0xFFD8E5BF) : null,
-            selectedTextColor: e == "None of the above" ? const Color(0xFF5B6749) : null,
+          children: widget.recentClinicalSymptoms.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedSymptoms.contains(e.uuid),
+            // selectedBgColor: e.title?.contains("None") ?? false ? const Color(0xFFD8E5BF) : null,
+            // selectedTextColor: e.title?.contains("None") ?? false ? const Color(0xFF5B6749) : null,
             onTap: () {
               setState(() {
-                if (e == "None of the above") {
-                  _selectedSymptoms.clear();
-                  _selectedSymptoms.add(e);
-                } else {
-                  _selectedSymptoms.remove("None of the above");
-                  if (_selectedSymptoms.contains(e)) {
-                    _selectedSymptoms.remove(e);
+                // if (e.title?.contains("None") ?? false) {
+                //   _selectedSymptoms.clear();
+                //   _selectedSymptoms.add(e.uuid ?? "0");
+                // } else {
+                  // _selectedSymptoms.remove("None of the above");
+                  if (_selectedSymptoms.contains(e.uuid)) {
+                    _selectedSymptoms.remove(e.uuid);
                   } else {
-                    _selectedSymptoms.add(e);
+                    _selectedSymptoms.add(e.uuid ?? "0");
                   }
-                }
+                // }
                 if (_symptomsError != null) _validate();
               });
             }
@@ -637,12 +648,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
       children: [
         buildRequiredLabel("Do you have any food allergy or food intolerance?"),
         const SizedBox(height: 12),
-        ..._allergyOptions.map((e) => ProfileRadioOption(
-          label: e,
-          isSelected: _selectedAllergy == e,
+        ...widget.allergiesIntolerances.map((e) => ProfileRadioOption(
+          label: e.title ?? "",
+          isSelected: _selectedAllergy == e.uuid,
           onTap: () {
             setState(() {
-              _selectedAllergy = e;
+              _selectedAllergy = e.uuid;
               if (_allergyError != null || _allergyDetailsError != null) _validate();
             });
           },
@@ -689,12 +700,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
       children: [
         buildRequiredLabel("Which reproductive or hormonal life stage best describes you currently?"),
         const SizedBox(height: 12),
-        ..._hormonalStages.map((e) => ProfileRadioOption(
-          label: e,
-          isSelected: _selectedHormonalStage == e,
+        ...widget.hormonalLifeStage.map((e) => ProfileRadioOption(
+          label: e.title ?? "",
+          isSelected: _selectedHormonalStage == e.uuid,
           onTap: () {
             setState(() {
-              _selectedHormonalStage = e;
+              _selectedHormonalStage = e.uuid;
               if (_hormonalStageError != null) _validate();
             });
           },

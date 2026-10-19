@@ -5,9 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../main.dart';
 import '../../../core/blocs/auth/logout/logout_bloc.dart';
 import '../../../core/blocs/profile/location/location_bloc.dart';
+import '../../../core/blocs/profile/onboarding_masters/onboarding_masters_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/models/profile/location_model.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/repository/profile_repo.dart';
 import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
@@ -36,6 +38,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
 
   late LocationBloc _stateBloc;
 
+  ValueNotifier<OnboardingMastersModel?> onboardingMastersModel = ValueNotifier(null);
   List<LocationData> stateList = [];
 
 
@@ -56,14 +59,19 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
 
   void callStateAPI() {
     _stateBloc = LocationBloc(profileRepo: ProfileRepo());
-    _stateBloc.add(UserLocationEvent(
-      url: Urls.getLocation,
-      body: {}
-    ));
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      LoaderService.show(context);
+      _stateBloc.add(UserLocationEvent(
+        url: Urls.getLocation,
+        body: {}
+      ));
+    });
   }
 
   void callOnboardingMastersAPI() {
-
+    BlocProvider.of<OnboardingMastersBloc>(context).add(UserOnboardingMastersEvent(
+      url: Urls.onboardingMasters
+    ));
   }
 
 
@@ -89,15 +97,26 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
           bloc: _stateBloc,
           listener: (context, state) {
             if(state is LocationSuccess) {
-              LoaderService.hide();
               stateList = state.model.data;
               setState(() { });
+              callOnboardingMastersAPI();
             } else if(state is LocationFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
             }
           },
-        )
+        ),
+        BlocListener<OnboardingMastersBloc, OnboardingMastersState>(
+          listener: (context, state) {
+            if(state is OnboardingMastersSuccess) {
+              LoaderService.hide();
+              onboardingMastersModel.value = state.model;
+            } else if(state is OnboardingMastersFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
       ],
       child: PopScope(
         canPop: widget.isBack,
@@ -130,120 +149,160 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
               ),
             ),
           ),
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            children: [
-              _buildProgressBanner(),
-              const SizedBox(height: 24),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 01",
-                title: "Profile & Program",
-                subtitle: "Gut Reset & Digestive Ease",
-                isComplete: true,
-                icon: appIcons.profileProgram,
-                iconBgColor: const Color(0xFFD8E5BF),
-                iconColor: const Color(0xFF5B6749),
-                buttonText: "Edit",
-                isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, ProfileProgramSelectionScreen(
-                  stateList: stateList,
-                )),
-              ),
-              const SizedBox(height: 12),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 02",
-                title: "Goals & Starting Point",
-                subtitle: "Better digestion & energy vitality",
-                isComplete: false,
-                icon: appIcons.goalsStartingPoint,
-                iconBgColor: const Color(0xFFFFDADB),
-                iconColor: const Color(0xFF3A0910),
-                buttonText: "Start",
-                isPrimaryAction: true,
-                onTapButton: () => navigation.pushSlideAnimation(context, GoalsStartingPointScreen()),
-              ),
-              const SizedBox(height: 12),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 03",
-                title: "Relevant Health & Safety",
-                subtitle: "Acid reflux · Physician cleared",
-                isComplete: true,
-                icon: appIcons.relevantHealthSafety,
-                iconBgColor: const Color(0xFFD8E5BF),
-                iconColor: const Color(0xFF5B6749),
-                buttonText: "Edit",
-                isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, HealthSafetyIntakeScreen()),
-              ),
-              const SizedBox(height: 12),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 04",
-                title: "Food & Digestion",
-                subtitle: "Plant-forward · Structured rhythm",
-                isComplete: true,
-                icon: appIcons.foodDigestion,
-                iconBgColor: const Color(0xFFFFDADB),
-                iconColor: const Color(0xFF3A0910),
-                buttonText: "Edit",
-                isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, FoodDigestionIntakeScreen()),
-              ),
-              const SizedBox(height: 12),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 05",
-                title: "Lifestyle & Coaching Fit",
-                subtitle: "7.5k steps · 7.5h restorative sleep",
-                isComplete: true,
-                icon: appIcons.lifestyleCoaching,
-                iconBgColor: const Color(0xFFD8E5BF),
-                iconColor: const Color(0xFF5B6749),
-                buttonText: "Edit",
-                isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, LifestyleCoachingFitScreen()),
-              ),
-              const SizedBox(height: 12),
-              _ChapterCard(
-                chapterNumber: "CHAPTER 06",
-                title: "Mindset & Sustainability",
-                subtitle: "Setting realistic weekly commitments",
-                isComplete: true,
-                icon: appIcons.leaf,
-                iconBgColor: const Color(0xFFFFDADB),
-                iconColor: const Color(0xFF3A0910),
-                buttonText: "Edit",
-                isPrimaryAction: false,
-                onTapButton: () => navigation.pushSlideAnimation(context, MindsetSustainabilityScreen()),
-              ),
-              const SizedBox(height: 32),
-              CommonButton(
-                name: "Log Out",
-                icon: Icons.logout,
-                imageSize: 22,
-                btnColor: Color(0xfff8f2ef),
-                fontColor: appColors.primary,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                radius: 10,
-                onTap: () {
-                  commonDialog(
-                    context: context,
+          body: ValueListenableBuilder(
+            valueListenable: onboardingMastersModel,
+            builder: (context, onboardingMasters, _) {
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                children: [
+                  _buildProgressBanner(),
+                  const SizedBox(height: 24),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 01",
+                    title: "Profile & Program",
+                    subtitle: "Gut Reset & Digestive Ease",
+                    isComplete: true,
+                    icon: appIcons.profileProgram,
+                    iconBgColor: const Color(0xFFD8E5BF),
+                    iconColor: const Color(0xFF5B6749),
+                    buttonText: "Edit",
+                    isPrimaryAction: false,
+                    onTapButton: () => navigation.pushSlideAnimation(context, ProfileProgramSelectionScreen(
+                      stateList: stateList,
+                      coachingJourney: onboardingMasters?.data?.coachingJourney ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 12),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 02",
+                    title: "Goals & Starting Point",
+                    subtitle: "Better digestion & energy vitality",
+                    isComplete: false,
+                    icon: appIcons.goalsStartingPoint,
+                    iconBgColor: const Color(0xFFFFDADB),
+                    iconColor: const Color(0xFF3A0910),
+                    buttonText: "Start",
+                    isPrimaryAction: true,
+                    onTapButton: () => navigation.pushSlideAnimation(context, GoalsStartingPointScreen(
+                      approachesTried: onboardingMasters?.data?.approachesTried ?? [],
+                      confidentAreas: onboardingMasters?.data?.confidentAreas ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 12),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 03",
+                    title: "Relevant Health & Safety",
+                    subtitle: "Acid reflux · Physician cleared",
+                    isComplete: true,
+                    icon: appIcons.relevantHealthSafety,
+                    iconBgColor: const Color(0xFFD8E5BF),
+                    iconColor: const Color(0xFF5B6749),
+                    buttonText: "Edit",
+                    isPrimaryAction: false,
+                    onTapButton: () => navigation.pushSlideAnimation(context, HealthSafetyIntakeScreen(
+                      medicalDiagnoses: onboardingMasters?.data?.medicalDiagnoses ?? [],
+                      familyMedicalHistory: onboardingMasters?.data?.familyMedicalHistory ?? [],
+                      recentClinicalSymptoms: onboardingMasters?.data?.recentClinicalSymptoms ?? [],
+                      allergiesIntolerances: onboardingMasters?.data?.allergiesIntolerances ?? [],
+                      hormonalLifeStage: onboardingMasters?.data?.hormonalLifeStage ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 12),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 04",
+                    title: "Food & Digestion",
+                    subtitle: "Plant-forward · Structured rhythm",
+                    isComplete: true,
+                    icon: appIcons.foodDigestion,
+                    iconBgColor: const Color(0xFFFFDADB),
+                    iconColor: const Color(0xFF3A0910),
+                    buttonText: "Edit",
+                    isPrimaryAction: false,
+                    onTapButton: () => navigation.pushSlideAnimation(context, FoodDigestionIntakeScreen(
+                      eatingPattern: onboardingMasters?.data?.eatingPattern ?? [],
+                      culturalFastingPractices: onboardingMasters?.data?.culturalFastingPractices ?? [],
+                      foodEnvWhoCooks: onboardingMasters?.data?.foodEnvWhoCooks ?? [],
+                      foodEnvSupportLevel: onboardingMasters?.data?.foodEnvSupportLevel ?? [],
+                      foodEnvMealsOutPerWeek: onboardingMasters?.data?.foodEnvMealsOutPerWeek ?? [],
+                      intakeFruit: onboardingMasters?.data?.intakeFruit ?? [],
+                      intakeVegetables: onboardingMasters?.data?.intakeVegetables ?? [],
+                      intakeWater: onboardingMasters?.data?.intakeWater ?? [],
+                      intakeCaffeine: onboardingMasters?.data?.intakeCaffeine ?? [],
+                      intakeSugary: onboardingMasters?.data?.intakeSugary ?? [],
+                      substanceHabits: onboardingMasters?.data?.substanceHabits ?? [],
+                      digestiveHealth: onboardingMasters?.data?.digestiveHealth ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 12),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 05",
+                    title: "Lifestyle & Coaching Fit",
+                    subtitle: "7.5k steps · 7.5h restorative sleep",
+                    isComplete: true,
+                    icon: appIcons.lifestyleCoaching,
+                    iconBgColor: const Color(0xFFD8E5BF),
+                    iconColor: const Color(0xFF5B6749),
+                    buttonText: "Edit",
+                    isPrimaryAction: false,
+                    onTapButton: () => navigation.pushSlideAnimation(context, LifestyleCoachingFitScreen(
+                      sleepNightWaking: onboardingMasters?.data?.sleepNightWaking ?? [],
+                      sleepFirstHour: onboardingMasters?.data?.sleepFirstHour ?? [],
+                      activityLevel: onboardingMasters?.data?.activityLevel ?? [],
+                      activityDailySteps: onboardingMasters?.data?.activityDailySteps ?? [],
+                      activityWorkoutsPerWeek: onboardingMasters?.data?.activityWorkoutsPerWeek ?? [],
+                      activityAvailableDays: onboardingMasters?.data?.activityAvailableDays ?? [],
+                      stressFirstChanges: onboardingMasters?.data?.stressFirstChanges ?? [],
+                      readinessScore: onboardingMasters?.data?.readinessScore ?? [],
+                      consistencyInterrupters: onboardingMasters?.data?.consistencyInterrupters ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 12),
+                  _ChapterCard(
+                    chapterNumber: "CHAPTER 06",
+                    title: "Mindset & Sustainability",
+                    subtitle: "Setting realistic weekly commitments",
+                    isComplete: true,
+                    icon: appIcons.leaf,
+                    iconBgColor: const Color(0xFFFFDADB),
+                    iconColor: const Color(0xFF3A0910),
+                    buttonText: "Edit",
+                    isPrimaryAction: false,
+                    onTapButton: () => navigation.pushSlideAnimation(context, MindsetSustainabilityScreen(
+                      goalMindset: onboardingMasters?.data?.goalMindset ?? [],
+                    )),
+                  ),
+                  const SizedBox(height: 32),
+                  CommonButton(
+                    name: "Log Out",
                     icon: Icons.logout,
-                    title: "Log Out",
-                    subtitle: "Are you sure you want to log out? You will need to sign back in to continue your progress.",
-                    onPressed: () {
-                      LoaderService.show(context);
-                      BlocProvider.of<LogoutBloc>(context).add(UserLogoutEvent(
-                        url: Urls.logout,
-                        body: {
-                          "fcm_token" : AppPreferences.getString(AppPreferences.fcmToken)
-                        }
-                      ));
+                    imageSize: 22,
+                    btnColor: Color(0xfff8f2ef),
+                    fontColor: appColors.primary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    radius: 10,
+                    onTap: () {
+                      commonDialog(
+                        context: context,
+                        icon: Icons.logout,
+                        title: "Log Out",
+                        subtitle: "Are you sure you want to log out? You will need to sign back in to continue your progress.",
+                        onPressed: () {
+                          LoaderService.show(context);
+                          BlocProvider.of<LogoutBloc>(context).add(UserLogoutEvent(
+                            url: Urls.logout,
+                            body: {
+                              "fcm_token" : AppPreferences.getString(AppPreferences.fcmToken)
+                            }
+                          ));
+                        },
+                      );
                     },
-                  );
-                },
-              ),
-              SizedBox(height: bottomPadding(context)),
-            ],
+                  ),
+                  SizedBox(height: bottomPadding(context)),
+                ],
+              );
+            }
           ),
         ),
       ),

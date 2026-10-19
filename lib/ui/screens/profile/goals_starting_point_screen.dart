@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../main.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -13,14 +13,17 @@ import 'widget/profile_section_card.dart';
 import 'widget/profile_text_area.dart';
 
 class GoalsStartingPointScreen extends StatefulWidget {
-  const GoalsStartingPointScreen({super.key});
+  final List<OnboardingData> approachesTried;
+  final List<OnboardingData> confidentAreas;
+
+  const GoalsStartingPointScreen({super.key, required this.approachesTried, required this.confidentAreas});
 
   @override
   State<GoalsStartingPointScreen> createState() => _GoalsStartingPointScreenState();
 }
 
 class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
-  final TextEditingController _heightController = TextEditingController(text: "165");
+  final TextEditingController _heightController = TextEditingController(text: "0");
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _learnedController = TextEditingController();
   final TextEditingController _confusingController = TextEditingController();
@@ -37,19 +40,19 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   bool _isCmSelected = true;
   bool _isKgSelected = true;
 
-  final List<String> _approachesList = [
-    "Calorie counting", "Macro tracking", "Portion control", "Intermittent fasting",
-    "Low-carb / Keto", "Detox / Juice plan", "Meal replacement", "Weight medication",
-    "Supplements", "Gym / Personal training", "Dietitian plan", "Online program/app",
-    "Self-directed", "None", "Other"
-  ];
+  // final List<String> _approachesList = [
+  //   "Calorie counting", "Macro tracking", "Portion control", "Intermittent fasting",
+  //   "Low-carb / Keto", "Detox / Juice plan", "Meal replacement", "Weight medication",
+  //   "Supplements", "Gym / Personal training", "Dietitian plan", "Online program/app",
+  //   "Self-directed", "None", "Other"
+  // ];
   final Set<String> _selectedApproaches = {};
 
-  final List<String> _confidentList = [
-    "Portions", "Protein", "Balanced meals", "Food labels", "Calories or macros",
-    "Meal preparation", "Hunger & fullness cues", "Exercise", "Sleep and stress",
-    "None yet", "Other"
-  ];
+  // final List<String> _confidentList = [
+  //   "Portions", "Protein", "Balanced meals", "Food labels", "Calories or macros",
+  //   "Meal preparation", "Hunger & fullness cues", "Exercise", "Sleep and stress",
+  //   "None yet", "Other"
+  // ];
   final Set<String> _selectedConfident = {};
 
 
@@ -111,8 +114,8 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      appLog("Goals Form Validated!");
-      navigation.pushReplaceFadeAnimation(context, HealthSafetyIntakeScreen());
+      // navigation.pushReplaceFadeAnimation(context, HealthSafetyIntakeScreen());
+      navigation.pop(context);
     }
   }
 
@@ -435,15 +438,15 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _approachesList.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedApproaches.contains(e),
+          children: widget.approachesTried.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedApproaches.contains(e.uuid),
             onTap: () {
               setState(() {
-                if (_selectedApproaches.contains(e)) {
-                  _selectedApproaches.remove(e);
+                if (_selectedApproaches.contains(e.uuid)) {
+                  _selectedApproaches.remove(e.uuid);
                 } else {
-                  _selectedApproaches.add(e);
+                  _selectedApproaches.add(e.uuid ?? "0");
                 }
                 if (_approachesError != null) _validate();
               });
@@ -492,17 +495,17 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: _confidentList.map((e) => ProfileChip(
-            label: e,
-            isSelected: _selectedConfident.contains(e),
+          children: widget.confidentAreas.map((e) => ProfileChip(
+            label: e.title ?? "",
+            isSelected: _selectedConfident.contains(e.uuid),
             selectedBgColor: const Color(0xFFD8E5BF),
             selectedTextColor: const Color(0xFF5B6749),
             onTap: () {
               setState(() {
-                if (_selectedConfident.contains(e)) {
-                  _selectedConfident.remove(e);
+                if (_selectedConfident.contains(e.uuid)) {
+                  _selectedConfident.remove(e.uuid);
                 } else {
-                  _selectedConfident.add(e);
+                  _selectedConfident.add(e.uuid ?? "0");
                 }
                 if (_confidentError != null) _validate();
               });
