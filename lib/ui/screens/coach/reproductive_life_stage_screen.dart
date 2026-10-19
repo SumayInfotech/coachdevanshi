@@ -21,8 +21,8 @@ class _ReproductiveLifeStageScreenState extends State<ReproductiveLifeStageScree
   // Section 1: Menstrual Pattern
   final TextEditingController _cycleLengthController = TextEditingController();
   final TextEditingController _bleedingDurationController = TextEditingController();
-  String? _cycleLengthError;
-  String? _bleedingDurationError;
+  // String? _cycleLengthError;
+  // String? _bleedingDurationError;
   bool _cycleLengthNotSure = false;
   
   String? _regularity;

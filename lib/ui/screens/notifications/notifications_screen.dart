@@ -101,7 +101,7 @@ class _NotificationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appColors.black.withOpacity(0.05),
+            color: appColors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 1),
             blurRadius: 1,
             spreadRadius: 0,

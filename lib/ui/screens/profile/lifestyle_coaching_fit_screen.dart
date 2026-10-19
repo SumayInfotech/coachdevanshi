@@ -71,7 +71,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _workoutTypesController = TextEditingController();
   final TextEditingController _wearableController = TextEditingController();
   final TextEditingController _enjoyDislikeController = TextEditingController();
-  String? _activityDetailsError;
+  // String? _activityDetailsError;
 
   String? _selectedRealisticCapacity;
   String? _realisticCapacityError;

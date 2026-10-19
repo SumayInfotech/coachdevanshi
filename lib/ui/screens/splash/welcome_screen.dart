@@ -15,7 +15,6 @@ import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
 import '../../../main.dart';
 import '../../widgets/common_web_view.dart';
-import '../auth/connect_activity_screen.dart';
 import '../auth/phone_login_screen.dart';
 import '../auth/sign_up_screen.dart';
 
@@ -114,19 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       onTap: () async {
                         LoaderService.show(context);
                         final data = await AuthServices.signInWithGoogle();
-                        if(data != null) {
-                          BlocProvider.of<SocialLoginBloc>(context).add(UserSocialLoginEvent(
-                            url: Urls.socialLogin,
-                            body: {
-                              "type": "google",
-                              "name": data.name,
-                              "email": data.email,
-                            }
-                          ));
-                        } else {
-                          LoaderService.hide();
-                          showSnackBar(context: context, isError: true, message: "Sign-in was cancelled. You can try again.");
-                        }
+                        buildSocialLogin(data, "google");
                       },
                     ),
                     if(Platform.isIOS) ...[
@@ -137,19 +124,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         onTap: () async {
                           LoaderService.show(context);
                           final data = await AuthServices.signInWithApple();
-                          if(data != null) {
-                            BlocProvider.of<SocialLoginBloc>(context).add(UserSocialLoginEvent(
-                              url: Urls.socialLogin,
-                              body: {
-                                "type": "apple",
-                                "name": data.name,
-                                "email": data.email,
-                              }
-                            ));
-                          } else {
-                            LoaderService.hide();
-                            showSnackBar(context: context, isError: true, message: "Sign-in was cancelled. You can try again.");
-                          }
+                          buildSocialLogin(data, "apple");
                         },
                       ),
                     ],
@@ -245,6 +220,22 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
       ),
     );
+  }
+
+  void buildSocialLogin(AuthUserData? data, String type) {
+    if(data != null) {
+      BlocProvider.of<SocialLoginBloc>(context).add(UserSocialLoginEvent(
+        url: Urls.socialLogin,
+        body: {
+          "type": type,
+          "name": data.name,
+          "email": data.email,
+        }
+      ));
+    } else {
+      LoaderService.hide();
+      showSnackBar(context: context, isError: true, message: "Sign-in was cancelled. You can try again.");
+    }
   }
 
   Widget _buildLoginButton({

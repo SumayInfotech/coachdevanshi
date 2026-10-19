@@ -57,16 +57,19 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
     ));
   }
 
+  void callLogout() async {
+    await AuthServices.signOut();
+    AppPreferences.clearPreferences();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
         BlocListener<LogoutBloc, LogoutState>(
-          listener: (context, state) async {
+          listener: (context, state) {
             if(state is LogoutSuccess) {
-              await AuthServices.signOut();
-              AppPreferences.clearPreferences();
+              callLogout();
               showSnackBar(context: context, isError: false, message: state.model.message ?? "");
               LoaderService.hide();
               navigation.pushAndRemoveUntilSlideAnimation(context, WelcomeScreen());
@@ -289,7 +292,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: appColors.black.withOpacity(0.05),
+            color: appColors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 1),
             blurRadius: 2,
           ),
@@ -343,7 +346,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: appColors.black.withOpacity(0.05),
+                        color: appColors.black.withValues(alpha: 0.05),
                         offset: const Offset(0, 1),
                         blurRadius: 1,
                       ),
@@ -454,7 +457,7 @@ class _ChapterCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: appColors.black.withOpacity(0.05),
+            color: appColors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 1),
             blurRadius: 1,
           ),

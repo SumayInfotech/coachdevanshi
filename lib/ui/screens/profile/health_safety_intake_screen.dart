@@ -6,7 +6,6 @@ import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
-import 'food_digestion_intake_screen.dart';
 import 'widget/profile_bottom_button.dart';
 import 'widget/profile_chip.dart';
 import 'widget/profile_radio_option.dart';

@@ -20,7 +20,6 @@ import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
 import '../profile/client_onboarding_introduction_screen.dart';
-import 'connect_activity_screen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String type;

@@ -23,19 +23,19 @@ class SelectPathwayScreen extends StatefulWidget {
 
 class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
   String? _selectedPathwayId;
-  bool _showError = false;
+  bool showError = false;
 
   void _onPathwaySelected(String id) {
     setState(() {
       _selectedPathwayId = id;
-      _showError = false;
+      showError = false;
     });
   }
 
   void _onContinue() {
     if (_selectedPathwayId == null) {
       setState(() {
-        _showError = true;
+        showError = true;
       });
       showSnackBar(context: context, isError: true, message: "Please select a pathway to continue.");
       return;
@@ -64,7 +64,7 @@ class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         _onBack();
       },
