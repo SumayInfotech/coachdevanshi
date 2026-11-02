@@ -39,19 +39,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   bool _isCmSelected = true;
   bool _isKgSelected = true;
 
-  // final List<String> _approachesList = [
-  //   "Calorie counting", "Macro tracking", "Portion control", "Intermittent fasting",
-  //   "Low-carb / Keto", "Detox / Juice plan", "Meal replacement", "Weight medication",
-  //   "Supplements", "Gym / Personal training", "Dietitian plan", "Online program/app",
-  //   "Self-directed", "None", "Other"
-  // ];
   final Set<String> _selectedApproaches = {};
-
-  // final List<String> _confidentList = [
-  //   "Portions", "Protein", "Balanced meals", "Food labels", "Calories or macros",
-  //   "Meal preparation", "Hunger & fullness cues", "Exercise", "Sleep and stress",
-  //   "None yet", "Other"
-  // ];
   final Set<String> _selectedConfident = {};
 
 
@@ -180,6 +168,7 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
           _buildExperienceSection(),
           const SizedBox(height: 24),
           ProfileBottomButton(
+            name: "Save & Continue to Health & Safety",
             onTap: _onSaveAndContinue,
           )
         ],

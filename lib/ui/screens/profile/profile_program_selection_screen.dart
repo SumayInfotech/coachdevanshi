@@ -262,6 +262,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
             _buildCoachingJourneySection(),
             const SizedBox(height: 24),
             ProfileBottomButton(
+              name: "Save & Continue to Goals & Starting Point",
               onTap: _onSaveAndContinue,
             )
           ],
@@ -827,8 +828,12 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               );
             },
           ),
-        if (_journeyError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_journeyError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_journeyError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_journeyError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }

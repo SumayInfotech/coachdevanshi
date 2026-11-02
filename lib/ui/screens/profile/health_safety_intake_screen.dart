@@ -49,20 +49,10 @@ class HealthSafetyIntakeScreen extends StatefulWidget {
 
 class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   // Medical Diagnoses
-  // final List<String> _diagnosesList = [
-  //   "Diabetes or prediabetes", "High blood pressure", "High cholesterol or triglycerides",
-  //   "Thyroid condition", "PCOS or PCOD", "Endometriosis, fibroids or adenomyosis",
-  //   "Fatty liver", "Anaemia or nutrient deficiency", "Kidney, heart or autoimmune condition",
-  //   "Digestive condition", "Anxiety, depression or mental-health condition", "None of the above", "Other"
-  // ];
   final Set<String> _selectedDiagnoses = {};
   String? _diagnosesError;
 
   // Family History
-  // final List<String> _familyHistoryList = [
-  //   "Diabetes", "High blood pressure", "High cholesterol", "Heart disease",
-  //   "Thyroid condition", "Obesity", "None known", "Other"
-  // ];
   final Set<String> _selectedFamilyHistory = {};
   String? _familyHistoryError;
 
@@ -82,11 +72,6 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   String? _restrictionsError;
 
   // Recent Clinical Symptoms
-  // final List<String> _symptomsList = [
-  //   "Chest pain during rest or activity", "Unexplained breathlessness", "Dizziness or fainting",
-  //   "Uncontrolled blood pressure", "Unexplained rapid weight loss", "Blood in stool",
-  //   "Persistent vomiting", "Severe abdominal or pelvic pain", "None of the above"
-  // ];
   final Set<String> _selectedSymptoms = {};
   String? _symptomsError;
 
@@ -95,22 +80,11 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
   final TextEditingController _allergyDetailsController = TextEditingController();
   String? _allergyError;
   String? _allergyDetailsError;
-  // final List<String> _allergyOptions = [
-  //   "No known allergies",
-  //   "Yes – medically diagnosed allergy",
-  //   "Yes – suspected allergy",
-  //   "Yes – intolerance or food triggers"
-  // ];
 
   // Hormonal Stage
   String? _selectedHormonalStage;
   String? _hormonalStageError;
-  // final List<String> _hormonalStages = [
-  //   "Regular menstrual cycles", "Irregular menstrual cycles", "Trying to conceive",
-  //   "Pregnant", "Postpartum and breastfeeding", "Postpartum and not breastfeeding",
-  //   "Perimenopause", "Menopause", "Periods absent due to medication or a health condition",
-  //   "Hysterectomy or reproductive surgery", "Not applicable", "Prefer not to answer"
-  // ];
+
 
   bool _validate() {
     bool isValid = true;
@@ -192,6 +166,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
     }
   }
 
+
   @override
   void dispose() {
     for (var med in medications) {
@@ -202,6 +177,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
     _allergyDetailsController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -265,12 +241,14 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
           _buildHormonalStageSection(),
           const SizedBox(height: 24),
           ProfileBottomButton(
+            name: "Save & Continue to Food & Digestion",
             onTap: _onSaveAndContinue,
           )
         ],
       ),
     );
   }
+
 
   Widget _buildSegmentedControl(bool? value, ValueChanged<bool> onChanged) {
     return Container(
@@ -289,10 +267,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                 decoration: BoxDecoration(
                   color: value == false ? appColors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
-                  boxShadow: value == false ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1, offset: const Offset(0, 1))] : null,
+                  boxShadow: value == false ? [BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.05),
+                    blurRadius: 1, offset: const Offset(0, 1)
+                  )] : null,
                 ),
-                child: CommonText(
-                  "No",
+                child: CommonText("No",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -311,10 +291,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                 decoration: BoxDecoration(
                   color: value == true ? appColors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
-                  boxShadow: value == true ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1, offset: const Offset(0, 1))] : null,
+                  boxShadow: value == true ? [BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.05),
+                    blurRadius: 1, offset: const Offset(0, 1)
+                  )] : null,
                 ),
-                child: CommonText(
-                  "Yes",
+                child: CommonText("Yes",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -355,8 +337,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_diagnosesError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_diagnosesError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_diagnosesError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_diagnosesError!, style: TextStyle(
+            color: appColors.red, fontSize: 12
+          ))
+        ),
       ],
     );
   }
@@ -386,8 +372,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_familyHistoryError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_familyHistoryError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_familyHistoryError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_familyHistoryError!, style: TextStyle(
+            color: appColors.red, fontSize: 12
+          ))
+        ),
       ],
     );
   }
@@ -405,8 +395,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             if (_medicationError != null) _validate();
           });
         }),
-        if (_medicationError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_medicationError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_medicationError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_medicationError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          ),
+        ),
         if (_takingMedication == true) ...[
           const SizedBox(height: 16),
           ...List.generate(medications.length, (index) {
@@ -428,20 +422,20 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                         "Entry #${index + 1} • Active Prescription",
                         style: TextStyle(fontSize: 12, color: appColors.primary, fontWeight: FontWeight.w600),
                       ),
-                      if (medications.length > 1)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              medications[index].dispose();
-                              medications.removeAt(index);
-                            });
-                          },
-                          child: Icon(Icons.close_rounded, size: 16, color: appColors.neutral),
-                        ),
+                      if (medications.length > 1) GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            medications[index].dispose();
+                            medications.removeAt(index);
+                          });
+                        },
+                        child: Icon(Icons.close_rounded, size: 16, color: appColors.neutral),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   CommonTextField(
+                    isRequired: false,
                     controller: med.nameController,
                     label: "Medication / Supplement Name",
                     hint: "e.g. Levothyroxine",
@@ -455,6 +449,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                     children: [
                       Expanded(
                         child: CommonTextField(
+                          isRequired: false,
                           controller: med.doseController, 
                           label: "Dose (if known)", 
                           hint: "e.g. 50 mcg", 
@@ -466,6 +461,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: CommonTextField(
+                          isRequired: false,
                           controller: med.freqController, 
                           label: "Frequency", 
                           hint: "e.g. Once daily", 
@@ -478,6 +474,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                   ),
                   const SizedBox(height: 12),
                   CommonTextField(
+                    isRequired: false,
                     controller: med.reasonController, 
                     label: "Reason / Condition", 
                     hint: "e.g. Hypothyroidism management", 
@@ -553,8 +550,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
               },
             ),
           ),
-          if (_limitationsError != null)
-            Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_limitationsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+          if (_limitationsError != null) Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: CommonText(_limitationsError!, style: TextStyle(
+              color: appColors.red, fontSize: 12)
+            )
+          ),
         ],
       ],
     );
@@ -594,8 +595,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
               },
             ),
           ),
-          if (_restrictionsError != null)
-            Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_restrictionsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+          if (_restrictionsError != null) Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: CommonText(_restrictionsError!, style: TextStyle(
+              color: appColors.red, fontSize: 12)
+            )
+          ),
         ],
       ],
     );
@@ -634,8 +639,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_symptomsError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_symptomsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_symptomsError != null)Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_symptomsError!, style: TextStyle(
+            color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -657,11 +666,17 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             });
           },
         )),
-        if (_allergyError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_allergyError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_allergyError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_allergyError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
         if (_selectedAllergy != null && _selectedAllergy != "No known allergies") ...[
           const SizedBox(height: 16),
-          CommonText("Specify foods & observed symptoms", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+          CommonText("Specify foods & observed symptoms",
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF534343))
+          ),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -685,8 +700,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
               },
             ),
           ),
-          if (_allergyDetailsError != null)
-            Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_allergyDetailsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+          if (_allergyDetailsError != null) Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: CommonText(_allergyDetailsError!, style: TextStyle(
+              color: appColors.red, fontSize: 12)
+            )
+          ),
         ],
       ],
     );
@@ -709,8 +728,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             });
           },
         )),
-        if (_hormonalStageError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_hormonalStageError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_hormonalStageError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_hormonalStageError!, style: TextStyle(
+            color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }

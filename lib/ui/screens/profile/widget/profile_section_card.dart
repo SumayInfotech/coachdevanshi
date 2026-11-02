@@ -6,10 +6,18 @@ import '../../../widgets/common_text.dart';
 
 class ProfileSectionCard extends StatelessWidget {
   final String title;
-  final String icon;
+  final String? icon;
+  final double? fontSize;
+  final IconData? iconData;
   final List<Widget> children;
 
-  const ProfileSectionCard({super.key, required this.title, required this.icon, required this.children});
+  const ProfileSectionCard({
+    super.key,
+    required this.title,
+    this.icon,
+    this.iconData,
+    required this.children, this.fontSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +41,19 @@ class ProfileSectionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 7),
-                child: Image.asset(icon, height: 20, width: 20, color: appColors.primary),
+                padding: const EdgeInsets.only(top: 4),
+                child: iconData != null
+                    ? Icon(iconData, size: 20, color: appColors.primary)
+                    : (icon != null
+                        ? Image.asset(
+                            icon!,
+                            height: 20,
+                            width: 20,
+                            color: appColors.primary,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(Icons.star_rounded, size: 20, color: appColors.primary),
+                          )
+                        : const SizedBox.shrink()),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -42,10 +61,10 @@ class ProfileSectionCard extends StatelessWidget {
                   title,
                   fontFamily: fontPlayfairDisplay,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: fontSize ?? 20,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1D1B1A),
-                    letterSpacing: 0
+                    color: Color(0xFF1D1B1A),
+                    letterSpacing: 0,
                   ),
                 ),
               ),

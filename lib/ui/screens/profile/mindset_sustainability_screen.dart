@@ -23,21 +23,6 @@ class MindsetSustainabilityScreen extends StatefulWidget {
 
 class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScreen> {
   // 1. Goal-Oriented Mindset
-  // final List<String> _mindsetOptions = [
-  //   "I do best with a clear routine",
-  //   "I need flexibility or I feel restricted",
-  //   "Numbers and data motivate me",
-  //   "Too much tracking overwhelms me",
-  //   "I prefer simple instructions and fewer choices",
-  //   "I like understanding the reason behind every recommendation",
-  //   "I can become all-or-nothing after one difficult day",
-  //   "I am usually self-directed",
-  //   "Regular accountability keeps me consistent",
-  //   "I get bored when a routine feels repetitive",
-  //   "I am hard on myself when I do not do something perfectly",
-  //   "Small visible wins keep me motivated",
-  //   "Other"
-  // ];
   final Set<String> _selectedMindsets = {};
   String? _mindsetError;
 
@@ -103,7 +88,8 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
   void _onSaveAndReview() {
     if (_validate()) {
       appLog("Mindset & Sustainability Form Validated!");
-      navigation.pushReplaceFadeAnimation(context, ClientConsentScreen());
+      // navigation.pushReplaceFadeAnimation(context, ClientConsentScreen());
+      navigation.pop(context);
     }
   }
 
@@ -173,6 +159,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           _buildReflectionsSection(),
           const SizedBox(height: 24),
           ProfileBottomButton(
+            name: "Save & Review",
             onTap: _onSaveAndReview,
           )
         ],
@@ -213,8 +200,12 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
             },
           )).toList(),
         ),
-        if (_mindsetError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_mindsetError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_mindsetError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_mindsetError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -238,8 +229,12 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
             if (_slowProgressError != null) _validate();
           },
         ),
-        if (_slowProgressError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_slowProgressError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_slowProgressError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_slowProgressError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -254,7 +249,10 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           color: Color(0xFF1D1B1A)
         ),
         const SizedBox(height: 16),
-        CommonText("One change you could genuinely start this week", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText(
+          "One change you could genuinely start this week",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 6),
         CommonTextField(
           label: '',
@@ -264,11 +262,16 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           borderColor: Colors.transparent,
           onChanged: (v) { if (_startChangeError != null) _validate(); },
         ),
-        if (_startChangeError != null)
-          Padding(padding: const EdgeInsets.only(top: 4, bottom: 8), child: CommonText(_startChangeError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_startChangeError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 8),
+          child: CommonText(_startChangeError!, style: TextStyle(color: appColors.red, fontSize: 12))
+        ),
         
         const SizedBox(height: 12),
-        CommonText("One thing you are not ready to change yet", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText(
+          "One thing you are not ready to change yet",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 6),
         CommonTextField(
           label: '',
@@ -278,8 +281,12 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           borderColor: Colors.transparent,
           onChanged: (v) { if (_notReadyChangeError != null) _validate(); },
         ),
-        if (_notReadyChangeError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_notReadyChangeError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_notReadyChangeError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_notReadyChangeError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -303,8 +310,12 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
             if (_visionError != null) _validate();
           },
         ),
-        if (_visionError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_visionError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_visionError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_visionError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -314,7 +325,10 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       title: "Open Reflections",
       icon: appIcons.edit,
       children: [
-        CommonText("Is there anything important about your health, body, food or lifestyle that we have not asked?", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText(
+          "Is there anything important about your health, body, food or lifestyle that we have not asked?",
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 12),
         ProfileTextArea(
           controller: _reflectionsController,

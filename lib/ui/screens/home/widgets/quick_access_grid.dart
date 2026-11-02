@@ -6,34 +6,38 @@ import '../../../widgets/common_text.dart';
 
 class QuickAccessItem {
   final String title;
-  final String iconPath;
+  final String? iconPath;
   final Color iconBgColor;
   final IconData fallbackIcon;
+  final Color iconColor;
   final VoidCallback? onTap;
 
   const QuickAccessItem({
     required this.title,
-    required this.iconPath,
+    this.iconPath,
     required this.iconBgColor,
     required this.fallbackIcon,
+    required this.iconColor,
     this.onTap,
   });
 }
 
 class QuickAccessGrid extends StatelessWidget {
   final List<QuickAccessItem>? items;
-  final VoidCallback? onCheckinTap;
-  final VoidCallback? onNotesTap;
-  final VoidCallback? onChatTap;
-  final VoidCallback? onMoreTap;
+  final bool showShortcuts;
+  final VoidCallback? onShortcutsTap;
+  final VoidCallback? onFoodDiaryTap;
+  final VoidCallback? onProgressPhotosTap;
+  final VoidCallback? onUploadReportsTap;
 
   const QuickAccessGrid({
     super.key,
     this.items,
-    this.onCheckinTap,
-    this.onNotesTap,
-    this.onChatTap,
-    this.onMoreTap,
+    this.showShortcuts = false,
+    this.onShortcutsTap,
+    this.onFoodDiaryTap,
+    this.onProgressPhotosTap,
+    this.onUploadReportsTap,
   });
 
   @override
@@ -41,32 +45,27 @@ class QuickAccessGrid extends StatelessWidget {
     final list = items ??
         [
           QuickAccessItem(
-            title: "Check-in",
-            iconPath: appIcons.homeTileCheckin,
+            title: "Food Diary",
+            iconPath: appIcons.book,
             iconBgColor: const Color(0xFFFFDADB).withValues(alpha: 0.5),
-            fallbackIcon: Icons.assignment_turned_in_rounded,
-            onTap: onCheckinTap,
+            fallbackIcon: Icons.menu_book_rounded,
+            iconColor: appColors.primary,
+            onTap: onFoodDiaryTap,
           ),
           QuickAccessItem(
-            title: "Notes",
-            iconPath: appIcons.homeTileNotes,
+            title: "Progress Photos",
+            iconPath: appIcons.addPhoto,
             iconBgColor: const Color(0xFFF2EDEB),
-            fallbackIcon: Icons.sticky_note_2_rounded,
-            onTap: onNotesTap,
+            fallbackIcon: Icons.camera_alt_outlined,
+            iconColor: const Color(0xFF534343),
+            onTap: onProgressPhotosTap,
           ),
           QuickAccessItem(
-            title: "Chat",
-            iconPath: appIcons.homeTileChat,
+            title: "Upload Reports",
             iconBgColor: const Color(0xFFD8E5BF).withValues(alpha: 0.5),
-            fallbackIcon: Icons.chat_bubble_rounded,
-            onTap: onChatTap,
-          ),
-          QuickAccessItem(
-            title: "More",
-            iconPath: appIcons.homeTileMore,
-            iconBgColor: const Color(0xFFF2EDEB),
-            fallbackIcon: Icons.grid_view_rounded,
-            onTap: onMoreTap,
+            fallbackIcon: Icons.cloud_upload_outlined,
+            iconColor: const Color(0xFF404A2F),
+            onTap: onUploadReportsTap,
           ),
         ];
 
@@ -86,19 +85,23 @@ class QuickAccessGrid extends StatelessWidget {
               ),
               fontFamily: 'serif',
             ),
-            CommonText(
-              "Shortcuts",
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: appColors.primary,
+            if (showShortcuts)
+              GestureDetector(
+                onTap: onShortcutsTap,
+                child: CommonText(
+                  "Shortcuts",
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: appColors.primary,
+                  ),
+                  fontFamily: fontFamilyPlusJakartaSans,
+                ),
               ),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
           ],
         ),
         const SizedBox(height: 12),
-        // 4 Shortcut Tiles Row
+        // Shortcut Tiles Row
         Row(
           children: List.generate(list.length, (index) {
             final item = list[index];
@@ -106,7 +109,7 @@ class QuickAccessGrid extends StatelessWidget {
             return Expanded(
               child: Container(
                 margin: EdgeInsets.only(
-                  right: index == list.length - 1 ? 0 : 8,
+                  right: index == list.length - 1 ? 0 : 10,
                 ),
                 child: Material(
                   color: Colors.transparent,
@@ -114,7 +117,7 @@ class QuickAccessGrid extends StatelessWidget {
                     onTap: item.onTap,
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
                       decoration: BoxDecoration(
                         color: appColors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -130,29 +133,36 @@ class QuickAccessGrid extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 38,
-                            height: 38,
+                            width: 42,
+                            height: 42,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: item.iconBgColor,
                             ),
                             child: Center(
-                              child: Image.asset(
-                                item.iconPath,
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    item.fallbackIcon,
-                                    color: appColors.primary,
-                                    size: 18,
-                                  );
-                                },
-                              ),
+                              child: item.iconPath != null
+                                  ? Image.asset(
+                                      item.iconPath!,
+                                      width: 20,
+                                      height: 20,
+                                      color: item.iconColor,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Icon(
+                                          item.fallbackIcon,
+                                          color: item.iconColor,
+                                          size: 20,
+                                        );
+                                      },
+                                    )
+                                  : Icon(
+                                      item.fallbackIcon,
+                                      color: item.iconColor,
+                                      size: 20,
+                                    ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 10),
                           CommonText(
                             item.title,
                             style: const TextStyle(

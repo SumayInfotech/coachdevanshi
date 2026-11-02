@@ -12,7 +12,8 @@ import '../bottom_bar_screen.dart';
 import 'widget/check_in_section_card.dart';
 
 class DailyWellnessLogScreen extends StatefulWidget {
-  const DailyWellnessLogScreen({super.key});
+  final bool isBack;
+  const DailyWellnessLogScreen({super.key, this.isBack = false});
 
   @override
   State<DailyWellnessLogScreen> createState() => _DailyWellnessLogScreenState();
@@ -162,8 +163,11 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
   }
 
   void _onBack() {
-    // Jump to HomeScreen tab instead of popping the route
-    bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    if(widget.isBack) {
+      navigation.pop(context);
+    } else {
+      bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    }
   }
 
   Future<void> _selectTime(TextEditingController controller) async {

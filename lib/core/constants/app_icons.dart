@@ -41,6 +41,7 @@ class AppIcons {
 
   /// Profile
   String get lotas => "$basePath/lotas.png";
+  String get reportUpload => "$basePath/report-upload.png";
   String get profileProgram => "$basePath/profile-program.png";
   String get goalsStartingPoint => "$basePath/goals-starting-point.png";
   String get relevantHealthSafety => "$basePath/relevant-health-safety.png";

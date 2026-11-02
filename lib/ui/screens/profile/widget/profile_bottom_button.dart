@@ -5,9 +5,10 @@ import '../../../../main.dart';
 import '../../../widgets/common_button.dart';
 
 class ProfileBottomButton extends StatelessWidget {
+  final String name;
   final VoidCallback onTap;
 
-  const ProfileBottomButton({super.key, required this.onTap});
+  const ProfileBottomButton({super.key, required this.onTap, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +25,12 @@ class ProfileBottomButton extends StatelessWidget {
         ],
       ),
       child: CommonButton(
-        name: "Save & Continue to Goals & Starting Point",
+        name: name,
         icon: Icons.arrow_forward_rounded,
         isIconFirst: false,
         imageSize: 16,
         btnColor: appColors.primary,
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w700,
         onTap: onTap,
       ),

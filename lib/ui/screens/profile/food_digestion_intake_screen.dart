@@ -39,15 +39,10 @@ class FoodDigestionIntakeScreen extends StatefulWidget {
 
 class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   // 1. Eating Pattern
-  // final List<String> _eatingPatternOptions = ["Vegetarian", "Vegan", "Eggitarian", "Non-vegetarian", "Pescatarian", "Other"];
   String? _selectedEatingPattern;
   String? _eatingPatternError;
 
   // 2. Cultural & Fasting Practices
-  // final List<String> _fastingOptions = [
-  //   "Jain", "No onion or garlic", "Paryushan", "Navratri fasting",
-  //   "Somvar or another regular fast", "Ramadan", "Other", "None"
-  // ];
   final Set<String> _selectedFasting = {};
   String? _fastingError;
 
@@ -71,17 +66,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   String? _foodsMatterError;
 
   // 6. Food Environment
-  // final List<String> _whoCooksOptions = ["Self", "Family", "Cook", "Canteen", "Delivery or combination"];
   String? _selectedWhoCooks;
   String? _whoCooksError;
 
   final TextEditingController _shareMealsController = TextEditingController();
-
-  // final List<String> _supportOptions = ["Supportive", "Neutral", "Resistant", "Not applicable"];
   String? _selectedSupport;
-
   String? _selectedMealsOut;
-  // final List<String> _mealsOutOptions = ["0–1", "2–3", "4–6", "7+"];
 
   // 7. Daily Intake Overview
   String? _intakeFruit;
@@ -92,18 +82,10 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
   String? _intakeError;
 
   // 8. Substance Habits
-  // final List<String> _substanceOptions = [
-  //   "No", "Alcohol", "Cigarettes", "Vaping", "Recreational substances", "Prefer not to answer"
-  // ];
   final Set<String> _selectedSubstances = {};
   String? _substanceError;
 
   // 9. Digestive Health
-  // final List<String> _digestionOptions = [
-  //   "Bloating", "Gas or frequent burping", "Acidity or reflux", "Constipation",
-  //   "Loose stools", "Alternating constipation and loose stools", "Abdominal pain or cramps",
-  //   "Nausea", "Feeling sleepy or very heavy after meals", "None"
-  // ];
   final Set<String> _selectedDigestion = {};
   String? _digestionError;
 
@@ -260,6 +242,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           _buildDigestiveSection(),
           const SizedBox(height: 24),
           ProfileBottomButton(
+            name: "Save & Continue to Lifestyle & Coaching Fit",
             onTap: _onSaveAndContinue,
           )
         ],
@@ -590,8 +573,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             if (_intakeError != null) _validate();
           })
         ),
-        if (_intakeError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_intakeError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_intakeError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_intakeError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -630,8 +617,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_substanceError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_substanceError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_substanceError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_substanceError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -669,8 +660,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_digestionError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_digestionError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_digestionError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_digestionError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }

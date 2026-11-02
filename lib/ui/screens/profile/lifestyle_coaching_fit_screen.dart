@@ -41,32 +41,16 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _durationController = TextEditingController();
   String? _sleepError;
 
-  // final List<String> _nightWakingOptions = ["Never", "Monthly", "1–2 times weekly", "3+ times weekly", "Most nights"];
   String? _selectedNightWaking;
   String? _nightWakingError;
 
-  // final List<String> _firstHourOptions = ["Ready to go", "Slow but okay", "Foggy and reluctant", "Need caffeine to function"];
   String? _selectedFirstHour;
   String? _firstHourError;
 
   // --- Section 2: Activity & Movement ---
-  // final List<String> _dailyActivityOptions = [
-  //   "Mostly seated with little movement",
-  //   "Mostly seated but some regular walking",
-  //   "On my feet for part of the day",
-  //   "Physically active work or high daily movement",
-  //   "Activity varies significantly by day"
-  // ];
-  String? _selectedDailyActivity;
-  String? _dailyActivityError;
-
-  // final List<String> _avgStepsOptions = ["Not tracked", "Below 3,000", "3,000–4,999", "5,000–7,499", "7,500–9,999", "10,000–12,499", "12,500+"];
-  String? _selectedAvgSteps;
-  String? _avgStepsError;
-
-  // final List<String> _workoutsCountOptions = ["0", "1", "2", "3", "4", "5+"];
-  String? _selectedWorkoutsCount;
-  String? _workoutsCountError;
+  String? _selectedDailyActivity, _dailyActivityError;
+  String? _selectedAvgSteps, _avgStepsError;
+  String? _selectedWorkoutsCount, _workoutsCountError;
 
   final TextEditingController _workoutTypesController = TextEditingController();
   final TextEditingController _wearableController = TextEditingController();
@@ -82,11 +66,6 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _stress3Controller = TextEditingController();
   String? _stressSourcesError;
 
-  // final List<String> _stressChangeOptions = [
-  //   "Food choices or cravings", "Meal timing", "Sleep", "Movement",
-  //   "Mood or patience", "Digestion", "Check-ins or communication",
-  //   "Nothing noticeable", "Other"
-  // ];
   final Set<String> _selectedStressChanges = {};
   String? _stressChangeError;
 
@@ -94,14 +73,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   String? _decompressionError;
 
   // --- Section 4: Readiness & Coaching Partnership ---
-  String? _readinessScore;
-  String? _readinessError;
+  String? _readinessScore, _readinessError;
 
-  // final List<String> _interruptionsOptions = [
-  //   "Work pressure", "Travel", "Social events", "Family responsibilities",
-  //   "Poor sleep", "Low energy", "Cravings or emotional eating", "Pain or illness",
-  //   "Lack of food preparation", "All-or-nothing thinking", "Limited support at home", "Other"
-  // ];
   final Set<String> _selectedInterruptions = {};
   String? _interruptionsError;
 
@@ -109,7 +82,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
     bool isValid = true;
 
     // Sleep
-    if (_bedtimeController.text.trim().isEmpty || _wakeTimeController.text.trim().isEmpty || _durationController.text.trim().isEmpty) {
+    if (_bedtimeController.text.trim().isEmpty || _wakeTimeController.text.trim().isEmpty
+        || _durationController.text.trim().isEmpty) {
       _sleepError = "Please complete sleep details";
       isValid = false;
     } else {
@@ -276,6 +250,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
           _buildReadinessSection(),
           const SizedBox(height: 24),
           ProfileBottomButton(
+            name: "Save & Continue to Mindset & Sustainability",
             onTap: _onSaveAndContinue,
           )
         ],
@@ -289,7 +264,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CommonText(number, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF857373))),
+          CommonText(number, style: TextStyle(
+            fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF857373)
+          )),
           const SizedBox(width: 8),
           Expanded(
             child: CommonTextField(
@@ -319,7 +296,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CommonText(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+            CommonText(label, style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343)
+            )),
             const SizedBox(height: 6),
             CommonTextField(
               label: '',
@@ -342,11 +321,18 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         buildTimeInput("Bedtime", "e.g., 10:45 PM", _bedtimeController),
         buildTimeInput("Wake time", "e.g., 6:30 AM", _wakeTimeController),
         buildTimeInput("Typical duration", "e.g., 7.5 hours", _durationController),
-        if (_sleepError != null)
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: CommonText(_sleepError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_sleepError != null) Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: CommonText(_sleepError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 8),
-        CommonText("Night waking frequency", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText(
+          "Night waking frequency",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -362,11 +348,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             },
           )).toList(),
         ),
-        if (_nightWakingError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_nightWakingError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_nightWakingError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_nightWakingError!,
+              style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 16),
-        CommonText("First hour after waking", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText("First hour after waking", style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343)
+        )),
         const SizedBox(height: 8),
         ...widget.sleepFirstHour.map((e) => ProfileRadioOption(
           label: e.title ?? "",
@@ -378,8 +370,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             });
           },
         )),
-        if (_firstHourError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_firstHourError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_firstHourError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_firstHourError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -398,7 +394,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                 decoration: BoxDecoration(
                   color: selected == e.uuid ? appColors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
-                  boxShadow: selected == e.uuid ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
+                  boxShadow: selected == e.uuid ? [BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.05), blurRadius: 1
+                  )] : null,
                 ),
                 child: CommonText(
                   e.title ?? "",
@@ -450,11 +448,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             });
           },
         )),
-        if (_dailyActivityError != null)
-          Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: CommonText(_dailyActivityError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_dailyActivityError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: CommonText(_dailyActivityError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 8),
-        CommonText("Average daily steps", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("Average daily steps", style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+        )),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -470,11 +474,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             },
           )).toList(),
         ),
-        if (_avgStepsError != null)
-          Padding(padding: const EdgeInsets.only(top: 8, bottom: 12), child: CommonText(_avgStepsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_avgStepsError != null) Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 12),
+          child: CommonText(_avgStepsError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 16),
-        CommonText("Current workouts per week", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("Current workouts per week", style: TextStyle(
+          fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+        )),
         const SizedBox(height: 8),
         buildNumPicker(
           _selectedWorkoutsCount, widget.activityWorkoutsPerWeek,
@@ -483,8 +493,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             if (_workoutsCountError != null) _validate();
           })
         ),
-        if (_workoutsCountError != null)
-          Padding(padding: const EdgeInsets.only(top: 4, bottom: 12), child: CommonText(_workoutsCountError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_workoutsCountError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: CommonText(_workoutsCountError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 16),
         buildActivityInput("Movement or workout types", "e.g., Brisk walking, weekend trails", _workoutTypesController),
@@ -492,7 +506,10 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         buildActivityInput("Any movement you enjoy or dislike", "e.g., Enjoy evening walks; dislike running", _enjoyDislikeController),
 
         const SizedBox(height: 8),
-        CommonText("On an ordinary week, how many days could you realistically make time for intentional movement?", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText(
+          "On an ordinary week, how many days could you realistically make time for intentional movement?",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 8),
         buildNumPicker(
           _selectedRealisticCapacity, widget.activityAvailableDays,
@@ -501,8 +518,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             if (_realisticCapacityError != null) _validate();
           })
         ),
-        if (_realisticCapacityError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_realisticCapacityError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_realisticCapacityError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_realisticCapacityError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -512,16 +533,26 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       title: "Stress & Decompression",
       icon: appIcons.heart,
       children: [
-        CommonText("What are the three biggest sources of stress in your life right now, and what tends to change first when stress is high?", style: TextStyle(fontSize: 13, color: const Color(0xFF534343))),
+        CommonText(
+          "What are the three biggest sources of stress in your life right now, and what tends to change first when stress is high?",
+          style: TextStyle(fontSize: 13, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 16),
 
         _buildNumberedListField("1.", "e.g., Back-to-back work meetings", _stress1Controller),
         _buildNumberedListField("2.", "e.g., Irregular travel or commuting", _stress2Controller),
         _buildNumberedListField("3.", "e.g., Managing family schedules", _stress3Controller),
-        if (_stressSourcesError != null)
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: CommonText(_stressSourcesError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_stressSourcesError != null) Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: CommonText(_stressSourcesError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
-        CommonText("What tends to change first when stress is high?", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText(
+          "What tends to change first when stress is high?",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -541,11 +572,18 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             },
           )).toList(),
         ),
-        if (_stressChangeError != null)
-          Padding(padding: const EdgeInsets.only(top: 8, bottom: 12), child: CommonText(_stressChangeError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_stressChangeError != null) Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 12),
+          child: CommonText(_stressChangeError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         const SizedBox(height: 16),
-        CommonText("When you feel overwhelmed, what helps you come back down — if anything?", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText(
+          "When you feel overwhelmed, what helps you come back down — if anything?",
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -567,8 +605,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             onChanged: (v) { if (_decompressionError != null) _validate(); },
           ),
         ),
-        if (_decompressionError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_decompressionError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_decompressionError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_decompressionError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -578,7 +620,10 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       title: "Readiness & Coaching Partnership",
       icon: appIcons.compass,
       children: [
-        CommonText("How ready do you feel to make changes right now?", style: TextStyle(fontSize: 13, color: const Color(0xFF534343))),
+        CommonText(
+          "How ready do you feel to make changes right now?",
+          style: TextStyle(fontSize: 13, color: const Color(0xFF534343))
+        ),
         const SizedBox(height: 12),
         // 1 to 10 Grid
         GridView.builder(
@@ -621,19 +666,32 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             );
           },
         ),
-        if (_readinessError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_readinessError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_readinessError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_readinessError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CommonText("1: Hesitant / exploring", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF857373))),
-            CommonText("10: Fully committed & ready", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF857373))),
+            CommonText(
+              "1: Hesitant / exploring",
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF857373))
+            ),
+            CommonText(
+              "10: Fully committed & ready",
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF857373))
+            ),
           ],
         ),
 
         const SizedBox(height: 24),
-        CommonText("What most commonly interrupts your consistency?\n(Select up to 3)", style: TextStyle(fontSize: 13, color: const Color(0xFF1D1B1A))),
+        CommonText(
+          "What most commonly interrupts your consistency?\n(Select up to 3)",
+          style: TextStyle(fontSize: 13, color: const Color(0xFF1D1B1A))
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -657,8 +715,12 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
             },
           )).toList(),
         ),
-        if (_interruptionsError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_interruptionsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_interruptionsError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_interruptionsError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }

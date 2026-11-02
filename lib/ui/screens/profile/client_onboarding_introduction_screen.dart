@@ -10,7 +10,8 @@ import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 
 class ClientOnboardingIntroductionScreen extends StatelessWidget {
-  const ClientOnboardingIntroductionScreen({super.key});
+  final bool isLogin;
+  const ClientOnboardingIntroductionScreen({super.key, this.isLogin = true});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +65,10 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
             fontWeight: FontWeight.w700,
             onTap: () {
               AppPreferences.setBool(AppPreferences.isIntro, true);
-              navigation.push(context, ClientOnboardingScreen(isBack: true));
+              navigation.push(context, ClientOnboardingScreen(
+                isBack: true,
+                isLogin: isLogin,
+              ));
             },
           ),
           const SizedBox(height: 16),

@@ -12,6 +12,7 @@ import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
 import 'coach/select_pathway_screen.dart';
 import 'home/home_screen.dart';
+import 'profile/client_onboarding_introduction_screen.dart';
 import 'profile/client_onboarding_screen.dart';
 import 'progress/baseline_progress_screen.dart';
 
@@ -67,9 +68,11 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             if(state is ProfileSuccess) {
               LoaderService.hide();
               userData.value = state.model.data?.user;
-              // if(!(state.model.data?.user?.isProfileCompleted ?? false)) {
-              //   navigation.pushAndRemoveUntilSlideAnimation(context, ClientOnboardingIntroductionScreen());
-              // }
+              if(!(state.model.data?.user?.isProfileCompleted ?? false)) {
+                // navigation.pushAndRemoveUntilSlideAnimation(context,
+                //   ClientOnboardingIntroductionScreen(isLogin: true)
+                // );
+              }
             } else if(state is ProfileFailed) {
               LoaderService.hide();
             }

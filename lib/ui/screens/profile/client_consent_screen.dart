@@ -119,7 +119,9 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
                   height: 20.63 / 13,
                 ),
                 children: [
-                  const TextSpan(text: "I consent to my information being used to create, deliver and monitor my coaching plan, as explained in the "),
+                  const TextSpan(
+                    text: "I consent to my information being used to create, deliver and monitor my coaching plan, as explained in the "
+                  ),
                   TextSpan(
                     text: "Privacy Notice",
                     style: const TextStyle(
@@ -128,7 +130,9 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()..onTap = () {
-                      navigation.pushSlideAnimation(context, const CommonWebView(title: "Privacy Notice", url: "https://www.google.com/"));
+                      navigation.pushSlideAnimation(context, const CommonWebView(
+                        title: "Privacy Notice", url: "https://www.google.com/"
+                      ));
                     },
                   ),
                   const WidgetSpan(
@@ -225,8 +229,8 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
               margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                 color: isChecked
-                    ? const Color(0xFF8B484D)
-                    : const Color(0xFFEDE7E5),
+                  ? const Color(0xFF8B484D)
+                  : const Color(0xFFEDE7E5),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: isChecked
@@ -242,8 +246,8 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: isRequired
-                          ? const Color(0xFFFFDADB).withValues(alpha: 0.6)
-                          : const Color(0xFFD8E5BF).withValues(alpha: 0.6),
+                        ? const Color(0xFFFFDADB).withValues(alpha: 0.6)
+                        : const Color(0xFFD8E5BF).withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: CommonText(
