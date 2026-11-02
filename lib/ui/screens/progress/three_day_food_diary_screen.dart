@@ -178,7 +178,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
           ),
         ),
         title: CommonText(
-          "Daily Wellness Log",
+          "Three-day Food Diary",
           fontFamily: fontPlayfairDisplay,
           style: TextStyle(
             fontSize: 16,

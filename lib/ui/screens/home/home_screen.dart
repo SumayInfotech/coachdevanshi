@@ -4,6 +4,7 @@ import '../../../main.dart';
 import '../bottom_bar_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../profile/blood_report_upload_screen.dart';
 import '../progress/three_day_food_diary_screen.dart';
 import '../progress/track_weekly_progress_screen.dart';
 import 'widgets/greeting_banner.dart';
@@ -84,8 +85,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Quick Access Grid (Food Diary, Progress Photos, Upload Reports)
                     QuickAccessGrid(
                       onFoodDiaryTap: () => navigation.push(context, const ThreeDayFoodDiaryScreen()),
-                      onProgressPhotosTap: () => navigation.push(context, const TrackWeeklyProgressScreen()),
-                      onUploadReportsTap: () => appLog("Upload Reports tapped"),
+                      onProgressPhotosTap: () => navigation.push(context,
+                        const TrackWeeklyProgressScreen(isBack: true)
+                      ),
+                      onUploadReportsTap: () => navigation.push(
+                        context,
+                        const BloodReportUploadScreen(isBack: true),
+                      ),
                     ),
                     const SizedBox(height: 28),
                   ],

@@ -502,10 +502,10 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.add, size: 16, color: appColors.primary),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 4),
                   CommonText(
                     "Add another medication/supplement",
-                    style: TextStyle(fontSize: 14, color: appColors.primary, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 12, color: appColors.primary, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),

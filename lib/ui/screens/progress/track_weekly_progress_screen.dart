@@ -13,7 +13,8 @@ import '../profile/widget/profile_section_card.dart';
 import 'three_day_food_diary_screen.dart';
 
 class TrackWeeklyProgressScreen extends StatefulWidget {
-  const TrackWeeklyProgressScreen({super.key});
+  final bool isBack;
+  const TrackWeeklyProgressScreen({super.key, this.isBack = false});
 
   @override
   State<TrackWeeklyProgressScreen> createState() => _TrackWeeklyProgressScreenState();
@@ -161,7 +162,11 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
   }
 
   void _onBack() {
-    navigation.pushReplaceSlideAnimation(context, ThreeDayFoodDiaryScreen());
+    if(widget.isBack) {
+      navigation.pop(context);
+    } else {
+      navigation.pushReplaceSlideAnimation(context, ThreeDayFoodDiaryScreen());
+    }
   }
 
   @override

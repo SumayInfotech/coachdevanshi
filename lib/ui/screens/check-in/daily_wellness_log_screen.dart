@@ -319,6 +319,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           buildRequiredLabel("Select Day to Log", color: const Color(0xFF534343)),
           const SizedBox(height: 12),
           Row(
+            spacing: 2,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
               int day = index + 1;
@@ -326,9 +327,9 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
               return GestureDetector(
                 onTap: () => setState(() => _selectedDay = day),
                 child: Container(
-                  width: 40,
                   height: 50,
                   alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF8B484D) : const Color(0xFFF8F2F0),
                     borderRadius: BorderRadius.circular(8),

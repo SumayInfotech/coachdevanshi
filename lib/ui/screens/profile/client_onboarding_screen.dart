@@ -17,6 +17,7 @@ import '../bottom_bar_screen.dart';
 import '../check-in/daily_wellness_log_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
 import '../progress/baseline_progress_screen.dart';
+import 'blood_report_upload_screen.dart';
 import '../progress/three_day_food_diary_screen.dart';
 import '../progress/track_weekly_progress_screen.dart';
 import '../splash/welcome_screen.dart';
@@ -450,7 +451,10 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                         subtitle: "Blood-report upload with report date",
                         buttonText: "Add Reports",
                         isPrimaryButton: true,
-                        onTapButton: () => appLog("Add Reports tapped"),
+                        onTapButton: () => navigation.pushSlideAnimation(
+                          context,
+                          const BloodReportUploadScreen(isBack: true),
+                        ),
                       ),
                     ],
 
