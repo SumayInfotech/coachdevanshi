@@ -12,7 +12,6 @@ import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
 import 'coach/select_pathway_screen.dart';
 import 'home/home_screen.dart';
-import 'profile/client_onboarding_introduction_screen.dart';
 import 'profile/client_onboarding_screen.dart';
 import 'progress/baseline_progress_screen.dart';
 
@@ -165,11 +164,15 @@ class HomeMenu extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(icon, height: 24, width: 24, color: isSelected ? appColors.primary : appColors.unSelected),
-          CommonText(
-            label,
+          Image.asset(icon,
+            height: 24, width: 24,
+            color: isSelected ? appColors.primary : appColors.unSelected
+          ),
+          CommonText(label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: isSelected ? appColors.primary : appColors.unSelected),
+            style: TextStyle(
+              fontSize: 12, color: isSelected ? appColors.primary : appColors.unSelected
+            ),
           ),
         ],
       ),

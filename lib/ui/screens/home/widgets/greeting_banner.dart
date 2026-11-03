@@ -1,9 +1,9 @@
-import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/utils.dart';
 import '../../../widgets/common_text.dart';
+import '../../bottom_bar_screen.dart';
 
 class GreetingBanner extends StatelessWidget {
   final String? dateText;

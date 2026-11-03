@@ -525,8 +525,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         const SizedBox(height: 10),
         _buildTextArea(
           controller: _selfConfidenceController,
-          hint:
-              "e.g., Feeling significantly lighter around the waist, favourite linen trousers fit comfortably without pinching, feeling calm and confident in social gatherings",
+          hint: "e.g., Feeling significantly lighter around the waist, favourite linen trousers fit comfortably without pinching, feeling calm and confident in social gatherings",
         ),
       ],
     );
@@ -700,8 +699,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         const SizedBox(height: 10),
         _buildTextArea(
           controller: _weeklyWinsController,
-          hint:
-              "e.g., Honored my morning hydration ritual every single day, took 15-minute post-dinner walks without skipping",
+          hint: "e.g., Honored my morning hydration ritual every single day, took 15-minute post-dinner walks without skipping",
         ),
       ],
     );
@@ -717,8 +715,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         const SizedBox(height: 10),
         _buildTextArea(
           controller: _proudMomentsController,
-          hint:
-              "e.g., Paused before eating during a hectic team lunch and ate mindfully without guilt or rush...",
+          hint: "e.g., Paused before eating during a hectic team lunch and ate mindfully without guilt or rush...",
         ),
       ],
     );
@@ -734,8 +731,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         const SizedBox(height: 10),
         _buildTextArea(
           controller: _obstaclesController,
-          hint:
-              "e.g., Late client call pushed dinner past 9:30 PM, making digestion feel slightly sluggish the next morning...",
+          hint: "e.g., Late client call pushed dinner past 9:30 PM, making digestion feel slightly sluggish the next morning...",
         ),
       ],
     );
@@ -759,8 +755,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         const SizedBox(height: 10),
         _buildTextArea(
           controller: _notesController,
-          hint:
-              "e.g., Looking forward to our Wednesday check-in; feeling positive about continuing this rhythm...",
+          hint: "e.g., Looking forward to our Wednesday check-in; feeling positive about continuing this rhythm...",
         ),
       ],
     );

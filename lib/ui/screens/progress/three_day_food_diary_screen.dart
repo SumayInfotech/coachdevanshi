@@ -18,24 +18,24 @@ class ThreeDayFoodDiaryScreen extends StatefulWidget {
 class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
   int _selectedDayIndex = 0;
 
-  final TextEditingController _dateController = TextEditingController(text: DateFormat('MMMM dd, yyyy').format(DateTime.now()));
+  final TextEditingController _dateController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String? _dateError;
 
   // Meal 1
-  final TextEditingController _m1TimeController = TextEditingController(text: "8:30 AM");
+  final TextEditingController _m1TimeController = TextEditingController();
   final TextEditingController _m1FoodController = TextEditingController();
   String? _m1TimeError;
   String? _m1FoodError;
 
   // Meal 2
-  final TextEditingController _m2TimeController = TextEditingController(text: "1:15 PM");
+  final TextEditingController _m2TimeController = TextEditingController();
   final TextEditingController _m2FoodController = TextEditingController();
   String? _m2TimeError;
   String? _m2FoodError;
 
   // Meal 3
-  final TextEditingController _m3TimeController = TextEditingController(text: "8:00 PM");
+  final TextEditingController _m3TimeController = TextEditingController();
   final TextEditingController _m3FoodController = TextEditingController();
   String? _m3TimeError;
   String? _m3FoodError;

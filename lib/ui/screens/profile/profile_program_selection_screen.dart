@@ -57,14 +57,46 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   String? _selectedJourney;
   final String _selectedCountry = 'India';
   String? _selectedState, _selectedCity;
-
+  String _autoDetectedTimeZone = "IST (UTC+5:30)";
 
   @override
   void initState() {
     super.initState();
+    _detectTimeZone();
     _cityBloc = LocationBloc(profileRepo: ProfileRepo());
     callStateAPI();
     setData();
+  }
+
+  void _detectTimeZone() {
+    final now = DateTime.now();
+    final offset = now.timeZoneOffset;
+    final isNegative = offset.isNegative;
+    final totalMinutes = offset.inMinutes.abs();
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    final sign = isNegative ? '-' : '+';
+    final formattedMinutes = minutes == 0 ? '' : ':${minutes.toString().padLeft(2, '0')}';
+    final utcOffset = totalMinutes == 0 ? 'UTC' : 'UTC$sign$hours$formattedMinutes';
+
+    String name = now.timeZoneName.trim().replaceAll(RegExp(r'[()]'), '');
+    if (name.contains(' ') && name.length > 5) {
+      final words = name.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+      final initials = words.map((w) => w[0].toUpperCase()).join();
+      if (initials.isNotEmpty && initials.length <= 5) {
+        name = initials;
+      }
+    }
+
+    if (name.isNotEmpty &&
+        !name.startsWith('+') &&
+        !name.startsWith('-') &&
+        !name.toUpperCase().startsWith('UTC')) {
+      _autoDetectedTimeZone = "$name ($utcOffset)";
+    } else {
+      _autoDetectedTimeZone = utcOffset;
+    }
+    setState(() {});
   }
 
 
@@ -457,9 +489,10 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-              : null,
+          boxShadow: isSelected ? [BoxShadow(
+            color: appColors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 1), blurRadius: 1
+          )] : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -468,8 +501,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               children: [
                 Icon(icon, color: isSelected ? const Color(0xFF713439) : const Color(0xFF1D1B1A), size: 16),
                 const SizedBox(width: 12),
-                CommonText(
-                  label,
+                CommonText(label,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -642,43 +674,51 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2EDEB),
-                      shape: BoxShape.circle,
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF2EDEB),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.access_time_rounded, color: Color(0xFF576245), size: 16),
                     ),
-                    child: const Icon(Icons.access_time_rounded, color: Color(0xFF576245), size: 16),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CommonText(
-                        "TIME ZONE",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF576245),
-                          letterSpacing: 0.55,
-                        ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const CommonText("TIME ZONE",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF576245),
+                              letterSpacing: 0.55,
+                            ),
+                          ),
+                          CommonText("Auto-detected: $_autoDetectedTimeZone",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF1D1B1A),
+                            ),
+                          ),
+                        ],
                       ),
-                      CommonText(
-                        "Auto-detected: IST (UTC+5:30)",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1D1B1A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-              const Icon(Icons.refresh_rounded, color: Color(0xFF576245), size: 16),
+              GestureDetector(
+                onTap: _detectTimeZone,
+                child: const Padding(
+                  padding: EdgeInsets.all(4.0),
+                  child: Icon(Icons.refresh_rounded, color: Color(0xFF576245), size: 16),
+                ),
+              ),
             ],
           ),
         ),
@@ -714,46 +754,30 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          height: 134,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: appColors.textFieldBgColor,
-            borderRadius: BorderRadius.circular(12),
-            border: _dailyRhythmError != null ? Border.all(color: appColors.red) : null,
+        CommonTextField(
+          label: "",
+          controller: _dailyRhythmController,
+          maxLines: null,
+          minLines: 5,
+          keyboardType: TextInputType.multiline,
+          borderColor: appColors.textFieldBgColor,
+          hint: "e.g. I work a hybrid job 9:30-6:30 with a commute on weekdays. Usually wake up by 6:30 AM, prepare meals with family, have chai around 5 PM, and wind down by 10:30 PM...",
+          style: TextStyle(
+            fontSize: 15,
+            color: const Color(0xFF1D1B1A),
+            fontFamily: fontFamilyPlusJakartaSans,
           ),
-          child: TextField(
-            controller: _dailyRhythmController,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            style: TextStyle(
-              fontSize: 15,
-              color: const Color(0xFF1D1B1A),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              hintText: "e.g. I work a hybrid job 9:30-6:30 with a commute on weekdays. Usually wake up by 6:30 AM, prepare meals with family, have chai around 5 PM, and wind down by 10:30 PM...",
-              hintStyle: TextStyle(
-                fontSize: 15,
-                color: const Color(0xFF857373),
-                fontFamily: fontFamilyPlusJakartaSans,
-              ),
-            ),
-            onChanged: (v) {
-              setState(() {});
-              if (_dailyRhythmError != null) _validate();
-            },
+          onChanged: (v) {
+            setState(() {});
+            if (_dailyRhythmError != null) _validate();
+          },
+        ),
+        if (_dailyRhythmError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, left: 4),
+          child: CommonText(_dailyRhythmError!,
+            style: TextStyle(color: appColors.red, fontSize: 12),
           ),
         ),
-        if (_dailyRhythmError != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
-            child: CommonText(
-              _dailyRhythmError!,
-              style: TextStyle(color: appColors.red, fontSize: 12),
-            ),
-          ),
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -762,8 +786,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               children: [
                 Image.asset(appIcons.edit, height: 12, width: 12, color: const Color(0xFF576245)),
                 const SizedBox(width: 4),
-                CommonText(
-                  "Min 50 characters",
+                CommonText("Min 50 characters",
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -772,8 +795,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                 ),
               ],
             ),
-            CommonText(
-              "${_dailyRhythmController.text.length} chars",
+            CommonText("${_dailyRhythmController.text.length} chars",
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
@@ -828,6 +850,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               );
             },
           ),
+
         if (_journeyError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_journeyError!,
@@ -851,16 +874,16 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-                : null,
+            boxShadow: isSelected ? [BoxShadow(
+              color: appColors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, 1), blurRadius: 1
+            )] : null,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 40, height: 40,
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected ? appColors.primary : const Color(0xFFD8C1C2),
@@ -874,8 +897,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CommonText(
-                      title,
+                    CommonText(title,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -883,8 +905,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       ),
                     ),
                     const SizedBox(height: 4),
-                    CommonText(
-                      subtitle,
+                    CommonText(subtitle,
                       style: TextStyle(
                         fontSize: 13,
                         color: const Color(0xFF534343),
@@ -896,8 +917,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               ),
               const SizedBox(width: 14),
               Container(
-                width: 20,
-                height: 20,
+                width: 20, height: 20,
                 margin: const EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

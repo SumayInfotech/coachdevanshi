@@ -129,7 +129,8 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       _whoCooksError = null;
     }
 
-    if (_intakeFruit == null || _intakeVeg == null || _intakeWater == null || _intakeCaffeine == null || _intakeSugar == null) {
+    if (_intakeFruit == null || _intakeVeg == null || _intakeWater == null
+        || _intakeCaffeine == null || _intakeSugar == null) {
       _intakeError = "Please complete daily intake overview";
       isValid = false;
     } else {
@@ -287,8 +288,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             });
           },
         )),
-        if (_eatingPatternError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_eatingPatternError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_eatingPatternError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_eatingPatternError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -324,8 +329,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             }
           )).toList(),
         ),
-        if (_fastingError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_fastingError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_fastingError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_fastingError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -342,7 +351,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CommonText(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+            CommonText(label,
+              style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343)
+              )
+            ),
             const SizedBox(height: 6),
             CommonTextField(
               label: '',
@@ -369,8 +382,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         buildRhythmInput("Dinner", "e.g., Khichdi or vegetable soup", _dinnerController),
         buildRhythmInput("Late-night food or drinks", "e.g., Herbal tea or warm milk", _lateNightController),
         buildRhythmInput("Usual meal timings", "e.g., Breakfast 8:30 AM · Lunch 1:30 PM", _mealTimingsController),
-        if (_rhythmsError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_rhythmsError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_rhythmsError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_rhythmsError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -380,7 +397,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       title: "Weekend Routine",
       icon: appIcons.sofa,
       children: [
-        CommonText("How is your weekend or eating-out routine different from weekdays?", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+        CommonText(
+          "How is your weekend or eating-out routine different from weekdays?",
+          style: TextStyle(
+            fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343)
+          )
+        ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -413,7 +435,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CommonText(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+            CommonText(label,
+              style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+              )
+            ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -445,8 +471,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         buildFoodsInput("Foods you enjoy and eat often", "e.g., Paneer, lentils, dark chocolate", _foodsEnjoyController),
         buildFoodsInput("Foods you dislike or avoid", "e.g., Bitter gourd, excessive oil", _foodsDislikeController),
         buildFoodsInput("Foods or drinks you are not ready to give up", "e.g., Morning masala chai", _foodsKeepController),
-        if (_foodsMatterError != null)
-          Padding(padding: const EdgeInsets.only(top: 4), child: CommonText(_foodsMatterError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_foodsMatterError != null) Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: CommonText(_foodsMatterError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }
@@ -458,7 +488,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       children: [
         buildRequiredLabel("What does your food environment look like?"),
         const SizedBox(height: 16),
-        CommonText("Who usually cooks", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("Who usually cooks",
+          style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+          )
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -473,7 +507,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           )).toList(),
         ),
         const SizedBox(height: 16),
-        CommonText("Who you share most meals with", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("Who you share most meals with",
+          style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+          )
+        ),
         const SizedBox(height: 6),
         CommonTextField(
           label: '',
@@ -483,7 +521,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           borderColor: Colors.transparent,
         ),
         const SizedBox(height: 16),
-        CommonText("How supportive they are", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("How supportive they are",
+          style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+          )
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -495,7 +537,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           )).toList(),
         ),
         const SizedBox(height: 16),
-        CommonText("Meals ordered or eaten out per week", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+        CommonText("Meals ordered or eaten out per week",
+          style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+          )
+        ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(4),
@@ -509,7 +555,9 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   decoration: BoxDecoration(
                     color: _selectedMealsOut == e.uuid ? appColors.white : Colors.transparent,
                     borderRadius: BorderRadius.circular(999),
-                    boxShadow: _selectedMealsOut == e.uuid ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
+                    boxShadow: _selectedMealsOut == e.uuid ? [BoxShadow(
+                      color: appColors.black.withValues(alpha: 0.05), blurRadius: 1
+                    )] : null,
                   ),
                   child: CommonText(
                     e.title ?? "",
@@ -525,8 +573,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
             )).toList(),
           ),
         ),
-        if (_whoCooksError != null)
-          Padding(padding: const EdgeInsets.only(top: 8), child: CommonText(_whoCooksError!, style: TextStyle(color: appColors.red, fontSize: 12))),
+        if (_whoCooksError != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(_whoCooksError!,
+            style: TextStyle(color: appColors.red, fontSize: 12)
+          )
+        ),
       ],
     );
   }

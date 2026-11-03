@@ -1,22 +1,23 @@
 import 'dart:io';
 
-import 'package:coach_devanshi_doshi/core/blocs/auth/social_login/social_login_bloc.dart';
-import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
-import 'package:coach_devanshi_doshi/ui/screens/profile/client_onboarding_introduction_screen.dart';
-import 'package:coach_devanshi_doshi/ui/widgets/common_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/blocs/auth/social_login/social_login_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
 import '../../../main.dart';
+import '../../widgets/common_text.dart';
 import '../../widgets/common_web_view.dart';
+import '../auth/email_login_screen.dart';
 import '../auth/phone_login_screen.dart';
 import '../auth/sign_up_screen.dart';
+import '../bottom_bar_screen.dart';
+import '../profile/client_onboarding_introduction_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -104,7 +105,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     _buildLoginButton(
                       iconPath: appIcons.email,
                       title: "Continue with Email",
-                      onTap: () {},
+                      onTap: () {
+                        navigation.pushSlideAnimation(context, const EmailLoginScreen());
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildLoginButton(
@@ -169,7 +172,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            navigation.pushSlideAnimation(context, CommonWebView(title: "Terms of Service", url: "https://www.google.com/"));
+                            navigation.pushSlideAnimation(context, CommonWebView(
+                              title: "Terms of Service",
+                              url: "https://www.google.com/"
+                            ));
                           },
                           child: const CommonText(
                             "Terms of Service",
@@ -181,8 +187,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                           ),
                         ),
-                        const CommonText(
-                          " and ",
+                        const CommonText(" and ",
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF8B8B8B),
@@ -190,7 +195,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            navigation.pushSlideAnimation(context, CommonWebView(title: "Privacy Policy", url: "https://www.google.com/"));
+                            navigation.pushSlideAnimation(context, CommonWebView(
+                              title: "Privacy Policy",
+                              url: "https://www.google.com/"
+                            ));
                           },
                           child: const CommonText(
                             "Privacy Policy",
@@ -202,8 +210,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ),
                           ),
                         ),
-                        const CommonText(
-                          ".",
+                        const CommonText(".",
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF8B8B8B),
@@ -254,8 +261,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         child: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 36, height: 36,
               decoration: const BoxDecoration(
                 color: Color(0xFFFAF4F5),
                 shape: BoxShape.circle,
@@ -263,16 +269,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               child: Center(
                 child: Image.asset(
                   iconPath,
-                  width: 20,
-                  height: 20,
+                  width: 20, height: 20,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: CommonText(
-                title,
+              child: CommonText(title,
                 style: const TextStyle(
                   fontSize: 15,
                   color: Color(0xFF2B2B2B),
@@ -282,8 +286,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
             Image.asset(
               appIcons.forward,
-              width: 14,
-              height: 14,
+              width: 14, height: 14,
               color: const Color(0xFFD4C7C8),
             ),
           ],

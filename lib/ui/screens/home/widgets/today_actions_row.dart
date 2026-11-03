@@ -38,7 +38,10 @@ class TodayActionsRow extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(appIcons.microCheckIn, width: 16, height: 16, color: Colors.white),
+                Image.asset(
+                  appIcons.microCheckIn,
+                  width: 16, height: 16, color: Colors.white
+                ),
                 SizedBox(width: 6),
                 Flexible(
                   child: CommonText(

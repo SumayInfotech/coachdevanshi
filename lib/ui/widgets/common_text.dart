@@ -1,5 +1,5 @@
-import 'package:coach_devanshi_doshi/core/constants/utils.dart';
 import 'package:flutter/material.dart';
+import '../../core/constants/utils.dart';
 import '../../main.dart';
 
 class CommonText extends StatelessWidget {

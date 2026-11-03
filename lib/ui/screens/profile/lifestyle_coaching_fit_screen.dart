@@ -134,7 +134,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
     }
 
     // Stress
-    if (_stress1Controller.text.trim().isEmpty || _stress2Controller.text.trim().isEmpty || _stress3Controller.text.trim().isEmpty) {
+    if (_stress1Controller.text.trim().isEmpty
+        || _stress2Controller.text.trim().isEmpty
+        || _stress3Controller.text.trim().isEmpty) {
       _stressSourcesError = "Please enter 3 sources of stress";
       isValid = false;
     } else {
@@ -351,7 +353,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         if (_nightWakingError != null) Padding(
           padding: const EdgeInsets.only(top: 4),
           child: CommonText(_nightWakingError!,
-              style: TextStyle(color: appColors.red, fontSize: 12)
+            style: TextStyle(color: appColors.red, fontSize: 12)
           )
         ),
 
@@ -418,7 +420,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CommonText(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343))),
+          CommonText(label, style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF534343)
+          )),
           const SizedBox(height: 6),
           CommonTextField(
             controller: controller,
@@ -652,7 +656,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                 decoration: BoxDecoration(
                   color: isSelected ? appColors.primary : appColors.textFieldBgColor,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: isSelected ? [BoxShadow(color: appColors.black.withValues(alpha: 0.05), blurRadius: 1)] : null,
+                  boxShadow: isSelected ? [BoxShadow(
+                    color: appColors.black.withValues(alpha: 0.05), blurRadius: 1
+                  )] : null,
                 ),
                 child: CommonText(
                   score.title ?? "",

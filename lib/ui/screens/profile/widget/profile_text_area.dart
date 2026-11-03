@@ -47,14 +47,13 @@ class ProfileTextArea extends StatelessWidget {
             ),
             onChanged: onChanged,
           ),
-          if (error != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: CommonText(
-                error ?? "",
-                style: TextStyle(color: appColors.red, fontSize: 12),
-              ),
+          if (error != null) Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: CommonText(
+              error ?? "",
+              style: TextStyle(color: appColors.red, fontSize: 12),
             ),
+          ),
         ],
       ),
     );

@@ -17,6 +17,7 @@ import '../../../core/services/loader_service.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
+import 'email_login_screen.dart';
 import 'otp_verification_screen.dart';
 import 'sign_up_screen.dart';
 
@@ -229,7 +230,9 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                     _buildSocialButton(
                       iconPath: appIcons.email,
                       title: "Email",
-                      onTap: () {},
+                      onTap: () {
+                        navigation.pushReplaceSlideAnimation(context, const EmailLoginScreen());
+                      },
                     ),
                     const SizedBox(width: 12),
                     _buildSocialButton(

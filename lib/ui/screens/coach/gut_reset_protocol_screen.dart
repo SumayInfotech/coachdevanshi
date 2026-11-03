@@ -352,20 +352,24 @@ class _GutResetProtocolScreenState extends State<GutResetProtocolScreen> {
         const SizedBox(height: 12),
         Column(
           children: [
-            Row(
-              children: [
-                Expanded(child: _buildOptionCard(_frequencyList[0], _selectedFrequency == _frequencyList[0], () => _onFreqSelected(_frequencyList[0]), selectedBg: const Color(0xFFD8E5BF), selectedText: const Color(0xFF151E07))),
-                const SizedBox(width: 8),
-                Expanded(child: _buildOptionCard(_frequencyList[1], _selectedFrequency == _frequencyList[1], () => _onFreqSelected(_frequencyList[1]))),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(child: _buildOptionCard(_frequencyList[0], _selectedFrequency == _frequencyList[0], () => _onFreqSelected(_frequencyList[0]), selectedBg: const Color(0xFFD8E5BF), selectedText: const Color(0xFF151E07))),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildOptionCard(_frequencyList[1], _selectedFrequency == _frequencyList[1], () => _onFreqSelected(_frequencyList[1]))),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(child: _buildOptionCard(_frequencyList[2], _selectedFrequency == _frequencyList[2], () => _onFreqSelected(_frequencyList[2]))),
-                const SizedBox(width: 8),
-                Expanded(child: _buildOptionCard(_frequencyList[3], _selectedFrequency == _frequencyList[3], () => _onFreqSelected(_frequencyList[3]))),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(child: _buildOptionCard(_frequencyList[2], _selectedFrequency == _frequencyList[2], () => _onFreqSelected(_frequencyList[2]))),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildOptionCard(_frequencyList[3], _selectedFrequency == _frequencyList[3], () => _onFreqSelected(_frequencyList[3]))),
+                ],
+              ),
             ),
           ],
         ),
@@ -428,20 +432,24 @@ class _GutResetProtocolScreenState extends State<GutResetProtocolScreen> {
         const SizedBox(height: 12),
         Column(
           children: [
-            Row(
-              children: [
-                Expanded(child: _buildOptionCard(_bowelCadenceList[0], _bowelCadence == _bowelCadenceList[0], () => _onCadenceSelected(_bowelCadenceList[0]), selectedBg: const Color(0xFFD8E5BF), selectedText: const Color(0xFF151E07))),
-                const SizedBox(width: 8),
-                Expanded(child: _buildOptionCard(_bowelCadenceList[1], _bowelCadence == _bowelCadenceList[1], () => _onCadenceSelected(_bowelCadenceList[1]))),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(child: _buildOptionCard(_bowelCadenceList[0], _bowelCadence == _bowelCadenceList[0], () => _onCadenceSelected(_bowelCadenceList[0]), selectedBg: const Color(0xFFD8E5BF), selectedText: const Color(0xFF151E07))),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildOptionCard(_bowelCadenceList[1], _bowelCadence == _bowelCadenceList[1], () => _onCadenceSelected(_bowelCadenceList[1]))),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(child: _buildOptionCard(_bowelCadenceList[2], _bowelCadence == _bowelCadenceList[2], () => _onCadenceSelected(_bowelCadenceList[2]))),
-                const SizedBox(width: 8),
-                Expanded(child: _buildOptionCard(_bowelCadenceList[3], _bowelCadence == _bowelCadenceList[3], () => _onCadenceSelected(_bowelCadenceList[3]))),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  Expanded(child: _buildOptionCard(_bowelCadenceList[2], _bowelCadence == _bowelCadenceList[2], () => _onCadenceSelected(_bowelCadenceList[2]))),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildOptionCard(_bowelCadenceList[3], _bowelCadence == _bowelCadenceList[3], () => _onCadenceSelected(_bowelCadenceList[3]))),
+                ],
+              ),
             ),
           ],
         ),
@@ -453,20 +461,22 @@ class _GutResetProtocolScreenState extends State<GutResetProtocolScreen> {
         const SizedBox(height: 16),
         buildRequiredLabel("Usually feel fully emptied?", color: const Color(0xFF1D1B1A)),
         const SizedBox(height: 12),
-        Row(
-          children: _evacuationCompletenessList.map((item) => Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: item != _evacuationCompletenessList.last ? 8.0 : 0.0),
-              child: _buildOptionCard(
-                item,
-                _evacuationCompleteness == item,
-                () => setState(() {
-                  _evacuationCompleteness = item;
-                  if (_evacuationError != null) _validate();
-                }),
+        IntrinsicHeight(
+          child: Row(
+            children: _evacuationCompletenessList.map((item) => Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(right: item != _evacuationCompletenessList.last ? 8.0 : 0.0),
+                child: _buildOptionCard(
+                  item,
+                  _evacuationCompleteness == item,
+                  () => setState(() {
+                    _evacuationCompleteness = item;
+                    if (_evacuationError != null) _validate();
+                  }),
+                ),
               ),
-            ),
-          )).toList(),
+            )).toList(),
+          ),
         ),
         if (_evacuationError != null)
           Padding(

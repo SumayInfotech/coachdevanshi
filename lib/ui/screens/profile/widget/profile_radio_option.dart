@@ -25,8 +25,7 @@ class ProfileRadioOption extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: CommonText(
-                label,
+              child: CommonText(label,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
@@ -35,8 +34,7 @@ class ProfileRadioOption extends StatelessWidget {
               ),
             ),
             Container(
-              width: 20,
-              height: 20,
+              width: 20, height: 20,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected ? appColors.primary : appColors.white,

@@ -118,8 +118,7 @@ class _NotificationCard extends StatelessWidget {
               color: badgeBgColor,
               borderRadius: BorderRadius.circular(9999),
             ),
-            child: CommonText(
-              badgeText,
+            child: CommonText(badgeText,
               style: TextStyle(
                 color: badgeTextColor,
                 fontSize: 12,
@@ -129,8 +128,7 @@ class _NotificationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          CommonText(
-            title,
+          CommonText(title,
             style: TextStyle(
               color: titleColor,
               fontSize: 15,

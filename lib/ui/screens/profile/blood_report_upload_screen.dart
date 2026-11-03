@@ -239,8 +239,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
-                    width: 40,
-                    height: 40,
+                    width: 40, height: 40,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFDADB).withValues(alpha: 0.5),
                       shape: BoxShape.circle,
@@ -267,8 +266,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
-                    width: 40,
-                    height: 40,
+                    width: 40, height: 40,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF2EDEB),
                       shape: BoxShape.circle,
@@ -295,8 +293,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: Container(
-                    width: 40,
-                    height: 40,
+                    width: 40, height: 40,
                     decoration: const BoxDecoration(
                       color: Color(0xFFF2EDEB),
                       shape: BoxShape.circle,
@@ -571,7 +568,6 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                     assetsPDF: file.path,
                   ));
                 } else {
-                  print("object ::::::: ${file.path}");
                   navigation.pushSlideAnimation(context,
                     OpenFullImage(file: file.path!),
                   );
@@ -587,8 +583,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 38, height: 38,
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFDADB).withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
@@ -596,8 +591,8 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                       child: Center(
                         child: Icon(
                           file.isPdf
-                              ? Icons.picture_as_pdf_outlined
-                              : Icons.image_outlined,
+                            ? Icons.picture_as_pdf_outlined
+                            : Icons.image_outlined,
                           color: appColors.primary,
                           size: 20,
                         ),
@@ -608,8 +603,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CommonText(
-                            file.name,
+                          CommonText(file.name,
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -620,8 +614,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
-                          CommonText(
-                            file.size,
+                          CommonText(file.size,
                             style: const TextStyle(
                               fontSize: 11,
                               color: Color(0xFF6D615C),

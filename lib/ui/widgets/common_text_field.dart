@@ -17,6 +17,7 @@ class CommonTextField extends StatelessWidget {
   final bool obscureText;
   final bool isDense;
   final int? maxLines;
+  final int? minLines;
   final Color? borderColor;
   final Color? hintColor;
   final Color? fillColor;
@@ -53,6 +54,7 @@ class CommonTextField extends StatelessWidget {
     this.onChanged,
     this.suffixIcon,
     this.maxLines = 1,
+    this.minLines,
     this.error,
     this.onTap,
     this.textCapitalization = TextCapitalization.none,
@@ -106,6 +108,7 @@ class CommonTextField extends StatelessWidget {
               inputFormatters: formatters,
               textInputAction: TextInputAction.done,
               maxLines: maxLines,
+              minLines: minLines,
               textCapitalization: textCapitalization,
               style: style ?? TextStyle(color: appColors.black, fontSize: 14, fontWeight: FontWeight.w500),
               cursorColor: cursorColor ?? appColors.black,

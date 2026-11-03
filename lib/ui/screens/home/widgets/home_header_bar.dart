@@ -1,8 +1,8 @@
-import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
-import 'package:coach_devanshi_doshi/ui/widgets/show_user_avatar.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
+import '../../../widgets/show_user_avatar.dart';
+import '../../bottom_bar_screen.dart';
 
 class HomeHeaderBar extends StatelessWidget {
   final VoidCallback? onProfileTap;
@@ -36,8 +36,7 @@ class HomeHeaderBar extends StatelessWidget {
           
           
           // Title
-          const Text(
-            "Home",
+          const Text("Home",
             style: TextStyle(
               fontFamily: 'serif',
               fontSize: 20,
@@ -53,8 +52,7 @@ class HomeHeaderBar extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 38,
-                  height: 38,
+                  width: 38, height: 38,
                   padding: EdgeInsets.all(10),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
@@ -63,8 +61,7 @@ class HomeHeaderBar extends StatelessWidget {
                   child: Center(
                     child: Image.asset(
                       appIcons.homeNotificationBell,
-                      width: 40,
-                      height: 40,
+                      width: 40, height: 40,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(
@@ -76,23 +73,20 @@ class HomeHeaderBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (hasUnreadNotifications)
-                  Positioned(
-                    right: 7,
-                    top: 7,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: appColors.primary,
-                        border: Border.all(
-                          color: appColors.bgColor,
-                          width: 1.5,
-                        ),
+                if (hasUnreadNotifications) Positioned(
+                  right: 7, top: 7,
+                  child: Container(
+                    width: 10, height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: appColors.primary,
+                      border: Border.all(
+                        color: appColors.bgColor,
+                        width: 1.5,
                       ),
                     ),
                   ),
+                ),
               ],
             ),
           ),

@@ -88,8 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onProgressPhotosTap: () => navigation.push(context,
                         const TrackWeeklyProgressScreen(isBack: true)
                       ),
-                      onUploadReportsTap: () => navigation.push(
-                        context,
+                      onUploadReportsTap: () => navigation.push(context,
                         const BloodReportUploadScreen(isBack: true),
                       ),
                     ),

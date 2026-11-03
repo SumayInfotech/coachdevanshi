@@ -26,8 +26,7 @@ class RestorativeQuoteCard extends StatelessWidget {
         children: [
           // Botanical icon badge
           Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
               color: Color(0xFFD8E5BF),
@@ -35,8 +34,7 @@ class RestorativeQuoteCard extends StatelessWidget {
             child: Center(
               child: Image.asset(
                 appIcons.homeLeafNudge,
-                width: 18,
-                height: 18,
+                width: 18, height: 18,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return const Icon(
@@ -51,8 +49,7 @@ class RestorativeQuoteCard extends StatelessWidget {
           const SizedBox(width: 14),
           // Quote Text
           Expanded(
-            child: CommonText(
-              quote,
+            child: CommonText(quote,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,

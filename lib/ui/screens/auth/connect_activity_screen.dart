@@ -1,10 +1,10 @@
 import 'dart:ui';
-import 'package:coach_devanshi_doshi/ui/screens/bottom_bar_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
+import '../bottom_bar_screen.dart';
 
 class ConnectActivityScreen extends StatefulWidget {
   final bool fromSignUp;

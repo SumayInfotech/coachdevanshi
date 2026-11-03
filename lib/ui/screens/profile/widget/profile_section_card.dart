@@ -42,23 +42,21 @@ class ProfileSectionCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: iconData != null
-                    ? Icon(iconData, size: 20, color: appColors.primary)
-                    : (icon != null
-                        ? Image.asset(
-                            icon!,
-                            height: 20,
-                            width: 20,
-                            color: appColors.primary,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Icon(Icons.star_rounded, size: 20, color: appColors.primary),
-                          )
-                        : const SizedBox.shrink()),
+                child: iconData != null ? Icon(
+                  iconData, size: 20, color: appColors.primary
+                ) : (icon != null ? Image.asset(
+                  icon!,
+                  height: 20,
+                  width: 20,
+                  color: appColors.primary,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.star_rounded, size: 20, color: appColors.primary
+                  ),
+                ) : const SizedBox.shrink()),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: CommonText(
-                  title,
+                child: CommonText(title,
                   fontFamily: fontPlayfairDisplay,
                   style: TextStyle(
                     fontSize: fontSize ?? 20,

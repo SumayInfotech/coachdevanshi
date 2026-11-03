@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:coach_devanshi_doshi/core/blocs/auth/resend_sign_up_otp/resend_sign_up_otp_bloc.dart';
-import 'package:coach_devanshi_doshi/core/services/loader_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,10 +8,12 @@ import 'package:pinput/pinput.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/auth/login/login_bloc.dart';
+import '../../../core/blocs/auth/resend_sign_up_otp/resend_sign_up_otp_bloc.dart';
 import '../../../core/blocs/auth/verify_otp/verify_otp_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/repository/auth_repo.dart';
+import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
@@ -26,10 +26,15 @@ class OtpVerificationScreen extends StatefulWidget {
   final bool fromSignUp;
   final String countryCode;
   final String phoneNumber;
+  final String? email;
 
   const OtpVerificationScreen({
     super.key,
-    required this.phoneNumber, this.fromSignUp = false, required this.countryCode, required this.type,
+    this.phoneNumber = "",
+    this.fromSignUp = false,
+    this.countryCode = "",
+    required this.type,
+    this.email,
   });
 
   @override
@@ -79,8 +84,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _resendCode() {
     if (_canResend) {
-      // Add your resend logic here. For example:
-      // BlocProvider.of<ResendSignUpOtpBloc>(context).add(UserResendSignUpOtpEvent(...));
       LoaderService.show(context);
       if(widget.fromSignUp) {
         BlocProvider.of<ResendSignUpOtpBloc>(context).add(UserResendSignUpOtpEvent(
@@ -95,8 +98,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           url: Urls.login,
           body: {
             "type": widget.type,
-            "phone_code": widget.countryCode,
-            "mobile": widget.phoneNumber,
+            if (widget.type == "email") "email": widget.email ?? widget.phoneNumber,
+            if (widget.type != "email") ...{
+              "phone_code": widget.countryCode,
+              "mobile": widget.phoneNumber,
+            },
           }
         ));
       }
@@ -122,8 +128,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         url: widget.fromSignUp ? Urls.signUpVerifyOTP : Urls.loginVerifyOTP,
         body: {
           if(!widget.fromSignUp) "type": widget.type,
-          "phone_code": widget.countryCode,
-          "mobile": widget.phoneNumber,
+          if (widget.type == "email") "email": widget.email ?? widget.phoneNumber,
+          if (widget.type != "email") ...{
+            "phone_code": widget.countryCode,
+            "mobile": widget.phoneNumber,
+          },
           "otp": _otpController.text
         }
       ));
@@ -141,7 +150,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
 
-    // Pinput theme definitions using consolidated appColors
     final defaultPinTheme = PinTheme(
       width: 43,
       height: 56,
@@ -197,18 +205,16 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               showSnackBar(context: context, isError: false, message: state.model.message ?? "");
               AppPreferences.setBool(AppPreferences.isLogin, true);
               AppPreferences.setString(AppPreferences.accessToken, state.model.data?.token ?? "");
-
-              if(state.model.data?.user?.isProfileCompleted ?? false) {
-                navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
+              if(widget.fromSignUp) {
+                if(state.model.data?.user?.isProfileCompleted ?? false) {
+                  navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
+                } else {
+                  userData.value = state.model.data?.user;
+                  navigation.pushAndRemoveUntilSlideAnimation(context, ClientOnboardingIntroductionScreen());
+                }
               } else {
-                navigation.pushAndRemoveUntilSlideAnimation(context, ClientOnboardingIntroductionScreen());
+                navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
               }
-
-              // if(widget.fromSignUp) {
-              //   navigation.pushSlideAnimation(context, ConnectActivityScreen(fromSignUp: widget.fromSignUp));
-              // } else {
-              //   navigation.pushAndRemoveUntilSlideAnimation(context, BottomBarScreen());
-              // }
             } else if(state is VerifyOTPFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
@@ -311,7 +317,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       ),
                     ),
                     CommonText(
-                      widget.phoneNumber,
+                      widget.email ?? (widget.type == "mobile" && widget.countryCode.isNotEmpty
+                          ? "${widget.countryCode} ${widget.phoneNumber}"
+                          : widget.phoneNumber),
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,

@@ -319,31 +319,35 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           buildRequiredLabel("Select Day to Log", color: const Color(0xFF534343)),
           const SizedBox(height: 12),
           Row(
-            spacing: 2,
+            spacing: 5,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
               int day = index + 1;
               bool isSelected = _selectedDay == day;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedDay = day),
-                child: Container(
-                  height: 50,
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF8B484D) : const Color(0xFFF8F2F0),
-                    borderRadius: BorderRadius.circular(8),
-                    border: isSelected ? null : Border.all(color: const Color(0xFF576245).withValues(alpha: 0.3)),
-                    boxShadow: isSelected
-                        ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-                        : null,
-                  ),
-                  child: CommonText(
-                    "D$day",
-                    style: TextStyle(
-                      fontSize: isSelected ? 15 : 12,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? appColors.white : (day > 5 ? const Color(0xFF713439) : const Color(0xFF534343)),
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedDay = day),
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFF8B484D) : const Color(0xFFF8F2F0),
+                      borderRadius: BorderRadius.circular(8),
+                      border: isSelected ? null : Border.all(color: const Color(0xFF576245).withValues(alpha: 0.3)),
+                      boxShadow: isSelected ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          offset: const Offset(0, 1), blurRadius: 1
+                        )
+                      ] : null,
+                    ),
+                    child: CommonText(
+                      "D$day",
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? appColors.white : (day > 5 ? const Color(0xFF713439) : const Color(0xFF534343)),
+                      ),
                     ),
                   ),
                 ),
@@ -463,9 +467,11 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                       children: [
                         Image.asset(appIcons.morning, height: 14, color: const Color(0xFF576245)),
                         const SizedBox(width: 6),
-                        const CommonText(
-                          "WAKE UP",
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF576245), letterSpacing: 0.5),
+                        const CommonText("WAKE UP",
+                          style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600,
+                            color: Color(0xFF576245), letterSpacing: 0.5
+                          ),
                         ),
                       ],
                     ),
@@ -501,9 +507,11 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                       children: [
                         Image.asset(appIcons.halfOutlineMoon, height: 14, color: const Color(0xFF8E464C)),
                         const SizedBox(width: 6),
-                        const CommonText(
-                          "BEDTIME",
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF8E464C), letterSpacing: 0.5),
+                        const CommonText("BEDTIME",
+                          style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600,
+                            color: Color(0xFF8E464C), letterSpacing: 0.5
+                          ),
                         ),
                       ],
                     ),
@@ -753,34 +761,35 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                     decoration: BoxDecoration(
                       color: isDone ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: isDone
-                          ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-                          : null,
+                      boxShadow: isDone ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          offset: const Offset(0, 1), blurRadius: 1
+                        )
+                      ] : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CommonText(
-                          "Yes",
+                        CommonText("Yes",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: isDone ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
                           ),
                         ),
-                        if (isDone)
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
-                            child: const Icon(Icons.check, size: 12, color: Colors.white),
-                          )
-                        else
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white, border: Border.all(color: const Color(0xFFE7E1DF))),
+                        if (isDone) Container(
+                          width: 20, height: 20,
+                          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
+                          child: const Icon(Icons.check, size: 12, color: Colors.white),
+                        ) else Container(
+                          width: 20, height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFFE7E1DF))
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -795,34 +804,37 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                     decoration: BoxDecoration(
                       color: !isDone ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: !isDone
-                          ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-                          : null,
+                      boxShadow: !isDone ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          offset: const Offset(0, 1), blurRadius: 1
+                        )
+                      ] : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CommonText(
-                          "No",
+                        CommonText("No",
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: !isDone ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
                           ),
                         ),
-                        if (!isDone)
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
-                            child: const Icon(Icons.check, size: 12, color: Colors.white),
-                          )
-                        else
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white, border: Border.all(color: const Color(0xFFE7E1DF))),
+                        if (!isDone) Container(
+                          width: 20,
+                          height: 20,
+                          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
+                          child: const Icon(Icons.check, size: 12, color: Colors.white),
+                        ) else Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFFE7E1DF))
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -876,11 +888,10 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           prefixIcon: const Icon(Icons.access_time, size: 16, color: Color(0xFF534343)),
           onTap: () => _selectTime(timeController),
         ),
-        if (timeError != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
-            child: CommonText(timeError, style: TextStyle(color: appColors.red, fontSize: 12)),
-          ),
+        if (timeError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, left: 4),
+          child: CommonText(timeError, style: TextStyle(color: appColors.red, fontSize: 12)),
+        ),
         const SizedBox(height: 16),
         buildRequiredLabel("Food & Beverage Items", color: const Color(0xFF534343)),
         const SizedBox(height: 6),
@@ -897,11 +908,10 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
             if (foodError != null) _validate();
           },
         ),
-        if (foodError != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
-            child: CommonText(foodError, style: TextStyle(color: appColors.red, fontSize: 12)),
-          ),
+        if (foodError != null) Padding(
+          padding: const EdgeInsets.only(top: 4, left: 4),
+          child: CommonText(foodError, style: TextStyle(color: appColors.red, fontSize: 12)),
+        ),
       ],
     );
   }
@@ -915,12 +925,14 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFDADB) : const Color(0xFFE7E1DF),
           borderRadius: BorderRadius.circular(999),
-          boxShadow: isSelected
-              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, 1), blurRadius: 1)]
-              : null,
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, 1), blurRadius: 1
+            )
+          ] : null,
         ),
-        child: CommonText(
-          label,
+        child: CommonText(label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,

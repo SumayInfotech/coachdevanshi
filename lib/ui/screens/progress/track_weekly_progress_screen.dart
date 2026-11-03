@@ -21,7 +21,7 @@ class TrackWeeklyProgressScreen extends StatefulWidget {
 }
 
 class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
-  final TextEditingController _dateController = TextEditingController(text: DateFormat('MMMM dd, yyyy').format(DateTime.now()));
+  final TextEditingController _dateController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String? _dateError;
 
@@ -109,8 +109,7 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
           children: [
             const SizedBox(height: 8),
             Container(
-              width: 40,
-              height: 4,
+              width: 40, height: 4,
               decoration: BoxDecoration(
                 color: const Color(0xFFE7E1DF),
                 borderRadius: BorderRadius.circular(999),
@@ -119,12 +118,22 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
             const SizedBox(height: 16),
             ListTile(
               leading: Icon(Icons.camera_alt_outlined, color: appColors.primary),
-              title: CommonText("Take Photo", style: TextStyle(color: appColors.neutral, fontSize: 16, fontWeight: FontWeight.w500)),
+              title: CommonText(
+                "Take Photo",
+                style: TextStyle(
+                  color: appColors.neutral, fontSize: 16, fontWeight: FontWeight.w500
+                )
+              ),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: Icon(Icons.photo_library_outlined, color: appColors.primary),
-              title: CommonText("Choose from Gallery", style: TextStyle(color: appColors.neutral, fontSize: 16, fontWeight: FontWeight.w500)),
+              title: CommonText(
+                "Choose from Gallery",
+                style: TextStyle(
+                  color: appColors.neutral, fontSize: 16, fontWeight: FontWeight.w500
+                )
+              ),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             const SizedBox(height: 16),
@@ -262,7 +271,7 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
             const SizedBox(height: 16),
             Center(
               child: CommonText(
-                "Submit with one or more photos. You can update or\nadd more angles at any time.",
+                "Submit with one or more photos. You can update or add more angles at any time.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
@@ -334,104 +343,102 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
               borderRadius: BorderRadius.circular(12),
               border: error != null ? Border.all(color: appColors.red) : null,
             ),
-            child: imageFile != null 
-              ? Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.file(imageFile, fit: BoxFit.cover),
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: GestureDetector(
-                        onTap: onTap,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: appColors.black.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.edit, color: appColors.white, size: 18),
+            child: imageFile != null ? Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(imageFile, fit: BoxFit.cover),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: appColors.black.withValues(alpha: 0.6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.edit, color: appColors.white, size: 18),
+                    ),
+                  ),
+                ),
+              ],
+            ) : Column(
+              children: [
+                Container(
+                  width: 56, height: 56,
+                  decoration: BoxDecoration(
+                    color: appColors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: appColors.black.withValues(alpha: 0.05),
+                        blurRadius: 1,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Image.asset(
+                      appIcons.addPhoto, color: appColors.primary, width: 24, height: 24
+                    )
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CommonText(
+                  "Tap to upload or take photo",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: appColors.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                CommonText(
+                  "Supports JPG, PNG up to 15MB",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: const Color(0xFF534343),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: appColors.white,
+                    borderRadius: BorderRadius.circular(999),
+                    boxShadow: [
+                      BoxShadow(
+                        color: appColors.black.withValues(alpha: 0.05),
+                        blurRadius: 1,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(hintIcon, color: const Color(0xFF534343), size: 14),
+                      const SizedBox(width: 6),
+                      CommonText(
+                        hintTitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF534343),
                         ),
                       ),
-                    ),
-                  ],
-                )
-              : Column(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: appColors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: appColors.black.withValues(alpha: 0.05),
-                            blurRadius: 1,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Image.asset(appIcons.addPhoto, color: appColors.primary, width: 24, height: 24)
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    CommonText(
-                      "Tap to upload or take photo",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: appColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    CommonText(
-                      "Supports JPG, PNG up to 15MB",
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: const Color(0xFF534343),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: appColors.white,
-                        borderRadius: BorderRadius.circular(999),
-                        boxShadow: [
-                          BoxShadow(
-                            color: appColors.black.withValues(alpha: 0.05),
-                            blurRadius: 1,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(hintIcon, color: const Color(0xFF534343), size: 14),
-                          const SizedBox(width: 6),
-                          CommonText(
-                            hintTitle,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF534343),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              ],
+            ),
           ),
         ),
-        if (error != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: CommonText(error, style: TextStyle(color: appColors.red, fontSize: 12)),
-          ),
+        if (error != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: CommonText(error, style: TextStyle(color: appColors.red, fontSize: 12)),
+        ),
       ],
     );
   }
@@ -474,8 +481,7 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
                   });
                 },
                 child: Container(
-                  width: 20,
-                  height: 20,
+                  width: 20, height: 20,
                   decoration: BoxDecoration(
                     color: _consentGiven ? appColors.primary : appColors.white,
                     borderRadius: BorderRadius.circular(6),
@@ -512,11 +518,10 @@ class _TrackWeeklyProgressScreenState extends State<TrackWeeklyProgressScreen> {
               ),
             ],
           ),
-          if (_consentError != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: CommonText(_consentError!, style: TextStyle(color: appColors.red, fontSize: 12)),
-            ),
+          if (_consentError != null) Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: CommonText(_consentError!, style: TextStyle(color: appColors.red, fontSize: 12)),
+          ),
         ],
       ),
     );

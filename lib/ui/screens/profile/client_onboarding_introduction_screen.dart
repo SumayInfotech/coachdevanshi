@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:coach_devanshi_doshi/ui/screens/profile/client_onboarding_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../main.dart';
@@ -8,6 +7,7 @@ import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
+import 'client_onboarding_screen.dart';
 
 class ClientOnboardingIntroductionScreen extends StatelessWidget {
   final bool isLogin;

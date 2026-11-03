@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:coach_devanshi_doshi/main.dart';
 import 'package:flutter/material.dart';
 
+import '../../main.dart';
 import 'custom_network_image.dart';
 
 class OpenFullImage extends StatefulWidget {

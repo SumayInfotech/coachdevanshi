@@ -180,11 +180,10 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       chapterNumber: "CHAPTER 01",
                       title: "Profile & Program",
                       subtitle: "Gut Reset & Digestive Ease",
-                      isComplete: true,
+                      isComplete: false,
                       icon: appIcons.profileProgram,
                       iconBgColor: const Color(0xFFD8E5BF),
                       iconColor: const Color(0xFF5B6749),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         ProfileProgramSelectionScreen(
@@ -202,7 +201,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       icon: appIcons.goalsStartingPoint,
                       iconBgColor: const Color(0xFFFFDADB),
                       iconColor: const Color(0xFF8B484D),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         GoalsStartingPointScreen(
@@ -221,7 +219,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       icon: appIcons.relevantHealthSafety,
                       iconBgColor: const Color(0xFFD8E5BF),
                       iconColor: const Color(0xFF5B6749),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         HealthSafetyIntakeScreen(
@@ -243,7 +240,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       icon: appIcons.foodDigestion,
                       iconBgColor: const Color(0xFFFFDADB),
                       iconColor: const Color(0xFF8B484D),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         FoodDigestionIntakeScreen(
@@ -272,7 +268,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       icon: appIcons.lifestyleCoaching,
                       iconBgColor: const Color(0xFFD8E5BF),
                       iconColor: const Color(0xFF5B6749),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         LifestyleCoachingFitScreen(
@@ -298,7 +293,6 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       icon: appIcons.mindset,
                       iconBgColor: const Color(0xFFFFDADB),
                       iconColor: const Color(0xFF8B484D),
-                      buttonText: "Edit",
                       onTapButton: () => navigation.pushSlideAnimation(
                         context,
                         MindsetSustainabilityScreen(
@@ -753,8 +747,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          CommonText(
-                            "Height",
+                          CommonText("Height",
                             style: TextStyle(
                               fontSize: 11,
                               color: Color(0xFF6D615C),
@@ -762,8 +755,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             fontFamily: fontFamilyPlusJakartaSans,
                           ),
                           SizedBox(height: 2),
-                          CommonText(
-                            "165 cm",
+                          CommonText("165 cm",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -798,8 +790,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          CommonText(
-                            "Weight",
+                          CommonText("Weight",
                             style: TextStyle(
                               fontSize: 11,
                               color: Color(0xFF6D615C),
@@ -807,8 +798,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             fontFamily: fontFamilyPlusJakartaSans,
                           ),
                           SizedBox(height: 2),
-                          CommonText(
-                            "64.5 kg",
+                          CommonText("64.5 kg",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -906,8 +896,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                           color: const Color(0xFFF2EDEB),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const CommonText(
-                          "Sync Now",
+                        child: const CommonText("Sync Now",
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -934,9 +923,8 @@ class _ChapterCard extends StatelessWidget {
   final String subtitle;
   final bool isComplete;
   final String icon;
-  final Color iconBgColor;
+  final Color? iconBgColor;
   final Color? iconColor;
-  final String buttonText;
   final VoidCallback onTapButton;
 
   const _ChapterCard({
@@ -945,14 +933,15 @@ class _ChapterCard extends StatelessWidget {
     required this.subtitle,
     required this.isComplete,
     required this.icon,
-    required this.iconBgColor,
+    this.iconBgColor,
     this.iconColor,
-    required this.buttonText,
     required this.onTapButton,
   });
 
   @override
   Widget build(BuildContext context) {
+    final String effectiveButtonText = (isComplete ? "Edit" : "Start");
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1000,21 +989,20 @@ class _ChapterCard extends StatelessWidget {
                       fontFamily: fontFamilyPlusJakartaSans,
                     ),
                     const SizedBox(width: 8),
-                    const Icon(
-                      Icons.check_circle_outline_rounded,
-                      size: 14,
+                    Image.asset(
+                      isComplete ? appIcons.complete : appIcons.pending,
+                      height: isComplete ? 12 : 13, width: isComplete ? 12 : 13,
                       color: Color(0xFF5B6749),
                     ),
                     const SizedBox(width: 4),
-                    const CommonText(
-                      "Complete",
+                    CommonText(
+                      isComplete ? "Complete" : "Pending",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF5B6749),
+                        color: isComplete ? Color(0xFF5B6749) : Color(0xFF857373),
                         letterSpacing: 0.33,
                       ),
-                      fontFamily: fontFamilyPlusJakartaSans,
                     ),
                   ],
                 ),
@@ -1048,15 +1036,15 @@ class _ChapterCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: appColors.textFieldBgColor,
+                color: isComplete ? appColors.textFieldBgColor : appColors.primary,
                 borderRadius: BorderRadius.circular(999),
               ),
               child: CommonText(
-                buttonText,
+                effectiveButtonText,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: appColors.primary,
+                  color: isComplete ? appColors.primary : appColors.white,
                 ),
                 fontFamily: fontFamilyPlusJakartaSans,
               ),

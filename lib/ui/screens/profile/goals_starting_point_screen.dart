@@ -22,7 +22,7 @@ class GoalsStartingPointScreen extends StatefulWidget {
 }
 
 class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
-  final TextEditingController _heightController = TextEditingController(text: "0");
+  final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _learnedController = TextEditingController();
   final TextEditingController _confusingController = TextEditingController();
@@ -243,6 +243,14 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
+                          hintText: "165",
+                          hintStyle: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF857373),
+                            fontFamily: fontFamilyPlusJakartaSans,
+                            letterSpacing: -0.64,
+                          ),
                         ),
                         onChanged: (v) {
                           if (_heightError != null) _validate();
@@ -265,13 +273,15 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
             Column(
               children: [
                 _buildIncrementBtn(Icons.keyboard_arrow_up_rounded, () {
-                  int val = int.tryParse(_heightController.text) ?? 165;
+                  int val = int.tryParse(_heightController.text) ?? 0;
                   _heightController.text = (val + 1).toString();
                 }),
                 const SizedBox(height: 4),
                 _buildIncrementBtn(Icons.keyboard_arrow_down_rounded, () {
-                  int val = int.tryParse(_heightController.text) ?? 165;
-                  _heightController.text = (val - 1).toString();
+                  int val = int.tryParse(_heightController.text) ?? 0;
+                  if(val > 0){
+                    _heightController.text = (val - 1).toString();
+                  }
                 }),
               ],
             ),

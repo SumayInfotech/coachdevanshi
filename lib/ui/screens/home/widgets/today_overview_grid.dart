@@ -46,16 +46,15 @@ class TodayOverviewGrid extends StatelessWidget {
               ),
               fontFamily: 'serif',
             ),
-            if (updatedTime != null && updatedTime!.isNotEmpty)
-              CommonText(
-                updatedTime!,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF534343),
-                ),
-                fontFamily: fontFamilyPlusJakartaSans,
+            if (updatedTime != null && updatedTime!.isNotEmpty)CommonText(
+              updatedTime!,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF534343),
               ),
+              fontFamily: fontFamilyPlusJakartaSans,
+            ),
           ],
         ),
         const SizedBox(height: 12),

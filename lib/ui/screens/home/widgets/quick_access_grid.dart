@@ -42,32 +42,31 @@ class QuickAccessGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = items ??
-        [
-          QuickAccessItem(
-            title: "Food Diary",
-            iconPath: appIcons.book,
-            iconBgColor: const Color(0xFFFFDADB).withValues(alpha: 0.5),
-            fallbackIcon: Icons.menu_book_rounded,
-            iconColor: appColors.primary,
-            onTap: onFoodDiaryTap,
-          ),
-          QuickAccessItem(
-            title: "Progress Photos",
-            iconPath: appIcons.addPhoto,
-            iconBgColor: const Color(0xFFF2EDEB),
-            fallbackIcon: Icons.camera_alt_outlined,
-            iconColor: const Color(0xFF534343),
-            onTap: onProgressPhotosTap,
-          ),
-          QuickAccessItem(
-            title: "Upload Reports",
-            iconBgColor: const Color(0xFFD8E5BF).withValues(alpha: 0.5),
-            fallbackIcon: Icons.cloud_upload_outlined,
-            iconColor: const Color(0xFF404A2F),
-            onTap: onUploadReportsTap,
-          ),
-        ];
+    final list = items ?? [
+      QuickAccessItem(
+        title: "Food Diary",
+        iconPath: appIcons.book,
+        iconBgColor: const Color(0xFFFFDADB).withValues(alpha: 0.5),
+        fallbackIcon: Icons.menu_book_rounded,
+        iconColor: appColors.primary,
+        onTap: onFoodDiaryTap,
+      ),
+      QuickAccessItem(
+        title: "Progress Photos",
+        iconPath: appIcons.addPhoto,
+        iconBgColor: const Color(0xFFF2EDEB),
+        fallbackIcon: Icons.camera_alt_outlined,
+        iconColor: const Color(0xFF534343),
+        onTap: onProgressPhotosTap,
+      ),
+      QuickAccessItem(
+        title: "Upload Reports",
+        iconBgColor: const Color(0xFFD8E5BF).withValues(alpha: 0.5),
+        fallbackIcon: Icons.cloud_upload_outlined,
+        iconColor: const Color(0xFF404A2F),
+        onTap: onUploadReportsTap,
+      ),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,8 +75,7 @@ class QuickAccessGrid extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const CommonText(
-              "Quick Access",
+            const CommonText("Quick Access",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -85,19 +83,17 @@ class QuickAccessGrid extends StatelessWidget {
               ),
               fontFamily: 'serif',
             ),
-            if (showShortcuts)
-              GestureDetector(
-                onTap: onShortcutsTap,
-                child: CommonText(
-                  "Shortcuts",
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: appColors.primary,
-                  ),
-                  fontFamily: fontFamilyPlusJakartaSans,
+            if (showShortcuts) GestureDetector(
+              onTap: onShortcutsTap,
+              child: CommonText("Shortcuts",
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: appColors.primary,
                 ),
+                fontFamily: fontFamilyPlusJakartaSans,
               ),
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -133,38 +129,33 @@ class QuickAccessGrid extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 42,
-                            height: 42,
+                            width: 42, height: 42,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: item.iconBgColor,
                             ),
                             child: Center(
-                              child: item.iconPath != null
-                                  ? Image.asset(
-                                      item.iconPath!,
-                                      width: 20,
-                                      height: 20,
-                                      color: item.iconColor,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Icon(
-                                          item.fallbackIcon,
-                                          color: item.iconColor,
-                                          size: 20,
-                                        );
-                                      },
-                                    )
-                                  : Icon(
-                                      item.fallbackIcon,
-                                      color: item.iconColor,
-                                      size: 20,
-                                    ),
+                              child: item.iconPath != null ? Image.asset(
+                                item.iconPath!,
+                                width: 20, height: 20,
+                                color: item.iconColor,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    item.fallbackIcon,
+                                    color: item.iconColor,
+                                    size: 20,
+                                  );
+                                },
+                              ) : Icon(
+                                item.fallbackIcon,
+                                color: item.iconColor,
+                                size: 20,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
-                          CommonText(
-                            item.title,
+                          CommonText(item.title,
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,

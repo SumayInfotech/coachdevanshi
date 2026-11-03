@@ -233,9 +233,9 @@ class _ClientConsentScreenState extends State<ClientConsentScreen> {
                   : const Color(0xFFEDE7E5),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: isChecked
-                  ? Icon(Icons.check, size: 14, color: appColors.white)
-                  : null,
+              child: isChecked ? Icon(
+                Icons.check, size: 14, color: appColors.white
+              ) : null,
             ),
             const SizedBox(width: 12),
             Expanded(

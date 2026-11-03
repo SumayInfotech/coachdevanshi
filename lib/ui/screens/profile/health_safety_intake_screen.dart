@@ -571,7 +571,9 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         _buildSegmentedControl(_hasRestrictions, (v) => setState(() => _hasRestrictions = v)),
         if (_hasRestrictions == true) ...[
           const SizedBox(height: 16),
-          CommonText("Specific medical guidance", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))),
+          CommonText("Specific medical guidance",
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+          ),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -583,7 +585,9 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             child: TextField(
               controller: _restrictionsController,
               maxLines: 3,
-              style: TextStyle(fontSize: 14, color: const Color(0xFF1D1B1A), fontFamily: fontFamilyPlusJakartaSans),
+              style: TextStyle(
+                fontSize: 14, color: const Color(0xFF1D1B1A), fontFamily: fontFamilyPlusJakartaSans
+              ),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "e.g. Advised to moderate sodium intake...",
@@ -678,27 +682,16 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF534343))
           ),
           const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: appColors.textFieldBgColor,
-              borderRadius: BorderRadius.circular(12),
-              border: _allergyDetailsError != null ? Border.all(color: appColors.red) : null,
-            ),
-            child: TextField(
-              controller: _allergyDetailsController,
-              maxLines: 3,
-              style: TextStyle(fontSize: 14, color: const Color(0xFF1D1B1A), fontFamily: fontFamilyPlusJakartaSans),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "e.g. Cow's milk causes bloating...",
-                hintStyle: TextStyle(fontSize: 14, color: const Color(0xFF857373)),
-                isDense: true,
-              ),
-              onChanged: (v) {
-                if (_allergyDetailsError != null) _validate();
-              },
-            ),
+          CommonTextField(
+            label: "",
+            controller: _allergyDetailsController,
+            maxLines: null,
+            minLines: 3,
+            borderColor: appColors.textFieldBgColor,
+            hint: "e.g. Cow's milk causes bloating and mild skin flare-ups; peanuts provoke localized hives.",
+            onChanged: (v) {
+              if (_allergyDetailsError != null) _validate();
+            },
           ),
           if (_allergyDetailsError != null) Padding(
             padding: const EdgeInsets.only(top: 4),

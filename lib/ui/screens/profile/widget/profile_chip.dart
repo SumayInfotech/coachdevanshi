@@ -25,8 +25,7 @@ class ProfileChip extends StatelessWidget {
           color: isSelected ? (selectedBgColor ?? const Color(0xFFFFDADB)) : appColors.textFieldBgColor,
           borderRadius: BorderRadius.circular(999),
         ),
-        child: CommonText(
-          label,
+        child: CommonText(label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

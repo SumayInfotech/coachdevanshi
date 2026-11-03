@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:coach_devanshi_doshi/core/constants/utils.dart';
-import 'package:coach_devanshi_doshi/core/services/loader_service.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,8 +10,10 @@ import '../../../../main.dart';
 import '../../../core/blocs/auth/sign_up/sign_up_bloc.dart';
 import '../../../core/blocs/auth/social_login/social_login_bloc.dart';
 import '../../../core/constants/urls.dart';
+import '../../../core/constants/utils.dart';
 import '../../../core/repository/auth_repo.dart';
 import '../../../core/services/auth_services.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';

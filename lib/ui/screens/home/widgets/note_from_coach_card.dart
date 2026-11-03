@@ -10,8 +10,7 @@ class NoteFromCoachCard extends StatelessWidget {
 
   const NoteFromCoachCard({
     super.key,
-    this.note =
-        "“Ananya, your digestive observations from Thursday reflect good gut ease with cooked warm lentils. Keep adhering to the 30-minute window for your morning water cadence before tea. Looking forward to our 1:1 check-in this Wednesday at 4:30 PM.”",
+    this.note = "“Ananya, your digestive observations from Thursday reflect good gut ease with cooked warm lentils. Keep adhering to the 30-minute window for your morning water cadence before tea. Looking forward to our 1:1 check-in this Wednesday at 4:30 PM.”",
     this.onTap,
   });
 
@@ -51,8 +50,7 @@ class NoteFromCoachCard extends StatelessWidget {
                 ),
               ],
             ),
-            child: CommonText(
-              note,
+            child: CommonText(note,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,

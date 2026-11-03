@@ -1,5 +1,5 @@
 name: coach_devanshi_doshi
-description: "A new Flutter project."
+description: "Coach Devanshi Doshi Application"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -54,15 +54,17 @@ dependencies:
   # --- Storage & Device Info ---
   shared_preferences: ^2.5.5
   package_info_plus: ^10.2.1
-  
+
+  # --- Media, Files & Pickers ---
+  image_picker: ^1.2.3
+  file_picker: ^13.3.1
+  syncfusion_flutter_pdfviewer: ^35.1.42
+
   # --- UI Components & Utilities ---
   cached_network_image: ^4.0.4
   shimmer: ^4.0.0
   pinput: ^6.0.2
   country_code_picker: ^3.4.1
-  image_picker: ^1.2.3
-  file_picker: ^13.3.1
-  syncfusion_flutter_pdfviewer: ^35.1.42
 
 dev_dependencies:
   flutter_test:
