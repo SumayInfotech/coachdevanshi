@@ -11,8 +11,16 @@ import 'auth/resend_sign_up_otp/resend_sign_up_otp_bloc.dart';
 import 'auth/sign_up/sign_up_bloc.dart';
 import 'auth/social_login/social_login_bloc.dart';
 import 'auth/verify_otp/verify_otp_bloc.dart';
+import 'profile/chapter_two/chapter_two_bloc.dart';
+import 'profile/chapter_three/chapter_three_bloc.dart';
 import 'profile/location/location_bloc.dart';
+import 'profile/chapter_one/chapter_one_bloc.dart';
 import 'profile/onboarding_masters/onboarding_masters_bloc.dart';
+import 'profile/onboarding_masters_status/onboarding_masters_status_bloc.dart';
+import 'profile/save_chapter/save_chapter_bloc.dart';
+import 'profile/chapter_four/chapter_four_bloc.dart';
+import 'profile/chapter_five/chapter_five_bloc.dart';
+import 'profile/chapter_six/chapter_six_bloc.dart';
 
 List<SingleChildWidget> blocProviders() {
 
@@ -53,6 +61,30 @@ List<SingleChildWidget> blocProviders() {
       ),
       BlocProvider(
         create: (context) => OnboardingMastersBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => OnboardingMasterStatusBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterOneBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => SaveChapterBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterTwoBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterThreeBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterFourBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterFiveBloc(profileRepo: profileRepo),
+      ),
+      BlocProvider(
+        create: (context) => ChapterSixBloc(profileRepo: profileRepo),
       ),
     ],
   ];

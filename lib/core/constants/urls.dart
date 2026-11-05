@@ -14,5 +14,9 @@ class Urls {
   static const logout = "$baseUrl/logout";
 
   static const getLocation = "$baseUrl/get-location";
+
+  // On Boarding Status
+  static const onboardingStatus = "$baseUrl/onboarding/status";
   static const onboardingMasters = "$baseUrl/onboarding-masters";
+  static String onboardingChapter({required String chapterId}) => "$baseUrl/onboarding/chapters/$chapterId";
 }

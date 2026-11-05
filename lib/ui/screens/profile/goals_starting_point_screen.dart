@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/profile/chapter_two/chapter_two_bloc.dart';
+import '../../../core/blocs/profile/save_chapter/save_chapter_bloc.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/chapter_two_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -22,6 +28,8 @@ class GoalsStartingPointScreen extends StatefulWidget {
 }
 
 class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
+  ChapterTwoModel? chapterTwoModel;
+
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _learnedController = TextEditingController();
@@ -42,6 +50,57 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   final Set<String> _selectedApproaches = {};
   final Set<String> _selectedConfident = {};
 
+  @override
+  void initState() {
+    super.initState();
+    callChapterTwoAPI();
+  }
+
+  void callChapterTwoAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<ChapterTwoBloc>(context).add(
+        UserChapterTwoEvent(url: Urls.onboardingChapter(chapterId: "2")),
+      );
+    });
+  }
+
+  void _populateFromChapterTwo(ChapterTwoModel model) {
+    final answers = model.data?.answers;
+    if (answers != null) {
+      if (answers.height != null) {
+        _heightController.text = answers.height.toString();
+      }
+      if (answers.heightUnit != null && answers.heightUnit!.isNotEmpty) {
+        _isCmSelected = answers.heightUnit!.toLowerCase() == "cm";
+      }
+      if (answers.approachesTried != null && answers.approachesTried!.isNotEmpty) {
+        _selectedApproaches.clear();
+        _selectedApproaches.addAll(answers.approachesTried!);
+      }
+      if (answers.approachesLearning != null && answers.approachesLearning!.isNotEmpty) {
+        _learnedController.text = answers.approachesLearning!;
+      }
+      if (answers.confidentAreas != null && answers.confidentAreas!.isNotEmpty) {
+        _selectedConfident.clear();
+        _selectedConfident.addAll(answers.confidentAreas!);
+      }
+      if (answers.confusingAreas != null && answers.confusingAreas!.isNotEmpty) {
+        _confusingController.text = answers.confusingAreas!;
+      }
+      if (answers.whatHelped != null && answers.whatHelped!.isNotEmpty) {
+        _helpedController.text = answers.whatHelped!;
+      }
+    }
+  }
+
+  Field? _getField(String key) {
+    final fields = chapterTwoModel?.data?.fields ?? [];
+    for (final f in fields) {
+      if (f.key == key) return f;
+    }
+    return null;
+  }
 
   bool _validate() {
     bool isValid = true;
@@ -51,20 +110,6 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
       isValid = false;
     } else {
       _heightError = null;
-    }
-
-    if (_weightController.text.trim().isEmpty) {
-      _weightError = "Please enter your weight";
-      isValid = false;
-    } else {
-      _weightError = null;
-    }
-
-    if (_learnedController.text.trim().isEmpty) {
-      _learnedError = "Please share what you learned";
-      isValid = false;
-    } else {
-      _learnedError = null;
     }
 
     if (_confusingController.text.trim().isEmpty) {
@@ -101,8 +146,29 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
   void _onSaveAndContinue() {
     if (_validate()) {
-      // navigation.pushReplaceFadeAnimation(context, HealthSafetyIntakeScreen());
-      navigation.pop(context);
+      LoaderService.show(context);
+
+      final num? parsedHeight = num.tryParse(_heightController.text.trim());
+      final dynamic heightValue = parsedHeight != null
+          ? (parsedHeight % 1 == 0 ? parsedHeight.toInt() : parsedHeight)
+          : _heightController.text.trim();
+
+      BlocProvider.of<SaveChapterBloc>(context).add(
+        UserSaveChapterEvent(
+          url: Urls.onboardingChapter(chapterId: "2"),
+          body: {
+            "answers": {
+              "height": heightValue,
+              "height_unit": _isCmSelected ? "cm" : "ft_in",
+              "approaches_tried": _selectedApproaches.toList(),
+              "approaches_learning": _learnedController.text.trim(),
+              "confident_areas": _selectedConfident.toList(),
+              "confusing_areas": _confusingController.text.trim(),
+              "what_helped": _helpedController.text.trim(),
+            }
+          },
+        ),
+      );
     }
   }
 
@@ -118,60 +184,89 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChapterTwoBloc, ChapterTwoState>(
+          listener: (context, state) {
+            if (state is ChapterTwoSuccess) {
+              LoaderService.hide();
+              chapterTwoModel = state.model;
+              _populateFromChapterTwo(state.model);
+              setState(() {});
+            } else if (state is ChapterTwoFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<SaveChapterBloc, SaveChapterState>(
+          listener: (context, state) {
+            if (state is SaveChapterSuccess) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: false, message: state.model.message ?? "");
+              navigation.pop(context, value: true);
+            } else if (state is SaveChapterFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: appColors.bgColor,
+        appBar: CommonAppBar(
+          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+          centerTitle: true,
+          leading: buildInkWell(
+            onTap: () => navigation.pop(context),
+            child: Container(
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: appColors.neutral,
+              ),
             ),
           ),
+          title: Column(
+            children: [
+              CommonText(
+                "CHAPTER ${chapterTwoModel?.data?.chapter ?? 2} OF ${chapterTwoModel?.data?.total ?? 6}",
+                style: TextStyle(
+                  fontSize: 11,
+                  color: appColors.primary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.55,
+                ),
+              ),
+              CommonText(
+                chapterTwoModel?.data?.title ?? "Goals & Starting Point",
+                fontFamily: fontPlayfairDisplay,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF1D1B1A),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.24,
+                ),
+              ),
+            ],
+          ),
         ),
-        title: Column(
+        body: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            CommonText(
-              "CHAPTER 2 OF 6",
-              style: TextStyle(
-                fontSize: 11,
-                color: appColors.primary,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.55,
-              ),
-            ),
-            CommonText(
-              "Goals & Starting Point",
-              fontFamily: fontPlayfairDisplay,
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color(0xFF1D1B1A),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.24,
-              ),
-            ),
+            _buildBaselineMeasurements(),
+            const SizedBox(height: 24),
+            _buildWeightSection(),
+            const SizedBox(height: 24),
+            _buildExperienceSection(),
+            const SizedBox(height: 24),
+            ProfileBottomButton(
+              name: "Save & Continue to Health & Safety",
+              onTap: _onSaveAndContinue,
+            )
           ],
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        children: [
-          _buildBaselineMeasurements(),
-          const SizedBox(height: 24),
-          _buildWeightSection(),
-          const SizedBox(height: 24),
-          _buildExperienceSection(),
-          const SizedBox(height: 24),
-          ProfileBottomButton(
-            name: "Save & Continue to Health & Safety",
-            onTap: _onSaveAndContinue,
-          )
-        ],
       ),
     );
   }
@@ -414,6 +509,18 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   }
 
   Widget _buildExperienceSection() {
+    final approachesField = _getField("approaches_tried");
+    final dynamicApproaches = approachesField?.options ?? [];
+    final hasDynamicApproaches = dynamicApproaches.isNotEmpty;
+
+    final confidentField = _getField("confident_areas");
+    final dynamicConfident = confidentField?.options ?? [];
+    final hasDynamicConfident = dynamicConfident.isNotEmpty;
+
+    final learningField = _getField("approaches_learning");
+    final confusingField = _getField("confusing_areas");
+    final helpedField = _getField("what_helped");
+
     return ProfileSectionCard(
       title: "Experience & Foundations",
       icon: appIcons.book,
@@ -429,27 +536,43 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
         // Approaches
         buildRequiredLabel(
-          "Approaches you have tried",
-          color: Color(0xFF1D1B1A),
+          approachesField?.label ?? "Approaches you have tried",
+          color: const Color(0xFF1D1B1A),
+          isRequired: approachesField?.required ?? true,
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: widget.approachesTried.map((e) => ProfileChip(
-            label: e.title ?? "",
-            isSelected: _selectedApproaches.contains(e.uuid),
-            onTap: () {
-              setState(() {
-                if (_selectedApproaches.contains(e.uuid)) {
-                  _selectedApproaches.remove(e.uuid);
-                } else {
-                  _selectedApproaches.add(e.uuid ?? "0");
-                }
-                if (_approachesError != null) _validate();
-              });
-            }
-          )).toList(),
+          children: hasDynamicApproaches
+              ? dynamicApproaches.map((e) => ProfileChip(
+                  label: e.label ?? "",
+                  isSelected: _selectedApproaches.contains(e.value),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedApproaches.contains(e.value)) {
+                        _selectedApproaches.remove(e.value);
+                      } else {
+                        if (e.value != null) _selectedApproaches.add(e.value!);
+                      }
+                      if (_approachesError != null) _validate();
+                    });
+                  },
+                )).toList()
+              : widget.approachesTried.map((e) => ProfileChip(
+                  label: e.title ?? "",
+                  isSelected: _selectedApproaches.contains(e.uuid),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedApproaches.contains(e.uuid)) {
+                        _selectedApproaches.remove(e.uuid);
+                      } else {
+                        _selectedApproaches.add(e.uuid ?? "0");
+                      }
+                      if (_approachesError != null) _validate();
+                    });
+                  },
+                )).toList(),
         ),
         if (_approachesError != null)
           Padding(
@@ -463,9 +586,8 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
         // Learnings
         buildRequiredLabel(
-          "What did you understand or learn from those experiences?",
-          isRequired: false,
-
+          learningField?.label ?? "What did you understand or learn from those experiences?",
+          isRequired: learningField?.required ?? false,
         ),
         const SizedBox(height: 12),
         ProfileTextArea(
@@ -486,29 +608,47 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
         // Confident areas
         buildRequiredLabel(
-          "Which areas do you already feel confident about?",
-          color: Color(0xFF1D1B1A),
+          confidentField?.label ?? "Which areas do you already feel confident about?",
+          color: const Color(0xFF1D1B1A),
+          isRequired: confidentField?.required ?? true,
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: widget.confidentAreas.map((e) => ProfileChip(
-            label: e.title ?? "",
-            isSelected: _selectedConfident.contains(e.uuid),
-            selectedBgColor: const Color(0xFFD8E5BF),
-            selectedTextColor: const Color(0xFF5B6749),
-            onTap: () {
-              setState(() {
-                if (_selectedConfident.contains(e.uuid)) {
-                  _selectedConfident.remove(e.uuid);
-                } else {
-                  _selectedConfident.add(e.uuid ?? "0");
-                }
-                if (_confidentError != null) _validate();
-              });
-            }
-          )).toList(),
+          children: hasDynamicConfident
+              ? dynamicConfident.map((e) => ProfileChip(
+                  label: e.label ?? "",
+                  isSelected: _selectedConfident.contains(e.value),
+                  selectedBgColor: const Color(0xFFD8E5BF),
+                  selectedTextColor: const Color(0xFF5B6749),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedConfident.contains(e.value)) {
+                        _selectedConfident.remove(e.value);
+                      } else {
+                        if (e.value != null) _selectedConfident.add(e.value!);
+                      }
+                      if (_confidentError != null) _validate();
+                    });
+                  },
+                )).toList()
+              : widget.confidentAreas.map((e) => ProfileChip(
+                  label: e.title ?? "",
+                  isSelected: _selectedConfident.contains(e.uuid),
+                  selectedBgColor: const Color(0xFFD8E5BF),
+                  selectedTextColor: const Color(0xFF5B6749),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedConfident.contains(e.uuid)) {
+                        _selectedConfident.remove(e.uuid);
+                      } else {
+                        _selectedConfident.add(e.uuid ?? "0");
+                      }
+                      if (_confidentError != null) _validate();
+                    });
+                  },
+                )).toList(),
         ),
         if (_confidentError != null)
           Padding(
@@ -522,8 +662,9 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
         // Confusing
         buildRequiredLabel(
-          "What still feels confusing or difficult?",
-          color: Color(0xFF1D1B1A),
+          confusingField?.label ?? "What still feels confusing or difficult?",
+          color: const Color(0xFF1D1B1A),
+          isRequired: confusingField?.required ?? true,
         ),
         const SizedBox(height: 12),
         ProfileTextArea(
@@ -539,8 +680,9 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
 
         // What helped
         buildRequiredLabel(
-          "What helped, what made you stop, and what contributed to progress returning?",
-          color: Color(0xFF1D1B1A),
+          helpedField?.label ?? "What helped, what made you stop, and what contributed to progress returning?",
+          color: const Color(0xFF1D1B1A),
+          isRequired: helpedField?.required ?? true,
         ),
         const SizedBox(height: 12),
         ProfileTextArea(

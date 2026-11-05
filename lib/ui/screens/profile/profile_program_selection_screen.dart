@@ -5,9 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/profile/location/location_bloc.dart';
+import '../../../core/blocs/profile/chapter_one/chapter_one_bloc.dart';
+import '../../../core/blocs/profile/save_chapter/save_chapter_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
 import '../../../core/models/profile/location_model.dart';
+import '../../../core/models/profile/chapter_one_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/repository/profile_repo.dart';
 import '../../../core/services/loader_service.dart';
@@ -19,8 +22,8 @@ import 'widget/profile_bottom_button.dart';
 import 'widget/profile_section_card.dart';
 
 class ProfileProgramSelectionScreen extends StatefulWidget {
-  final List<OnboardingData> coachingJourney;
-  const ProfileProgramSelectionScreen({super.key, required this.coachingJourney});
+  final List<OnboardingData>? coachingJourney;
+  const ProfileProgramSelectionScreen({super.key, this.coachingJourney});
 
   @override
   State<ProfileProgramSelectionScreen> createState() => _ProfileProgramSelectionScreenState();
@@ -31,6 +34,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   late LocationBloc _stateBloc;
   late LocationBloc _cityBloc;
 
+  ChapterOneModel? chapterOneModel;
+
   List<LocationData> stateList = [];
   List<LocationData> cityList = [];
 
@@ -39,9 +44,13 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController(text: "India");
   // final TextEditingController _stateController = TextEditingController();
   // final TextEditingController _cityController = TextEditingController();
   final TextEditingController _dailyRhythmController = TextEditingController();
+
+  DateTime? _selectedDob;
+  String? _apiCityName;
 
   String? _fullNameError;
   String? _mobileError;
@@ -55,7 +64,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   String _selectedGender = 'Female';
   String? _selectedJourney;
-  final String _selectedCountry = 'India';
+  String _selectedCountry = 'India';
   String? _selectedState, _selectedCity;
   String _autoDetectedTimeZone = "IST (UTC+5:30)";
 
@@ -65,6 +74,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     _detectTimeZone();
     _cityBloc = LocationBloc(profileRepo: ProfileRepo());
     callStateAPI();
+    callChapterOneAPI();
     setData();
   }
 
@@ -115,8 +125,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       LoaderService.show(context);
       _stateBloc.add(UserLocationEvent(
-          url: Urls.getLocation,
-          body: {}
+        url: Urls.getLocation,
+        body: {}
       ));
     });
   }
@@ -129,6 +139,92 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
         "state_id" : stateId
       }
     ));
+  }
+
+  void callChapterOneAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<ChapterOneBloc>(context).add(
+        UserChapterOneEvent(url: Urls.onboardingChapter(chapterId: "1")),
+      );
+    });
+  }
+
+  void _populateFromChapterOne(ChapterOneModel model) {
+    final answers = model.data?.answers;
+    if (answers != null) {
+      if (answers.email != null && answers.email!.isNotEmpty) {
+        _emailController.text = answers.email!;
+      }
+      if (answers.fullName != null && answers.fullName!.isNotEmpty) {
+        _fullNameController.text = answers.fullName!;
+      }
+      if (answers.nickname != null && answers.nickname!.isNotEmpty) {
+        _nicknameController.text = answers.nickname!;
+      }
+      if (answers.mobile != null && answers.mobile!.isNotEmpty) {
+        _mobileController.text = answers.mobile!;
+      }
+      if (answers.phoneCode != null && answers.phoneCode!.isNotEmpty) {
+        selectedCountryCode = answers.phoneCode!;
+      }
+      if (answers.dob != null) {
+        _selectedDob = answers.dob;
+        _dobController.text =
+            "${answers.dob!.month.toString().padLeft(2, '0')} / ${answers.dob!.day.toString().padLeft(2, '0')} / ${answers.dob!.year}";
+      }
+      if (answers.gender != null && answers.gender!.isNotEmpty) {
+        _selectedGender = answers.gender!;
+      }
+      if (answers.country != null && answers.country!.isNotEmpty) {
+        _selectedCountry = answers.country!;
+        _countryController.text = answers.country!;
+      }
+      if (answers.city != null && answers.city!.isNotEmpty) {
+        _apiCityName = answers.city;
+        _matchCityFromAnswers();
+      }
+      if (answers.timezone != null && answers.timezone!.isNotEmpty) {
+        _autoDetectedTimeZone = answers.timezone!;
+      }
+      if (answers.dailyRhythm != null && answers.dailyRhythm!.isNotEmpty) {
+        _dailyRhythmController.text = answers.dailyRhythm!;
+      }
+      if (answers.coachingJourney != null && answers.coachingJourney!.isNotEmpty) {
+        _selectedJourney = answers.coachingJourney;
+      }
+    }
+  }
+
+  void _matchCityFromAnswers() {
+    if (_apiCityName != null && cityList.isNotEmpty) {
+      for (final c in cityList) {
+        if (c.name?.trim().toLowerCase() == _apiCityName?.trim().toLowerCase() ||
+            c.id.toString() == _apiCityName?.trim()) {
+          _selectedCity = c.id.toString();
+          break;
+        }
+      }
+    }
+  }
+
+  Field? _getField(String key) {
+    final fields = chapterOneModel?.data?.fields ?? [];
+    for (final f in fields) {
+      if (f.key == key) return f;
+    }
+    return null;
+  }
+
+  IconData _getGenderIcon(String value) {
+    final val = value.toLowerCase();
+    if (val.contains("female")) {
+      return Icons.female_rounded;
+    } else if (val.contains("male")) {
+      return Icons.male_rounded;
+    } else {
+      return Icons.transgender_rounded;
+    }
   }
 
   bool _validate() {
@@ -189,8 +285,52 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   void _onSaveAndContinue() {
     if (_validate()) {
-    //   navigation.pushReplaceFadeAnimation(context, GoalsStartingPointScreen());
-      navigation.pop(context);
+      LoaderService.show(context);
+
+      String genderValue = _selectedGender;
+      final genderField = _getField("gender");
+      if (genderField != null) {
+        for (final opt in genderField.options) {
+          if ((opt.value?.toLowerCase() == _selectedGender.toLowerCase()) ||
+              (opt.label?.toLowerCase() == _selectedGender.toLowerCase())) {
+            genderValue = opt.value ?? _selectedGender;
+            break;
+          }
+        }
+      }
+
+      String dobString = "";
+      if (_selectedDob != null) {
+        dobString =
+            "${_selectedDob!.year.toString().padLeft(4, '0')}-${_selectedDob!.month.toString().padLeft(2, '0')}-${_selectedDob!.day.toString().padLeft(2, '0')}";
+      } else {
+        dobString = _dobController.text.trim();
+      }
+
+      final matchingCity = cityList.where((c) => c.id.toString() == _selectedCity).firstOrNull;
+      final cityToSave = matchingCity?.name ?? _apiCityName ?? _selectedCity ?? "";
+
+      BlocProvider.of<SaveChapterBloc>(context).add(
+        UserSaveChapterEvent(
+          url: Urls.onboardingChapter(chapterId: "1"),
+          body: {
+            "answers": {
+              "email": _emailController.text.trim(),
+              "full_name": _fullNameController.text.trim(),
+              "nickname": _nicknameController.text.trim(),
+              "phone_code": selectedCountryCode,
+              "mobile": _mobileController.text.trim(),
+              "dob": dobString,
+              "gender": genderValue,
+              "city": cityToSave,
+              "country": _selectedCountry,
+              "timezone": _autoDetectedTimeZone,
+              "daily_rhythm": _dailyRhythmController.text.trim(),
+              "coaching_journey": _selectedJourney
+            }
+          },
+        ),
+      );
     }
   }
 
@@ -202,6 +342,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     _nicknameController.dispose();
     _mobileController.dispose();
     _dobController.dispose();
+    _countryController.dispose();
     // _stateController.dispose();
     // _cityController.dispose();
     _dailyRhythmController.dispose();
@@ -218,6 +359,9 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           listener: (context, state) {
             if(state is LocationSuccess) {
               stateList = state.model.data;
+              if (_selectedState != null && _selectedState!.isNotEmpty) {
+                callCityAPI(stateId: _selectedState!);
+              }
               setState(() { });
               LoaderService.hide();
             } else if(state is LocationFailed) {
@@ -232,13 +376,39 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
             if(state is LocationSuccess) {
               LoaderService.hide();
               cityList = state.model.data;
+              _matchCityFromAnswers();
               setState(() { });
             } else if(state is LocationFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
             }
           },
-        )
+        ),
+        BlocListener<ChapterOneBloc, ChapterOneState>(
+          listener: (context, state) {
+            if (state is ChapterOneSuccess) {
+              LoaderService.hide();
+              chapterOneModel = state.model;
+              _populateFromChapterOne(state.model);
+              setState(() {});
+            } else if (state is ChapterOneFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<SaveChapterBloc, SaveChapterState>(
+          listener: (context, state) {
+            if (state is SaveChapterSuccess) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: false, message: state.model.message ?? "");
+              navigation.pop(context, value: true);
+            } else if (state is SaveChapterFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
       ],
       child: Scaffold(
         backgroundColor: appColors.bgColor,
@@ -259,7 +429,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           title: Column(
             children: [
               CommonText(
-                "CHAPTER 1 OF 6",
+                "CHAPTER ${chapterOneModel?.data?.chapter ?? 1} OF ${chapterOneModel?.data?.total ?? 6}",
                 style: TextStyle(
                   fontSize: 11,
                   color: appColors.primary,
@@ -268,11 +438,11 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                 ),
               ),
               CommonText(
-                "Profile & Program",
+                chapterOneModel?.data?.title ?? "Profile & Program",
                 fontFamily: fontPlayfairDisplay,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
-                  color: const Color(0xFF1D1B1A),
+                  color: Color(0xFF1D1B1A),
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.24,
                 ),
@@ -373,10 +543,11 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               mainAxisSize: MainAxisSize.min,
               children: [
                 CountryCodePicker(
+                  key: ValueKey(selectedCountryCode),
                   onChanged: (countryCode) {
                     selectedCountryCode = countryCode.dialCode ?? "+91";
                   },
-                  initialSelection: 'IN',
+                  initialSelection: selectedCountryCode,
                   favorite: const ['+91', 'IN'],
                   showCountryOnly: false,
                   showOnlyCountryWhenClosed: false,
@@ -412,11 +583,12 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           onTap: () async {
             DateTime? pickedDate = await showDatePicker(
               context: context,
-              initialDate: DateTime.now().subtract(const Duration(days: 365 * 25)),
+              initialDate: _selectedDob ?? DateTime.now().subtract(const Duration(days: 365 * 25)),
               firstDate: DateTime(1900),
               lastDate: DateTime.now(),
             );
             if (pickedDate != null) {
+              _selectedDob = pickedDate;
               String formattedDate =
                   "${pickedDate.month.toString().padLeft(2, '0')} / ${pickedDate.day.toString().padLeft(2, '0')} / ${pickedDate.year}";
               setState(() {
@@ -431,9 +603,18 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildBiologicalContextSection() {
+    final genderField = _getField("gender");
+    final genderOptions = (genderField != null && genderField.options.isNotEmpty)
+        ? genderField.options
+        : [
+            Option(value: "female", label: "Female", description: null, image: null),
+            Option(value: "male", label: "Male", description: null, image: null),
+            Option(value: "prefer_not_to_answer", label: "Prefer not to answer", description: null, image: null),
+          ];
+
     return ProfileSectionCard(
-      title: "Biological Context",
-      icon: appIcons.progress, // using a relevant icon
+      title: genderField?.label ?? "Biological Context",
+      icon: appIcons.progress,
       children: [
         RichText(
           text: TextSpan(
@@ -455,26 +636,16 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           ),
         ),
         const SizedBox(height: 16),
-        _buildSelectionPill(
-          label: "Female",
-          icon: Icons.female_rounded,
-          isSelected: _selectedGender == "Female",
-          onTap: () => setState(() => _selectedGender = "Female"),
-        ),
-        const SizedBox(height: 10),
-        _buildSelectionPill(
-          label: "Male",
-          icon: Icons.male_rounded,
-          isSelected: _selectedGender == "Male",
-          onTap: () => setState(() => _selectedGender = "Male"),
-        ),
-        const SizedBox(height: 10),
-        _buildSelectionPill(
-          label: "Prefer not to answer",
-          icon: Icons.transgender_rounded,
-          isSelected: _selectedGender == "Prefer not to answer",
-          onTap: () => setState(() => _selectedGender = "Prefer not to answer"),
-        ),
+        for (int i = 0; i < genderOptions.length; i++) ...[
+          if (i > 0) const SizedBox(height: 10),
+          _buildSelectionPill(
+            label: genderOptions[i].label ?? "",
+            icon: _getGenderIcon(genderOptions[i].value ?? genderOptions[i].label ?? ""),
+            isSelected: (_selectedGender.toLowerCase() == (genderOptions[i].value ?? "").toLowerCase()) ||
+                (_selectedGender.toLowerCase() == (genderOptions[i].label ?? "").toLowerCase()),
+            onTap: () => setState(() => _selectedGender = genderOptions[i].label ?? genderOptions[i].value ?? ""),
+          ),
+        ],
       ],
     );
   }
@@ -547,7 +718,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
         const SizedBox(height: 12),
         CommonTextField(
           label: "Country",
-          controller: TextEditingController(text: _selectedCountry),
+          controller: _countryController,
           isRequired: false,
           hint: "",
           readOnly: true,
@@ -571,7 +742,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                     ),
                   ),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedState,
+                    key: ValueKey(_selectedState),
+                    initialValue: stateList.any((state) => state.id.toString() == _selectedState) ? _selectedState : null,
                     isExpanded: true,
                     hint: const Text(
                       "Select State",
@@ -602,11 +774,13 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                     onChanged: (value) {
                       setState(() {
                         _selectedState = value;
-                        // _stateController.clear();
+                        _selectedCity = null;
+                        cityList.clear();
                       });
                       if (value != null) {
                         callCityAPI(stateId: value.toString());
                       }
+                      if (_stateError != null) _validate();
                     },
                   ),
                 ],
@@ -624,7 +798,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                     ),
                   ),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedCity,
+                    key: ValueKey(_selectedCity),
+                    initialValue: cityList.any((city) => city.id.toString() == _selectedCity) ? _selectedCity : null,
                     isExpanded: true,
                     hint: const Text(
                       "Select City",
@@ -646,17 +821,17 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
                       color: Color(0xFF1D1B1A),
                       fontFamily: fontFamilyPlusJakartaSans,
                     ),
-                    items: cityList.map((state) {
+                    items: cityList.map((city) {
                       return DropdownMenuItem<String>(
-                        value: state.id.toString(),
-                        child: Text(state.name ?? ""),
+                        value: city.id.toString(),
+                        child: Text(city.name ?? ""),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
                         _selectedCity = value;
-                        // _cityController.clear();
                       });
+                      if (_cityError != null) _validate();
                     },
                   ),
                 ],
@@ -809,6 +984,11 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   }
 
   Widget _buildCoachingJourneySection() {
+    final journeyField = _getField("coaching_journey");
+    final dynamicJourneyOptions = journeyField?.options ?? [];
+    final hasDynamicOptions = dynamicJourneyOptions.isNotEmpty;
+    final hasFallbackOptions = (widget.coachingJourney != null && widget.coachingJourney!.isNotEmpty);
+
     return ProfileSectionCard(
       title: "Coaching Journey",
       icon: appIcons.coachingJourney,
@@ -821,49 +1001,74 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               color: Color(0xFF534343),
             ),
             children: [
-              const TextSpan(text: "Which coaching journey are you joining? "),
+              TextSpan(text: journeyField?.label ?? "Which coaching journey are you joining? "),
               TextSpan(text: "*", style: TextStyle(color: appColors.primary)),
             ],
           ),
         ),
         const SizedBox(height: 12),
 
-        if(widget.coachingJourney.isEmpty)
+        if (!hasDynamicOptions && !hasFallbackOptions)
           errorTextWidget(title: "No coaching journey found!")
+        else if (hasDynamicOptions)
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 12),
+            itemCount: dynamicJourneyOptions.length,
+            itemBuilder: (context, index) {
+              final item = dynamicJourneyOptions[index];
+              return _buildJourneyPill(
+                title: item.label ?? "",
+                subtitle: item.description ?? "",
+                icon: item.image ?? "",
+                isSelected: _selectedJourney == item.value,
+                onTap: () => setState(() {
+                  _selectedJourney = item.value;
+                  if (_journeyError != null) _validate();
+                }),
+              );
+            },
+          )
         else
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.only(bottom: 12),
-            itemCount: widget.coachingJourney.length,
+            padding: const EdgeInsets.only(bottom: 12),
+            itemCount: widget.coachingJourney!.length,
             itemBuilder: (context, index) {
-              final item = widget.coachingJourney[index];
+              final item = widget.coachingJourney![index];
               return _buildJourneyPill(
                 title: item.title ?? "",
                 subtitle: item.description ?? "",
                 icon: item.image ?? "",
                 isSelected: _selectedJourney == item.uuid,
-                onTap: () => setState(()  {
+                onTap: () => setState(() {
                   _selectedJourney = item.uuid;
-                  if(_journeyError != null) _validate();
+                  if (_journeyError != null) _validate();
                 }),
               );
             },
           ),
 
-        if (_journeyError != null) Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: CommonText(_journeyError!,
-            style: TextStyle(color: appColors.red, fontSize: 12)
-          )
-        ),
+        if (_journeyError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: CommonText(
+              _journeyError!,
+              style: TextStyle(color: appColors.red, fontSize: 12),
+            ),
+          ),
       ],
     );
   }
 
   Widget _buildJourneyPill({
-    required String title, required String subtitle, required String icon,
-    required bool isSelected, required VoidCallback onTap
+    required String title,
+    required String subtitle,
+    required String icon,
+    required bool isSelected,
+    required VoidCallback onTap,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -874,41 +1079,66 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFFFDADB) : appColors.textFieldBgColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected ? [BoxShadow(
-              color: appColors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, 1), blurRadius: 1
-            )] : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: appColors.black.withValues(alpha: 0.05),
+                      offset: const Offset(0, 1),
+                      blurRadius: 1,
+                    )
+                  ]
+                : null,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40, height: 40,
-                padding: EdgeInsets.all(10),
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected ? appColors.primary : const Color(0xFFD8C1C2),
                   shape: BoxShape.circle,
                 ),
-                child: Image.network(icon, color: isSelected ? appColors.white : const Color(0xFF1D1B1A)),
-                // child: Image.asset(icon, color: isSelected ? appColors.white : const Color(0xFF1D1B1A)),
+                child: icon.startsWith("http")
+                    ? Image.network(
+                        icon,
+                        color: isSelected ? appColors.white : const Color(0xFF1D1B1A),
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.fitness_center_rounded,
+                          size: 18,
+                          color: isSelected ? appColors.white : const Color(0xFF1D1B1A),
+                        ),
+                      )
+                    : Image.asset(
+                        icon,
+                        color: isSelected ? appColors.white : const Color(0xFF1D1B1A),
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.fitness_center_rounded,
+                          size: 18,
+                          color: isSelected ? appColors.white : const Color(0xFF1D1B1A),
+                        ),
+                      ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CommonText(title,
-                      style: TextStyle(
+                    CommonText(
+                      title,
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1D1B1A),
+                        color: Color(0xFF1D1B1A),
                       ),
                     ),
                     const SizedBox(height: 4),
-                    CommonText(subtitle,
-                      style: TextStyle(
+                    CommonText(
+                      subtitle,
+                      style: const TextStyle(
                         fontSize: 13,
-                        color: const Color(0xFF534343),
+                        color: Color(0xFF534343),
                         height: 17.88 / 13,
                       ),
                     ),
@@ -917,7 +1147,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               ),
               const SizedBox(width: 14),
               Container(
-                width: 20, height: 20,
+                width: 20,
+                height: 20,
                 margin: const EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

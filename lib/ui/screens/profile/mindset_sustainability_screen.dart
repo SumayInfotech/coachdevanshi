@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/profile/chapter_six/chapter_six_bloc.dart';
+import '../../../core/blocs/profile/save_chapter/save_chapter_bloc.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/chapter_six_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_text.dart';
 import '../../widgets/common_text_field.dart';
@@ -21,6 +27,8 @@ class MindsetSustainabilityScreen extends StatefulWidget {
 }
 
 class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScreen> {
+  ChapterSixModel? chapterSixModel;
+
   // 1. Goal-Oriented Mindset
   final Set<String> _selectedMindsets = {};
   String? _mindsetError;
@@ -41,6 +49,54 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
 
   // 5. Open Reflections
   final TextEditingController _reflectionsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    callChapterSixAPI();
+  }
+
+  void callChapterSixAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<ChapterSixBloc>(context).add(
+        UserChapterSixEvent(url: Urls.onboardingChapter(chapterId: "6")),
+      );
+    });
+  }
+
+  void _populateFromChapterSix(ChapterSixModel model) {
+    final answers = model.data?.answers;
+    if (answers != null) {
+      if (answers.goalMindset != null && answers.goalMindset!.isNotEmpty) {
+        _selectedMindsets.clear();
+        _selectedMindsets.addAll(answers.goalMindset!);
+      }
+      if (answers.slowProgressResponse != null) {
+        _slowProgressController.text = answers.slowProgressResponse!;
+      }
+      if (answers.oneChangeToStart != null) {
+        _startChangeController.text = answers.oneChangeToStart!;
+      }
+      if (answers.notReadyToChange != null) {
+        _notReadyChangeController.text = answers.notReadyToChange!;
+      }
+      if (answers.visionOfSuccess != null) {
+        _visionController.text = answers.visionOfSuccess!;
+      }
+      if (answers.openReflections != null) {
+        _reflectionsController.text = answers.openReflections!;
+      }
+    }
+  }
+
+  Field? _getField(String key) {
+    final fields = chapterSixModel?.data?.fields ?? [];
+    for (final f in fields) {
+      if (f.key == key) return f;
+    }
+    return null;
+  }
 
   bool _validate() {
     bool isValid = true;
@@ -86,9 +142,22 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
 
   void _onSaveAndReview() {
     if (_validate()) {
-      appLog("Mindset & Sustainability Form Validated!");
-      // navigation.pushReplaceFadeAnimation(context, ClientConsentScreen());
-      navigation.pop(context);
+      LoaderService.show(context);
+      BlocProvider.of<SaveChapterBloc>(context).add(
+        UserSaveChapterEvent(
+          url: Urls.onboardingChapter(chapterId: "6"),
+          body: {
+            "answers": {
+              "goal_mindset": _selectedMindsets.toList(),
+              "slow_progress_response": _slowProgressController.text.trim(),
+              "one_change_to_start": _startChangeController.text.trim(),
+              "not_ready_to_change": _notReadyChangeController.text.trim(),
+              "vision_of_success": _visionController.text.trim(),
+              "open_reflections": _reflectionsController.text.trim(),
+            }
+          },
+        ),
+      );
     }
   }
 
@@ -104,69 +173,101 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChapterSixBloc, ChapterSixState>(
+          listener: (context, state) {
+            if (state is ChapterSixSuccess) {
+              LoaderService.hide();
+              chapterSixModel = state.model;
+              _populateFromChapterSix(state.model);
+              setState(() {});
+            } else if (state is ChapterSixFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<SaveChapterBloc, SaveChapterState>(
+          listener: (context, state) {
+            if (state is SaveChapterSuccess) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: false, message: state.model.message ?? "");
+              navigation.pop(context, value: true);
+            } else if (state is SaveChapterFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: appColors.bgColor,
+        appBar: CommonAppBar(
+          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+          centerTitle: true,
+          leading: buildInkWell(
+            onTap: () => navigation.pop(context),
+            child: Container(
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: appColors.neutral,
+              ),
             ),
           ),
+          title: Column(
+            children: [
+              CommonText(
+                "CHAPTER ${chapterSixModel?.data?.chapter ?? 6} OF ${chapterSixModel?.data?.total ?? 6}",
+                style: TextStyle(
+                  fontSize: 11,
+                  color: appColors.primary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.55,
+                ),
+              ),
+              CommonText(
+                chapterSixModel?.data?.title ?? "Mindset & Sustainability",
+                fontFamily: fontPlayfairDisplay,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF1D1B1A),
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.24,
+                ),
+              ),
+            ],
+          ),
         ),
-        title: Column(
+        body: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           children: [
-            CommonText(
-              "CHAPTER 6 OF 6",
-              style: TextStyle(
-                fontSize: 11,
-                color: appColors.primary,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.55,
-              ),
-            ),
-            CommonText(
-              "Mindset & Sustainability",
-              fontFamily: fontPlayfairDisplay,
-              style: TextStyle(
-                fontSize: 16,
-                color: const Color(0xFF1D1B1A),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.24,
-              ),
-            ),
+            _buildMindsetSection(),
+            const SizedBox(height: 24),
+            _buildSlowProgressSection(),
+            const SizedBox(height: 24),
+            _buildBoundariesSection(),
+            const SizedBox(height: 24),
+            _buildVisionSection(),
+            const SizedBox(height: 24),
+            _buildReflectionsSection(),
+            const SizedBox(height: 24),
+            ProfileBottomButton(
+              name: "Save & Review",
+              onTap: _onSaveAndReview,
+            )
           ],
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        children: [
-          _buildMindsetSection(),
-          const SizedBox(height: 24),
-          _buildSlowProgressSection(),
-          const SizedBox(height: 24),
-          _buildBoundariesSection(),
-          const SizedBox(height: 24),
-          _buildVisionSection(),
-          const SizedBox(height: 24),
-          _buildReflectionsSection(),
-          const SizedBox(height: 24),
-          ProfileBottomButton(
-            name: "Save & Review",
-            onTap: _onSaveAndReview,
-          )
-        ],
       ),
     );
   }
 
   Widget _buildMindsetSection() {
+    final dynamicMindsets = _getField("goal_mindset")?.options ?? [];
+    final hasDynamicMindsets = dynamicMindsets.isNotEmpty;
+
     return ProfileSectionCard(
       title: "Goal-Oriented Mindset",
       icon: appIcons.mindset,
@@ -174,30 +275,49 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
         buildRequiredLabel(
           "Which statements sound most like you when you are working toward a goal?",
           subtext: "(Select up to 3)",
-          color: Color(0xFF1D1B1A)
+          color: const Color(0xFF1D1B1A)
         ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 12,
-          children: widget.goalMindset.map((e) => ProfileChip(
-            label: e.title ?? "",
-            isSelected: _selectedMindsets.contains(e.uuid),
-            onTap: () {
-              setState(() {
-                if (_selectedMindsets.contains(e.uuid)) {
-                  _selectedMindsets.remove(e.uuid);
-                } else {
-                  if (_selectedMindsets.length < 3) {
-                    _selectedMindsets.add(e.uuid ?? "0");
-                  } else {
-                    appLog("Can only select up to 3 options");
-                  }
-                }
-                if (_mindsetError != null) _validate();
-              });
-            },
-          )).toList(),
+          children: hasDynamicMindsets
+              ? dynamicMindsets.map((e) => ProfileChip(
+                  label: e.label ?? "",
+                  isSelected: _selectedMindsets.contains(e.value),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedMindsets.contains(e.value)) {
+                        _selectedMindsets.remove(e.value);
+                      } else {
+                        if (_selectedMindsets.length < 3) {
+                          if (e.value != null) _selectedMindsets.add(e.value!);
+                        } else {
+                          appLog("Can only select up to 3 options");
+                        }
+                      }
+                      if (_mindsetError != null) _validate();
+                    });
+                  },
+                )).toList()
+              : widget.goalMindset.map((e) => ProfileChip(
+                  label: e.title ?? "",
+                  isSelected: _selectedMindsets.contains(e.uuid),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedMindsets.contains(e.uuid)) {
+                        _selectedMindsets.remove(e.uuid);
+                      } else {
+                        if (_selectedMindsets.length < 3) {
+                          _selectedMindsets.add(e.uuid ?? "0");
+                        } else {
+                          appLog("Can only select up to 3 options");
+                        }
+                      }
+                      if (_mindsetError != null) _validate();
+                    });
+                  },
+                )).toList(),
         ),
         if (_mindsetError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
@@ -216,7 +336,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       children: [
         buildRequiredLabel(
           "When progress is slower than you hoped, what tends to happen in your head — and what do you usually do next?",
-          color: Color(0xFF1D1B1A)
+          color: const Color(0xFF1D1B1A)
         ),
         const SizedBox(height: 12),
         ProfileTextArea(
@@ -245,12 +365,12 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       children: [
         buildRequiredLabel(
           "What is one change you could genuinely start this week, and one thing you are not ready to change yet?",
-          color: Color(0xFF1D1B1A)
+          color: const Color(0xFF1D1B1A)
         ),
         const SizedBox(height: 16),
-        CommonText(
+        const CommonText(
           "One change you could genuinely start this week",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF534343))
         ),
         const SizedBox(height: 6),
         CommonTextField(
@@ -267,9 +387,9 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
         ),
         
         const SizedBox(height: 12),
-        CommonText(
+        const CommonText(
           "One thing you are not ready to change yet",
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF534343))
         ),
         const SizedBox(height: 6),
         CommonTextField(
@@ -297,7 +417,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       children: [
         buildRequiredLabel(
           "If coaching worked well for you, what would feel different in your body, your routine and your life?",
-          color: Color(0xFF1D1B1A)
+          color: const Color(0xFF1D1B1A)
         ),
         const SizedBox(height: 12),
         ProfileTextArea(
@@ -324,9 +444,9 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       title: "Open Reflections",
       icon: appIcons.edit,
       children: [
-        CommonText(
+        const CommonText(
           "Is there anything important about your health, body, food or lifestyle that we have not asked?",
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF534343))
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF534343))
         ),
         const SizedBox(height: 12),
         ProfileTextArea(

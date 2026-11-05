@@ -7,7 +7,9 @@ import '../../../../core/constants/utils.dart';
 import '../../../../main.dart';
 import '../../../core/blocs/auth/logout/logout_bloc.dart';
 import '../../../core/blocs/profile/onboarding_masters/onboarding_masters_bloc.dart';
+import '../../../core/blocs/profile/onboarding_masters_status/onboarding_masters_status_bloc.dart';
 import '../../../core/constants/urls.dart';
+import '../../../core/models/profile/onboarding_master_status_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
@@ -38,11 +40,13 @@ class ClientOnboardingScreen extends StatefulWidget {
 }
 
 class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
+  ValueNotifier<OnboardingMasterStatusModel?> onboardingMasterStatus = ValueNotifier(null);
   ValueNotifier<OnboardingMastersModel?> onboardingMastersModel = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
+    callOnboardingMasterStatusAPI();
     callOnboardingMastersAPI();
   }
 
@@ -54,6 +58,15 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
     }
   }
 
+  void callOnboardingMasterStatusAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      LoaderService.show(context);
+      BlocProvider.of<OnboardingMasterStatusBloc>(context).add(
+        UserOnboardingMasterStatusEvent(url: Urls.onboardingStatus),
+      );
+    });
+  }
+
   void callOnboardingMastersAPI() {
     BlocProvider.of<OnboardingMastersBloc>(context).add(
       UserOnboardingMastersEvent(url: Urls.onboardingMasters),
@@ -63,6 +76,103 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
   void callLogout() async {
     await AuthServices.signOut();
     AppPreferences.clearPreferences();
+  }
+
+  String _getChapterIcon(int chapterNumber) {
+    switch (chapterNumber) {
+      case 1:
+        return appIcons.profileProgram;
+      case 2:
+        return appIcons.goalsStartingPoint;
+      case 3:
+        return appIcons.relevantHealthSafety;
+      case 4:
+        return appIcons.foodDigestion;
+      case 5:
+        return appIcons.lifestyleCoaching;
+      case 6:
+        return appIcons.mindset;
+      default:
+        return appIcons.profileProgram;
+    }
+  }
+
+  Color _getChapterIconBgColor(int chapterNumber) {
+    return chapterNumber % 2 != 0 ? const Color(0xFFD8E5BF) : const Color(0xFFFFDADB);
+  }
+
+  Color _getChapterIconColor(int chapterNumber) {
+    return chapterNumber % 2 != 0 ? const Color(0xFF5B6749) : const Color(0xFF8B484D);
+  }
+
+  void _onChapterTap(int chapterNumber, OnboardingMastersModel? onboardingMasters) {
+    Widget? screen;
+    switch (chapterNumber) {
+      case 1:
+        screen = ProfileProgramSelectionScreen(
+          coachingJourney: onboardingMasters?.data?.coachingJourney ?? [],
+        );
+        break;
+      case 2:
+        screen = GoalsStartingPointScreen(
+          approachesTried: onboardingMasters?.data?.approachesTried ?? [],
+          confidentAreas: onboardingMasters?.data?.confidentAreas ?? [],
+        );
+        break;
+      case 3:
+        screen = HealthSafetyIntakeScreen(
+          medicalDiagnoses: onboardingMasters?.data?.medicalDiagnoses ?? [],
+          familyMedicalHistory: onboardingMasters?.data?.familyMedicalHistory ?? [],
+          recentClinicalSymptoms: onboardingMasters?.data?.recentClinicalSymptoms ?? [],
+          allergiesIntolerances: onboardingMasters?.data?.allergiesIntolerances ?? [],
+          hormonalLifeStage: onboardingMasters?.data?.hormonalLifeStage ?? [],
+        );
+        break;
+      case 4:
+        screen = FoodDigestionIntakeScreen(
+          eatingPattern: onboardingMasters?.data?.eatingPattern ?? [],
+          culturalFastingPractices: onboardingMasters?.data?.culturalFastingPractices ?? [],
+          foodEnvWhoCooks: onboardingMasters?.data?.foodEnvWhoCooks ?? [],
+          foodEnvSupportLevel: onboardingMasters?.data?.foodEnvSupportLevel ?? [],
+          foodEnvMealsOutPerWeek: onboardingMasters?.data?.foodEnvMealsOutPerWeek ?? [],
+          intakeFruit: onboardingMasters?.data?.intakeFruit ?? [],
+          intakeVegetables: onboardingMasters?.data?.intakeVegetables ?? [],
+          intakeWater: onboardingMasters?.data?.intakeWater ?? [],
+          intakeCaffeine: onboardingMasters?.data?.intakeCaffeine ?? [],
+          intakeSugary: onboardingMasters?.data?.intakeSugary ?? [],
+          substanceHabits: onboardingMasters?.data?.substanceHabits ?? [],
+          digestiveHealth: onboardingMasters?.data?.digestiveHealth ?? [],
+        );
+        break;
+      case 5:
+        screen = LifestyleCoachingFitScreen(
+          sleepNightWaking: onboardingMasters?.data?.sleepNightWaking ?? [],
+          sleepFirstHour: onboardingMasters?.data?.sleepFirstHour ?? [],
+          activityLevel: onboardingMasters?.data?.activityLevel ?? [],
+          activityDailySteps: onboardingMasters?.data?.activityDailySteps ?? [],
+          activityWorkoutsPerWeek: onboardingMasters?.data?.activityWorkoutsPerWeek ?? [],
+          activityAvailableDays: onboardingMasters?.data?.activityAvailableDays ?? [],
+          stressFirstChanges: onboardingMasters?.data?.stressFirstChanges ?? [],
+          readinessScore: onboardingMasters?.data?.readinessScore ?? [],
+          consistencyInterrupters: onboardingMasters?.data?.consistencyInterrupters ?? [],
+        );
+        break;
+      case 6:
+        screen = MindsetSustainabilityScreen(
+          goalMindset: onboardingMasters?.data?.goalMindset ?? [],
+        );
+        break;
+    }
+
+    if (screen != null) {
+      navigation.pushSlideAnimation(context, screen,
+        onValue: (value) {
+          if(value == true) {
+            callOnboardingMasterStatusAPI();
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -79,6 +189,17 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
               LoaderService.hide();
               navigation.pushAndRemoveUntilSlideAnimation(context, const WelcomeScreen());
             } else if (state is LogoutFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<OnboardingMasterStatusBloc, OnboardingMasterStatusState>(
+          listener: (context, state) {
+            if (state is OnboardingMasterStatusSuccess) {
+              onboardingMasterStatus.value = state.model;
+              LoaderService.hide();
+            } else if (state is OnboardingMasterStatusFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
             }
@@ -106,409 +227,326 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
           backgroundColor: appColors.bgColor,
           body: SafeArea(
             child: ValueListenableBuilder(
-              valueListenable: onboardingMastersModel,
-              builder: (context, onboardingMasters, _) {
-                return ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  children: [
-                    // Top Bar (Profile)
-                    Row(
+              valueListenable: onboardingMasterStatus,
+              builder: (context, model, _) {
+                final masterStatus = model?.data;
+                return ValueListenableBuilder(
+                  valueListenable: onboardingMastersModel,
+                  builder: (context, onboardingMasters, _) {
+                    final List<Chapter> chapters = masterStatus?.chapters ?? [];
+
+                    return ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       children: [
-                        if (widget.isBack)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: buildInkWell(
-                              onTap: () => _onBack(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                child: Icon(
-                                  Icons.arrow_back,
-                                  size: 24,
-                                  color: appColors.neutral,
+                        // Top Bar (Profile)
+                        Row(
+                          children: [
+                            if (widget.isBack)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: buildInkWell(
+                                  onTap: () => _onBack(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.arrow_back,
+                                      size: 24,
+                                      color: appColors.neutral,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        const CommonText(
-                          "Profile",
-                          style: TextStyle(
-                            fontSize: 26,
-                            color: Color(0xFF1D1B1A),
-                            fontWeight: FontWeight.w700,
-                          ),
-                          fontFamily: 'serif',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Greeting Banner
-                    CommonText(
-                      displayDate.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF534343),
-                        letterSpacing: 0.55,
-                      ),
-                      fontFamily: fontFamilyPlusJakartaSans,
-                    ),
-                    const SizedBox(height: 4),
-                    ValueListenableBuilder(
-                      valueListenable: userData,
-                      builder: (context, user, _) {
-                        return CommonText(
-                          "Good morning, ${user?.name?.split(" ").first ?? "Ananya"}",
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1D1B1A),
-                            height: 1.3,
-                          ),
-                          fontFamily: 'serif',
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Onboarding Journey Progress Banner
-                    _buildOnboardingJourneyBanner(),
-                    const SizedBox(height: 16),
-
-                    // 6 Chapter Cards
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 01",
-                      title: "Profile & Program",
-                      subtitle: "Gut Reset & Digestive Ease",
-                      isComplete: false,
-                      icon: appIcons.profileProgram,
-                      iconBgColor: const Color(0xFFD8E5BF),
-                      iconColor: const Color(0xFF5B6749),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        ProfileProgramSelectionScreen(
-                          coachingJourney: onboardingMasters?.data?.coachingJourney ?? [],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 02",
-                      title: "Goals& Starting Point",
-                      subtitle: "Better digestion & energy vitality",
-                      isComplete: true,
-                      icon: appIcons.goalsStartingPoint,
-                      iconBgColor: const Color(0xFFFFDADB),
-                      iconColor: const Color(0xFF8B484D),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        GoalsStartingPointScreen(
-                          approachesTried: onboardingMasters?.data?.approachesTried ?? [],
-                          confidentAreas: onboardingMasters?.data?.confidentAreas ?? [],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 03",
-                      title: "Relevant Health & Safety",
-                      subtitle: "Acid reflux · Physician cleared",
-                      isComplete: true,
-                      icon: appIcons.relevantHealthSafety,
-                      iconBgColor: const Color(0xFFD8E5BF),
-                      iconColor: const Color(0xFF5B6749),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        HealthSafetyIntakeScreen(
-                          medicalDiagnoses: onboardingMasters?.data?.medicalDiagnoses ?? [],
-                          familyMedicalHistory: onboardingMasters?.data?.familyMedicalHistory ?? [],
-                          recentClinicalSymptoms: onboardingMasters?.data?.recentClinicalSymptoms ?? [],
-                          allergiesIntolerances: onboardingMasters?.data?.allergiesIntolerances ?? [],
-                          hormonalLifeStage: onboardingMasters?.data?.hormonalLifeStage ?? [],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 04",
-                      title: "Food & Digestion",
-                      subtitle: "Plant-forward · Structured rhythm",
-                      isComplete: true,
-                      icon: appIcons.foodDigestion,
-                      iconBgColor: const Color(0xFFFFDADB),
-                      iconColor: const Color(0xFF8B484D),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        FoodDigestionIntakeScreen(
-                          eatingPattern: onboardingMasters?.data?.eatingPattern ?? [],
-                          culturalFastingPractices: onboardingMasters?.data?.culturalFastingPractices ?? [],
-                          foodEnvWhoCooks: onboardingMasters?.data?.foodEnvWhoCooks ?? [],
-                          foodEnvSupportLevel: onboardingMasters?.data?.foodEnvSupportLevel ?? [],
-                          foodEnvMealsOutPerWeek: onboardingMasters?.data?.foodEnvMealsOutPerWeek ?? [],
-                          intakeFruit: onboardingMasters?.data?.intakeFruit ?? [],
-                          intakeVegetables: onboardingMasters?.data?.intakeVegetables ?? [],
-                          intakeWater: onboardingMasters?.data?.intakeWater ?? [],
-                          intakeCaffeine: onboardingMasters?.data?.intakeCaffeine ?? [],
-                          intakeSugary: onboardingMasters?.data?.intakeSugary ?? [],
-                          substanceHabits: onboardingMasters?.data?.substanceHabits ?? [],
-                          digestiveHealth: onboardingMasters?.data?.digestiveHealth ?? [],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 05",
-                      title: "Lifestyle & Coaching Fit",
-                      subtitle: "7.5k steps · 7.5h restorative sleep",
-                      isComplete: true,
-                      icon: appIcons.lifestyleCoaching,
-                      iconBgColor: const Color(0xFFD8E5BF),
-                      iconColor: const Color(0xFF5B6749),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        LifestyleCoachingFitScreen(
-                          sleepNightWaking: onboardingMasters?.data?.sleepNightWaking ?? [],
-                          sleepFirstHour: onboardingMasters?.data?.sleepFirstHour ?? [],
-                          activityLevel: onboardingMasters?.data?.activityLevel ?? [],
-                          activityDailySteps: onboardingMasters?.data?.activityDailySteps ?? [],
-                          activityWorkoutsPerWeek: onboardingMasters?.data?.activityWorkoutsPerWeek ?? [],
-                          activityAvailableDays: onboardingMasters?.data?.activityAvailableDays ?? [],
-                          stressFirstChanges: onboardingMasters?.data?.stressFirstChanges ?? [],
-                          readinessScore: onboardingMasters?.data?.readinessScore ?? [],
-                          consistencyInterrupters: onboardingMasters?.data?.consistencyInterrupters ?? [],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    _ChapterCard(
-                      chapterNumber: "CHAPTER 06",
-                      title: "Mindset & Sustainability",
-                      subtitle: "Self-talk & Setting realistic commitments",
-                      isComplete: true,
-                      icon: appIcons.mindset,
-                      iconBgColor: const Color(0xFFFFDADB),
-                      iconColor: const Color(0xFF8B484D),
-                      onTapButton: () => navigation.pushSlideAnimation(
-                        context,
-                        MindsetSustainabilityScreen(
-                          goalMindset: onboardingMasters?.data?.goalMindset ?? [],
-                        ),
-                      ),
-                    ),
-
-                    if(!widget.isLogin)...[
-                      const SizedBox(height: 20),
-
-                      // Active Program Card
-                      _buildActiveProgramSection(context),
-                      const SizedBox(height: 16),
-
-                      // Action / Tracking Cards (5 cards)
-                      _ActionCard(
-                        iconWidget: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFDADB).withValues(alpha: 0.5),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.calendar_today_outlined,
-                              size: 18,
-                              color: appColors.primary,
-                            ),
-                          ),
-                        ),
-                        title: "Three-day Food Diary",
-                        subtitle: "Three-day food diary with one weekend day",
-                        buttonText: "Edit",
-                        isPrimaryButton: false,
-                        onTapButton: () => navigation.pushSlideAnimation(
-                          context,
-                          const ThreeDayFoodDiaryScreen(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _ActionCard(
-                        iconWidget: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              appIcons.homeMicroCheckinIcon,
-                              width: 18,
-                              height: 18,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        title: "Micro Check-in",
-                        subtitle: "First seven days of steps, sleep and water baseline",
-                        badgeText: "Due",
-                        buttonText: "Add Data",
-                        isPrimaryButton: true,
-                        onTapButton: () => navigation.pushSlideAnimation(context,
-                          const DailyWellnessLogScreen(isBack: true),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _ActionCard(
-                        iconWidget: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              appIcons.progress,
-                              width: 18,
-                              height: 18,
-                              color: appColors.primary,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        title: "Baseline and Progress Measurements",
-                        subtitle: "First seven days of steps, sleep and water baseline",
-                        badgeText: "Due",
-                        buttonText: "Add Data",
-                        isPrimaryButton: true,
-                        onTapButton: () => navigation.pushSlideAnimation(
-                          context,
-                          const BaselineProgressScreen(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _ActionCard(
-                        iconWidget: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              appIcons.addPhoto,
-                              width: 18,
-                              height: 18,
-                              color: appColors.primary,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        title: "Progress Photos",
-                        subtitle: "Upload Progress photos to monitor your coaching progress",
-                        buttonText: "Add Photos",
-                        isPrimaryButton: true,
-                        onTapButton: () => navigation.pushSlideAnimation(
-                          context,
-                          const TrackWeeklyProgressScreen(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      _ActionCard(
-                        iconWidget: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              appIcons.reportUpload,
-                              width: 18,
-                              height: 18,
-                              color: appColors.primary,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        title: "Blood Report Upload",
-                        subtitle: "Blood-report upload with report date",
-                        buttonText: "Add Reports",
-                        isPrimaryButton: true,
-                        onTapButton: () => navigation.pushSlideAnimation(
-                          context,
-                          const BloodReportUploadScreen(isBack: true),
-                        ),
-                      ),
-                    ],
-
-                    // Log Out Button
-                    const SizedBox(height: 24),
-                    buildInkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        commonDialog(
-                          context: context,
-                          icon: Icons.logout,
-                          title: "Log Out",
-                          subtitle:
-                              "Are you sure you want to log out? You will need to sign back in to continue your progress.",
-                          onPressed: () {
-                            LoaderService.show(context);
-                            BlocProvider.of<LogoutBloc>(context).add(
-                              UserLogoutEvent(
-                                url: Urls.logout,
-                                body: {
-                                  "fcm_token": AppPreferences.getString(AppPreferences.fcmToken),
-                                },
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F2EF),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.logout_rounded,
-                              size: 20,
-                              color: appColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            CommonText(
-                              "Log Out",
+                            const CommonText(
+                              "Profile",
                               style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: appColors.primary,
+                                fontSize: 26,
+                                color: Color(0xFF1D1B1A),
+                                fontWeight: FontWeight.w700,
                               ),
-                              fontFamily: fontFamilyPlusJakartaSans,
+                              fontFamily: 'serif',
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    SizedBox(height: bottomPadding(context) + 16),
-                  ],
+                        const SizedBox(height: 20),
+
+                        // Greeting Banner
+                        CommonText(
+                          displayDate.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF534343),
+                            letterSpacing: 0.55,
+                          ),
+                          fontFamily: fontFamilyPlusJakartaSans,
+                        ),
+                        const SizedBox(height: 4),
+                        ValueListenableBuilder(
+                          valueListenable: userData,
+                          builder: (context, user, _) {
+                            return CommonText(
+                              "Good morning, ${user?.name?.split(" ").first ?? "Ananya"}",
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1D1B1A),
+                                height: 1.3,
+                              ),
+                              fontFamily: 'serif',
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+
+                        if(chapters.isNotEmpty) ...[
+                          // Onboarding Journey Progress Banner
+                          _buildOnboardingJourneyBanner(
+                            total: masterStatus?.totalChapters ?? chapters.length,
+                            completed: masterStatus?.completedChapters ??
+                              chapters.where((c) => (c.status?.toLowerCase() == "completed" ||
+                                c.status?.toLowerCase() == "complete" ||
+                                c.completedAt != null)
+                              ).length,
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Dynamic Chapter Cards
+                          for (int i = 0; i < chapters.length; i++) ...[
+                            Builder(
+                              builder: (context) {
+                                final chapter = chapters[i];
+                                final chapterNum = chapter.chapter ?? (i + 1);
+                                final isComplete = (chapter.status?.toLowerCase() == "completed" ||
+                                    chapter.status?.toLowerCase() == "complete" ||
+                                    chapter.completedAt != null);
+
+                                return _ChapterCard(
+                                  chapterNumber: "CHAPTER ${chapterNum.toString().padLeft(2, '0')}",
+                                  title: chapter.title ?? "",
+                                  subtitle: chapter.subtitle ?? "",
+                                  isComplete: isComplete,
+                                  icon: _getChapterIcon(chapterNum),
+                                  iconBgColor: _getChapterIconBgColor(chapterNum),
+                                  iconColor: _getChapterIconColor(chapterNum),
+                                  onTapButton: () => _onChapterTap(chapterNum, onboardingMasters),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
+
+                        if(!widget.isLogin)...[
+                          const SizedBox(height: 20),
+
+                          // Active Program Card
+                          _buildActiveProgramSection(context),
+                          const SizedBox(height: 16),
+
+                          // Action / Tracking Cards (5 cards)
+                          _ActionCard(
+                            iconWidget: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFDADB).withValues(alpha: 0.5),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 18,
+                                  color: appColors.primary,
+                                ),
+                              ),
+                            ),
+                            title: "Three-day Food Diary",
+                            subtitle: "Three-day food diary with one weekend day",
+                            buttonText: "Edit",
+                            isPrimaryButton: false,
+                            onTapButton: () => navigation.pushSlideAnimation(
+                              context,
+                              const ThreeDayFoodDiaryScreen(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          _ActionCard(
+                            iconWidget: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  appIcons.homeMicroCheckinIcon,
+                                  width: 18,
+                                  height: 18,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            title: "Micro Check-in",
+                            subtitle: "First seven days of steps, sleep and water baseline",
+                            badgeText: "Due",
+                            buttonText: "Add Data",
+                            isPrimaryButton: true,
+                            onTapButton: () => navigation.pushSlideAnimation(context,
+                              const DailyWellnessLogScreen(isBack: true),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          _ActionCard(
+                            iconWidget: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  appIcons.progress,
+                                  width: 18,
+                                  height: 18,
+                                  color: appColors.primary,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            title: "Baseline and Progress Measurements",
+                            subtitle: "First seven days of steps, sleep and water baseline",
+                            badgeText: "Due",
+                            buttonText: "Add Data",
+                            isPrimaryButton: true,
+                            onTapButton: () => navigation.pushSlideAnimation(
+                              context,
+                              const BaselineProgressScreen(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          _ActionCard(
+                            iconWidget: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  appIcons.addPhoto,
+                                  width: 18,
+                                  height: 18,
+                                  color: appColors.primary,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            title: "Progress Photos",
+                            subtitle: "Upload Progress photos to monitor your coaching progress",
+                            buttonText: "Add Photos",
+                            isPrimaryButton: true,
+                            onTapButton: () => navigation.pushSlideAnimation(
+                              context,
+                              const TrackWeeklyProgressScreen(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          _ActionCard(
+                            iconWidget: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  appIcons.reportUpload,
+                                  width: 18,
+                                  height: 18,
+                                  color: appColors.primary,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                            title: "Blood Report Upload",
+                            subtitle: "Blood-report upload with report date",
+                            buttonText: "Add Reports",
+                            isPrimaryButton: true,
+                            onTapButton: () => navigation.pushSlideAnimation(
+                              context,
+                              const BloodReportUploadScreen(isBack: true),
+                            ),
+                          ),
+                        ],
+
+                        // Log Out Button
+                        const SizedBox(height: 24),
+                        buildInkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            commonDialog(
+                              context: context,
+                              icon: Icons.logout,
+                              title: "Log Out",
+                              subtitle:
+                                  "Are you sure you want to log out? You will need to sign back in to continue your progress.",
+                              onPressed: () {
+                                LoaderService.show(context);
+                                BlocProvider.of<LogoutBloc>(context).add(
+                                  UserLogoutEvent(
+                                    url: Urls.logout,
+                                    body: {
+                                      "fcm_token": AppPreferences.getString(AppPreferences.fcmToken),
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F2EF),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.logout_rounded,
+                                  size: 20,
+                                  color: appColors.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                CommonText(
+                                  "Log Out",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: appColors.primary,
+                                  ),
+                                  fontFamily: fontFamilyPlusJakartaSans,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: bottomPadding(context) + 16),
+                      ],
+                    );
+                  },
                 );
-              },
+              }
             ),
           ),
         ),
@@ -516,8 +554,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
     );
   }
 
-  Widget _buildOnboardingJourneyBanner() {
-    int completed = 4, total = 6;
+  Widget _buildOnboardingJourneyBanner({required int completed, required int total}) {
     return Container(
       decoration: BoxDecoration(
         color: appColors.textFieldBgColor,
@@ -942,115 +979,119 @@ class _ChapterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final String effectiveButtonText = (isComplete ? "Edit" : "Start");
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: appColors.black.withValues(alpha: 0.04),
-            offset: const Offset(0, 1),
-            blurRadius: 4,
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
+    return buildInkWell(
+      onTap: onTapButton,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: appColors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: appColors.black.withValues(alpha: 0.04),
+              offset: const Offset(0, 1),
+              blurRadius: 4,
             ),
-            child: Image.asset(icon,
-              color: iconColor ?? const Color(0xFF292726),
-              fit: BoxFit.contain,
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Image.asset(icon,
+                color: iconColor ?? const Color(0xFF292726),
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CommonText(
-                      chapterNumber,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: appColors.primary,
-                        letterSpacing: 0.55,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CommonText(
+                        chapterNumber,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: appColors.primary,
+                          letterSpacing: 0.55,
+                        ),
+                        fontFamily: fontFamilyPlusJakartaSans,
                       ),
-                      fontFamily: fontFamilyPlusJakartaSans,
-                    ),
-                    const SizedBox(width: 8),
-                    Image.asset(
-                      isComplete ? appIcons.complete : appIcons.pending,
-                      height: isComplete ? 12 : 13, width: isComplete ? 12 : 13,
-                      color: Color(0xFF5B6749),
-                    ),
-                    const SizedBox(width: 4),
-                    CommonText(
-                      isComplete ? "Complete" : "Pending",
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isComplete ? Color(0xFF5B6749) : Color(0xFF857373),
-                        letterSpacing: 0.33,
+                      const SizedBox(width: 8),
+                      Image.asset(
+                        isComplete ? appIcons.complete : appIcons.pending,
+                        height: isComplete ? 12 : 13, width: isComplete ? 12 : 13,
+                        color: isComplete ? const Color(0xFF5B6749) : const Color(0xFF857373),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                CommonText(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF292726),
-                    letterSpacing: -0.5,
+                      const SizedBox(width: 4),
+                      CommonText(
+                        isComplete ? "Complete" : "Pending",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isComplete ? const Color(0xFF5B6749) : const Color(0xFF857373),
+                          letterSpacing: 0.33,
+                        ),
+                      ),
+                    ],
                   ),
-                  fontFamily: 'serif',
+                  const SizedBox(height: 4),
+                  CommonText(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF292726),
+                      letterSpacing: -0.5,
+                    ),
+                    fontFamily: 'serif',
+                  ),
+                  const SizedBox(height: 4),
+                  CommonText(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6D615C),
+                    ),
+                    fontFamily: fontFamilyPlusJakartaSans,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: onTapButton,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isComplete ? appColors.textFieldBgColor : appColors.primary,
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                const SizedBox(height: 4),
-                CommonText(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF6D615C),
+                child: CommonText(
+                  effectiveButtonText,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: isComplete ? appColors.primary : appColors.white,
                   ),
                   fontFamily: fontFamilyPlusJakartaSans,
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          InkWell(
-            onTap: onTapButton,
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isComplete ? appColors.textFieldBgColor : appColors.primary,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: CommonText(
-                effectiveButtonText,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isComplete ? appColors.primary : appColors.white,
-                ),
-                fontFamily: fontFamilyPlusJakartaSans,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
