@@ -115,8 +115,11 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     _fullNameController.text = user?.name ?? "";
     _emailController.text = user?.email ?? "";
     _mobileController.text = user?.mobile ?? "";
-    _selectedState = user?.stateId;
-    _selectedCity = user?.cityId;
+    _selectedState = user?.stateId?.toString();
+    _selectedCity = user?.cityId?.toString();
+    if (_selectedState != null && _selectedState!.isNotEmpty) {
+      callCityAPI(stateId: _selectedState!);
+    }
     setState(() { });
   }
 
@@ -179,6 +182,13 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
       if (answers.country != null && answers.country!.isNotEmpty) {
         _selectedCountry = answers.country!;
         _countryController.text = answers.country!;
+      }
+      if (answers.stateId != null && answers.stateId.toString().isNotEmpty) {
+        _selectedState = answers.stateId.toString();
+        callCityAPI(stateId: _selectedState!);
+      }
+      if (answers.cityId != null && answers.cityId.toString().isNotEmpty) {
+        _selectedCity = answers.cityId.toString();
       }
       if (answers.city != null && answers.city!.isNotEmpty) {
         _apiCityName = answers.city;
@@ -323,6 +333,8 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
               "dob": dobString,
               "gender": genderValue,
               "city": cityToSave,
+              "city_id": _selectedCity,
+              "state_id": _selectedState,
               "country": _selectedCountry,
               "timezone": _autoDetectedTimeZone,
               "daily_rhythm": _dailyRhythmController.text.trim(),

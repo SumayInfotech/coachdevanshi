@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
+import '../../../core/constants/urls.dart';
+import '../../../core/models/home/dashboard_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../../main.dart';
 import '../bottom_bar_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
@@ -24,82 +29,170 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  DashboardModel? dashboardModel;
+
+  @override
+  void initState() {
+    super.initState();
+    callDashboardAPI();
+  }
+
+  void callDashboardAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<DashboardBloc>(context).add(
+        const UserDashboardEvent(url: Urls.dashboard),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Header Bar
-            HomeHeaderBar(
-              onProfileTap: () => appLog("Profile tapped"),
-              onNotificationTap: () => navigation.push(context, const NotificationsScreen()),
-            ),
-            // Main Content Area
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Restorative Quote / Botanical Nudge (Placed at top as in new design)
-                    const RestorativeQuoteCard(),
-                    const SizedBox(height: 16),
-                    // Greeting & Profile Banner
-                    const GreetingBanner(),
-                    const SizedBox(height: 18),
-                    // Your Plan Card
-                    YourPlanCard(
-                      planTag: "YOUR PLAN",
-                      planTitle: "Fat Loss & Inch\nLoss",
-                      durationSubtitle: "120 days left • Ends on 30 Dec 2024",
-                      progressPercent: 0.60,
-                      showPhaseStatus: false,
-                      onTap: () => navigation.push(context, const FatLossInchLossScreen()),
-                    ),
-                    const SizedBox(height: 16),
-                    // Note from Coach Card
-                    NoteFromCoachCard(
-                      onTap: () => appLog("Note from coach tapped"),
-                    ),
-                    const SizedBox(height: 20),
-                    // Today's Overview Grid (2x2: Steps & Weight, Micro & Weekly check-in)
-                    TodayOverviewGrid(
-                      stepCount: "7,842",
-                      weightText: "64.5 kg",
-                      onStepsTap: () => appLog("Daily steps card tapped"),
-                      onSyncTap: () => appLog("Sync steps tapped"),
-                      onWeightTap: () => appLog("Weight card tapped"),
-                      onAddWeightTap: () => appLog("Add weight tapped"),
-                      onMicroCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
-                      onWeeklyCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
-                    ),
-                    const SizedBox(height: 16),
-                    // Today's Actions (Dual Buttons)
-                    TodayActionsRow(
-                      onLogMicroCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
-                      onFillWeeklyCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
-                    ),
-                    const SizedBox(height: 20),
-                    // Quick Access Grid (Food Diary, Progress Photos, Upload Reports)
-                    QuickAccessGrid(
-                      onFoodDiaryTap: () => navigation.push(context, const ThreeDayFoodDiaryScreen()),
-                      onProgressPhotosTap: () => navigation.push(context,
-                        const TrackWeeklyProgressScreen(isBack: true)
-                      ),
-                      onUploadReportsTap: () => navigation.push(context,
-                        const BloodReportUploadScreen(isBack: true),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                  ],
+    return BlocListener<DashboardBloc, DashboardState>(
+      listener: (context, state) {
+        if (state is DashboardSuccess) {
+          LoaderService.hide();
+          setState(() {
+            dashboardModel = state.model;
+          });
+        } else if (state is DashboardFailed) {
+          LoaderService.hide();
+          appLog(state.message);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: appColors.bgColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Top Header Bar
+              HomeHeaderBar(
+                hasUnreadNotifications: (dashboardModel?.data?.unreadNotifications ?? 0) > 0,
+                onProfileTap: () => appLog("Profile tapped"),
+                onNotificationTap: () => navigation.push(context, const NotificationsScreen()),
+              ),
+              // Main Content Area
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    BlocProvider.of<DashboardBloc>(context).add(
+                      const UserDashboardEvent(url: Urls.dashboard),
+                    );
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                    child: _buildContent(),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    final data = dashboardModel?.data;
+    final plan = data?.plan;
+    final today = data?.todayOverview;
+    final checkins = data?.checkins;
+
+    final String? greetingText = (data != null && data.name != null && data.name!.isNotEmpty)
+        ? "${data.greeting ?? "Good morning"}, ${data.name}"
+        : null;
+
+    final String stepCount = today?.steps != null ? today!.steps.toString() : "--";
+    final String weightText = today?.weight != null ? "${today!.weight} kg" : "--";
+
+    final String? microBadgeText = checkins?.micro?.status != null
+        ? (checkins!.micro!.status![0].toUpperCase() + checkins.micro!.status!.substring(1))
+        : null;
+    final String? weeklyBadgeText = checkins?.weekly?.status != null
+        ? (checkins!.weekly!.status![0].toUpperCase() + checkins.weekly!.status!.substring(1))
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Restorative Quote / Botanical Nudge (hidden if quote is null or empty)
+        if (data?.quote != null && data!.quote!.trim().isNotEmpty) ...[
+          RestorativeQuoteCard(quote: "“${data.quote!.trim()}”"),
+          const SizedBox(height: 16),
+        ],
+
+        // Greeting & Profile Banner
+        GreetingBanner(
+          dateText: data?.dateLabel,
+          greetingText: greetingText,
+        ),
+        const SizedBox(height: 18),
+
+        // Your Plan Card (hidden if plan is null)
+        if (plan != null) ...[
+          YourPlanCard(
+            planTag: "YOUR PLAN",
+            planTitle: plan.title ?? "",
+            durationSubtitle: "${plan.daysLeft ?? 0} days left • Ends on ${plan.endDateLabel ?? ""}",
+            progressPercent: ((plan.progressPercent ?? 0) / 100.0).clamp(0.0, 1.0),
+            showPhaseStatus: plan.pathway?.title != null && plan.pathway!.title!.isNotEmpty,
+            phaseTitle: plan.pathway?.title ?? "",
+            statusText: plan.status ?? "Active",
+            onTap: () => navigation.push(context, const FatLossInchLossScreen()),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Note from Coach Card (hidden if coach note is null or empty)
+        if (data?.coachNote != null && data!.coachNote!.note!.trim().isNotEmpty) ...[
+          NoteFromCoachCard(
+            note: "“${data.coachNote!.note!.trim()}”",
+            onTap: () => appLog("Note from coach tapped"),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Today's Overview Grid (hidden if today overview & checkins are null)
+        if (today != null || checkins != null) ...[
+          TodayOverviewGrid(
+            stepCount: stepCount,
+            weightText: weightText,
+            microBadgeText: microBadgeText,
+            weeklyBadgeText: weeklyBadgeText,
+            isMicroDone: checkins?.micro?.isDone,
+            updatedTime: today?.stepsSyncedAt,
+            onStepsTap: () => appLog("Daily steps card tapped"),
+            onSyncTap: () => appLog("Sync steps tapped"),
+            onWeightTap: () => appLog("Weight card tapped"),
+            onAddWeightTap: () => appLog("Add weight tapped"),
+            onMicroCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
+            onWeeklyCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Today's Actions (hidden if checkins is null)
+        if (checkins != null) ...[
+          TodayActionsRow(
+            onLogMicroCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
+            onFillWeeklyCheckIn: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
+          ),
+          const SizedBox(height: 20),
+        ],
+
+        // Quick Access Grid (Food Diary, Progress Photos, Upload Reports)
+        QuickAccessGrid(
+          onFoodDiaryTap: () => navigation.push(context, const ThreeDayFoodDiaryScreen()),
+          onProgressPhotosTap: () => navigation.push(context,
+            const TrackWeeklyProgressScreen(isBack: true),
+          ),
+          onUploadReportsTap: () => navigation.push(context,
+            const BloodReportUploadScreen(isBack: true),
+          ),
+        ),
+        const SizedBox(height: 28),
+      ],
     );
   }
 }

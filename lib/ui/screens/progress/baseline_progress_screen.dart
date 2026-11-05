@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
@@ -38,6 +39,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   final TextEditingController _notesController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
+  DateTime? _selectedPeriodDate;
   String? _dateError;
   String? _weightError;
   String? _chestError;
@@ -49,13 +51,13 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   bool _isAbdomenCmSelected = true;
   bool _isHipCmSelected = true;
 
-  String _selectedCravingLevel = "Mild & manageable";
+  String? _selectedCravingLevel;
   bool _didTravel = true;
 
   @override
   void initState() {
     super.initState();
-    _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    // _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
   }
 
   bool _validate() {
@@ -393,6 +395,21 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
     }
   }
 
+  Future<void> _selectPeriodDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedPeriodDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedPeriodDate = picked;
+        _periodStartController.text = DateFormat('MM/dd/yyyy').format(picked);
+      });
+    }
+  }
+
   Widget _buildDateSection() {
     return ProfileSectionCard(
       title: "Measurement Date",
@@ -568,6 +585,18 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
                     hint: "mm/dd/yyyy",
                     fillColor: appColors.textFieldBgColor,
                     borderColor: Colors.transparent,
+                    readOnly: true,
+                    onTap: () => _selectPeriodDate(context),
+                    suffixIcon: IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: Icon(
+                        Icons.calendar_today_outlined,
+                        size: 16,
+                        color: appColors.primary,
+                      ),
+                      onPressed: () => _selectPeriodDate(context),
+                    ),
                   ),
                 ],
               ),
@@ -592,6 +621,8 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
                     hint: "e.g., Day 14 (28d)",
                     fillColor: appColors.textFieldBgColor,
                     borderColor: Colors.transparent,
+                    keyboardType: .number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                 ],
               ),

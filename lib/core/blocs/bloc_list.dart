@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../repository/auth_repo.dart';
+import '../repository/home_repo.dart';
 import '../repository/profile_repo.dart';
 
 import 'auth/login/login_bloc.dart';
@@ -11,6 +12,7 @@ import 'auth/resend_sign_up_otp/resend_sign_up_otp_bloc.dart';
 import 'auth/sign_up/sign_up_bloc.dart';
 import 'auth/social_login/social_login_bloc.dart';
 import 'auth/verify_otp/verify_otp_bloc.dart';
+import 'home/dashboard/dashboard_bloc.dart';
 import 'profile/chapter_two/chapter_two_bloc.dart';
 import 'profile/chapter_three/chapter_three_bloc.dart';
 import 'profile/location/location_bloc.dart';
@@ -21,11 +23,14 @@ import 'profile/save_chapter/save_chapter_bloc.dart';
 import 'profile/chapter_four/chapter_four_bloc.dart';
 import 'profile/chapter_five/chapter_five_bloc.dart';
 import 'profile/chapter_six/chapter_six_bloc.dart';
+import 'home/daily_checkin/daily_checkin_bloc.dart';
+import 'home/save_daily_checkin/save_daily_checkin_bloc.dart';
 
 List<SingleChildWidget> blocProviders() {
 
   final AuthRepo authRepo = AuthRepo();
   final ProfileRepo profileRepo = ProfileRepo();
+  final HomeRepo homeRepo = HomeRepo();
 
   return [
 
@@ -85,6 +90,19 @@ List<SingleChildWidget> blocProviders() {
       ),
       BlocProvider(
         create: (context) => ChapterSixBloc(profileRepo: profileRepo),
+      ),
+    ],
+
+    /// Home Blocs
+    ...[
+      BlocProvider(
+        create: (context) => DashboardBloc(homeRepo: homeRepo),
+      ),
+      BlocProvider(
+        create: (context) => DailyCheckinBloc(homeRepo: homeRepo),
+      ),
+      BlocProvider(
+        create: (context) => SaveDailyCheckinBloc(homeRepo: homeRepo),
       ),
     ],
   ];

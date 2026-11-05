@@ -76,6 +76,8 @@ class Answers {
   Answers({
     this.height,
     this.heightUnit,
+    this.weight,
+    this.weightUnit,
     this.approachesTried,
     this.approachesLearning,
     this.confidentAreas,
@@ -85,6 +87,8 @@ class Answers {
 
   final dynamic height;
   final String? heightUnit;
+  final dynamic weight;
+  final String? weightUnit;
   final List<String>? approachesTried;
   final String? approachesLearning;
   final List<String>? confidentAreas;
@@ -95,6 +99,8 @@ class Answers {
     return Answers(
       height: json["height"],
       heightUnit: json["height_unit"],
+      weight: json["weight"],
+      weightUnit: json["weight_unit"],
       approachesTried: json["approaches_tried"] == null ? [] : List<String>.from(json["approaches_tried"]!.map((x) => x.toString())),
       approachesLearning: json["approaches_learning"],
       confidentAreas: json["confident_areas"] == null ? [] : List<String>.from(json["confident_areas"]!.map((x) => x.toString())),
@@ -106,6 +112,8 @@ class Answers {
   Map<String, dynamic> toJson() => {
     "height": height,
     "height_unit": heightUnit,
+    "weight": weight,
+    "weight_unit": weightUnit,
     "approaches_tried": approachesTried,
     "approaches_learning": approachesLearning,
     "confident_areas": confidentAreas,

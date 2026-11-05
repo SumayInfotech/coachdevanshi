@@ -74,6 +74,13 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
       if (answers.heightUnit != null && answers.heightUnit!.isNotEmpty) {
         _isCmSelected = answers.heightUnit!.toLowerCase() == "cm";
       }
+      if (answers.weight != null) {
+        _weightController.text = answers.weight.toString();
+      }
+      if (answers.weightUnit != null && answers.weightUnit!.isNotEmpty) {
+        _isKgSelected = answers.weightUnit!.toLowerCase() == "kg" ||
+            answers.weightUnit!.toLowerCase().contains("kilo");
+      }
       if (answers.approachesTried != null && answers.approachesTried!.isNotEmpty) {
         _selectedApproaches.clear();
         _selectedApproaches.addAll(answers.approachesTried!);
@@ -110,6 +117,13 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
       isValid = false;
     } else {
       _heightError = null;
+    }
+
+    if (_weightController.text.trim().isEmpty) {
+      _weightError = "Please enter your weight";
+      isValid = false;
+    } else {
+      _weightError = null;
     }
 
     if (_confusingController.text.trim().isEmpty) {
@@ -153,13 +167,22 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
           ? (parsedHeight % 1 == 0 ? parsedHeight.toInt() : parsedHeight)
           : _heightController.text.trim();
 
+      final num? parsedWeight = num.tryParse(_weightController.text.trim());
+      final dynamic weightValue = parsedWeight != null
+          ? (parsedWeight % 1 == 0 ? parsedWeight.toInt() : parsedWeight)
+          : _weightController.text.trim();
+
       BlocProvider.of<SaveChapterBloc>(context).add(
         UserSaveChapterEvent(
           url: Urls.onboardingChapter(chapterId: "2"),
           body: {
+            "weight": weightValue,
+            "weight_unit": _isKgSelected ? "kg" : "lbs",
             "answers": {
               "height": heightValue,
               "height_unit": _isCmSelected ? "cm" : "ft_in",
+              "weight": weightValue,
+              "weight_unit": _isKgSelected ? "kg" : "lbs",
               "approaches_tried": _selectedApproaches.toList(),
               "approaches_learning": _learnedController.text.trim(),
               "confident_areas": _selectedConfident.toList(),

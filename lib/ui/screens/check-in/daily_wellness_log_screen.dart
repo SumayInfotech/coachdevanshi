@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/home/daily_checkin/daily_checkin_bloc.dart';
+import '../../../core/blocs/home/save_daily_checkin/save_daily_checkin_bloc.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/home/daily_checkin_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -21,48 +27,168 @@ class DailyWellnessLogScreen extends StatefulWidget {
 
 class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
   // Section 1: Date
-  int _selectedDay = 1;
-  final TextEditingController _dateController = TextEditingController(text: DateFormat('MMMM dd, yyyy').format(DateTime.now()));
+  int? _selectedDay;
+  final TextEditingController _dateController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
   String? _dateError;
 
   // Section 2: Circadian Rhythm & Rest
   final TextEditingController _weightController = TextEditingController();
   bool _isKgSelected = true;
-  final TextEditingController _wakeUpController = TextEditingController(text: "06:30 AM");
-  final TextEditingController _bedtimeController = TextEditingController(text: "10:45 PM");
-  String _sleepQuality = "Deep & Restorative";
+  final TextEditingController _wakeUpController = TextEditingController();
+  final TextEditingController _bedtimeController = TextEditingController();
+  String? _sleepQuality;
 
   // Section 3: Movement & Hydration
-  final TextEditingController _stepsController = TextEditingController(text: "8450");
-  final TextEditingController _waterController = TextEditingController(text: "2.5");
+  final TextEditingController _stepsController = TextEditingController();
+  final TextEditingController _waterController = TextEditingController();
   bool _isLitresSelected = true;
 
   // Section 4: Mindset & Rituals
-  bool _isMeditationDone = true;
+  bool? _isMeditationDone;
   final TextEditingController _meditationNotesController = TextEditingController();
-  bool _isJournalingDone = true;
+  bool? _isJournalingDone;
   final TextEditingController _journalingNotesController = TextEditingController();
 
   // Meals
-  final TextEditingController _breakfastTimeController = TextEditingController(text: "8:30 AM");
+  final TextEditingController _breakfastTimeController = TextEditingController();
   final TextEditingController _breakfastFoodController = TextEditingController();
   String? _breakfastTimeError;
   String? _breakfastFoodError;
 
-  final TextEditingController _midMorningTimeController = TextEditingController(text: "11:00 AM");
+  final TextEditingController _midMorningTimeController = TextEditingController();
   final TextEditingController _midMorningFoodController = TextEditingController();
   String? _midMorningTimeError;
   String? _midMorningFoodError;
 
-  final TextEditingController _lunchTimeController = TextEditingController(text: "1:15 PM");
+  final TextEditingController _lunchTimeController = TextEditingController();
   final TextEditingController _lunchFoodController = TextEditingController();
   String? _lunchTimeError;
   String? _lunchFoodError;
 
-  final TextEditingController _dinnerTimeController = TextEditingController(text: "8:00 PM");
+  final TextEditingController _dinnerTimeController = TextEditingController();
   final TextEditingController _dinnerFoodController = TextEditingController();
   String? _dinnerTimeError;
   String? _dinnerFoodError;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    callDailyCheckinAPI();
+  }
+
+  void callDailyCheckinAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      final String dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      BlocProvider.of<DailyCheckinBloc>(context).add(
+        UserDailyCheckinEvent(url: Urls.dailyCheck(date: dateStr)),
+      );
+    });
+  }
+
+  void _populateFromDailyCheckin(DailyCheckinModel model) {
+    final data = model.data;
+    if (data == null) {
+      _clearForm();
+      return;
+    }
+
+    if (data.recordDate != null && data.recordDate!.isNotEmpty) {
+      try {
+        _selectedDate = DateFormat('yyyy-MM-dd').parse(data.recordDate!);
+        _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+      } catch (_) {}
+    }
+
+    _selectedDay = data.baselineDay;
+
+    if (data.weight != null) {
+      _weightController.text = data.weight.toString();
+    } else {
+      _weightController.clear();
+    }
+
+    if (data.weightUnit != null) {
+      _isKgSelected = data.weightUnit?.toLowerCase() == "kg";
+    }
+
+    _wakeUpController.text = data.wakeTime ?? "";
+    _bedtimeController.text = data.bedTime ?? "";
+
+    if (data.sleepQuality != null) {
+      switch (data.sleepQuality) {
+        case "deep_restorative":
+          _sleepQuality = "Deep & Restorative";
+          break;
+        case "moderately_refreshed":
+          _sleepQuality = "Moderately refreshed";
+          break;
+        case "light_restless":
+          _sleepQuality = "Light / Restless";
+          break;
+        case "interrupted":
+          _sleepQuality = "Interrupted";
+          break;
+        default:
+          _sleepQuality = data.sleepQuality;
+      }
+    } else {
+      _sleepQuality = null;
+    }
+
+    _stepsController.text = data.steps != null ? data.steps.toString() : "";
+    _waterController.text = data.waterIntake != null ? data.waterIntake.toString() : "";
+
+    if (data.waterUnit != null) {
+      _isLitresSelected = data.waterUnit?.toLowerCase() == "litres";
+    }
+
+    _isMeditationDone = data.meditationDone;
+    _meditationNotesController.text = data.meditationNotes ?? "";
+
+    _isJournalingDone = data.journalingDone;
+    _journalingNotesController.text = data.notes ?? data.journalingNotes ?? "";
+
+    _breakfastTimeController.text = data.meals?.breakfast?.time ?? "";
+    _breakfastFoodController.text = data.meals?.breakfast?.items ?? "";
+
+    _midMorningTimeController.text = data.meals?.midMorning?.time ?? "";
+    _midMorningFoodController.text = data.meals?.midMorning?.items ?? "";
+
+    _lunchTimeController.text = data.meals?.lunch?.time ?? "";
+    _lunchFoodController.text = data.meals?.lunch?.items ?? "";
+
+    _dinnerTimeController.text = data.meals?.dinner?.time ?? "";
+    _dinnerFoodController.text = data.meals?.dinner?.items ?? "";
+
+    setState(() {});
+  }
+
+  void _clearForm() {
+    _weightController.clear();
+    _isKgSelected = true;
+    _wakeUpController.clear();
+    _bedtimeController.clear();
+    _sleepQuality = null;
+    _stepsController.clear();
+    _waterController.clear();
+    _isLitresSelected = true;
+    _isMeditationDone = null;
+    _meditationNotesController.clear();
+    _isJournalingDone = null;
+    _journalingNotesController.clear();
+    _breakfastTimeController.clear();
+    _breakfastFoodController.clear();
+    _midMorningTimeController.clear();
+    _midMorningFoodController.clear();
+    _lunchTimeController.clear();
+    _lunchFoodController.clear();
+    _dinnerTimeController.clear();
+    _dinnerFoodController.clear();
+    setState(() {});
+  }
 
   bool _validate() {
     bool isValid = true;
@@ -89,44 +215,38 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
     }
 
     // Mid-Morning
-    if (_midMorningTimeController.text.trim().isEmpty) {
+    if (_midMorningTimeController.text.trim().isNotEmpty && _midMorningFoodController.text.trim().isEmpty) {
+      _midMorningFoodError = "Required";
+      isValid = false;
+    } else if (_midMorningFoodController.text.trim().isNotEmpty && _midMorningTimeController.text.trim().isEmpty) {
       _midMorningTimeError = "Required";
       isValid = false;
     } else {
       _midMorningTimeError = null;
-    }
-    if (_midMorningFoodController.text.trim().isEmpty) {
-      _midMorningFoodError = "Required";
-      isValid = false;
-    } else {
       _midMorningFoodError = null;
     }
 
     // Lunch
-    if (_lunchTimeController.text.trim().isEmpty) {
+    if (_lunchTimeController.text.trim().isNotEmpty && _lunchFoodController.text.trim().isEmpty) {
+      _lunchFoodError = "Required";
+      isValid = false;
+    } else if (_lunchFoodController.text.trim().isNotEmpty && _lunchTimeController.text.trim().isEmpty) {
       _lunchTimeError = "Required";
       isValid = false;
     } else {
       _lunchTimeError = null;
-    }
-    if (_lunchFoodController.text.trim().isEmpty) {
-      _lunchFoodError = "Required";
-      isValid = false;
-    } else {
       _lunchFoodError = null;
     }
 
     // Dinner
-    if (_dinnerTimeController.text.trim().isEmpty) {
+    if (_dinnerTimeController.text.trim().isNotEmpty && _dinnerFoodController.text.trim().isEmpty) {
+      _dinnerFoodError = "Required";
+      isValid = false;
+    } else if (_dinnerFoodController.text.trim().isNotEmpty && _dinnerTimeController.text.trim().isEmpty) {
       _dinnerTimeError = "Required";
       isValid = false;
     } else {
       _dinnerTimeError = null;
-    }
-    if (_dinnerFoodController.text.trim().isEmpty) {
-      _dinnerFoodError = "Required";
-      isValid = false;
-    } else {
       _dinnerFoodError = null;
     }
 
@@ -136,8 +256,111 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
 
   void _onSave() {
     if (_validate()) {
-      appLog("Daily Check-in Validated and Saved!");
-      _onBack();
+      LoaderService.show(context);
+
+      double? sleepHours;
+      if (_bedtimeController.text.trim().isNotEmpty && _wakeUpController.text.trim().isNotEmpty) {
+        try {
+          final bedTime = DateFormat('hh:mm a').parse(_bedtimeController.text.trim());
+          final wakeTime = DateFormat('hh:mm a').parse(_wakeUpController.text.trim());
+          var diff = wakeTime.difference(bedTime);
+          if (diff.isNegative) diff += const Duration(days: 1);
+          sleepHours = double.parse((diff.inMinutes / 60.0).toStringAsFixed(1));
+        } catch (_) {
+          try {
+            final bedTime = DateFormat.jm().parse(_bedtimeController.text.trim());
+            final wakeTime = DateFormat.jm().parse(_wakeUpController.text.trim());
+            var diff = wakeTime.difference(bedTime);
+            if (diff.isNegative) diff += const Duration(days: 1);
+            sleepHours = double.parse((diff.inMinutes / 60.0).toStringAsFixed(1));
+          } catch (_) {}
+        }
+      }
+
+      String? sleepQualityKey;
+      if (_sleepQuality != null) {
+        switch (_sleepQuality) {
+          case "Deep & Restorative":
+            sleepQualityKey = "deep_restorative";
+            break;
+          case "Moderately refreshed":
+            sleepQualityKey = "moderately_refreshed";
+            break;
+          case "Light / Restless":
+            sleepQualityKey = "light_restless";
+            break;
+          case "Interrupted":
+            sleepQualityKey = "interrupted";
+            break;
+          default:
+            sleepQualityKey = _sleepQuality?.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_');
+        }
+      }
+
+      final Map<String, dynamic> meals = {};
+      if (_breakfastTimeController.text.trim().isNotEmpty || _breakfastFoodController.text.trim().isNotEmpty) {
+        meals["breakfast"] = {
+          "time": _breakfastTimeController.text.trim(),
+          "items": _breakfastFoodController.text.trim(),
+        };
+      }
+      if (_midMorningTimeController.text.trim().isNotEmpty || _midMorningFoodController.text.trim().isNotEmpty) {
+        meals["mid_morning"] = {
+          "time": _midMorningTimeController.text.trim(),
+          "items": _midMorningFoodController.text.trim(),
+        };
+      }
+      if (_lunchTimeController.text.trim().isNotEmpty || _lunchFoodController.text.trim().isNotEmpty) {
+        meals["lunch"] = {
+          "time": _lunchTimeController.text.trim(),
+          "items": _lunchFoodController.text.trim(),
+        };
+      }
+      if (_dinnerTimeController.text.trim().isNotEmpty || _dinnerFoodController.text.trim().isNotEmpty) {
+        meals["dinner"] = {
+          "time": _dinnerTimeController.text.trim(),
+          "items": _dinnerFoodController.text.trim(),
+        };
+      }
+
+      final Map<String, dynamic> body = {
+        "record_date": DateFormat('yyyy-MM-dd').format(_selectedDate),
+        "baseline_day": _selectedDay ?? 1,
+        if (_weightController.text.trim().isNotEmpty)
+          "weight": double.tryParse(_weightController.text.trim()),
+        "weight_unit": _isKgSelected ? "kg" : "lbs",
+        if (_wakeUpController.text.trim().isNotEmpty)
+          "wake_time": _wakeUpController.text.trim(),
+        if (_bedtimeController.text.trim().isNotEmpty)
+          "bed_time": _bedtimeController.text.trim(),
+        "sleep_hours": ?sleepHours,
+        "sleep_quality": ?sleepQualityKey,
+        if (_stepsController.text.trim().isNotEmpty)
+          "steps": int.tryParse(_stepsController.text.trim()),
+        if (_waterController.text.trim().isNotEmpty)
+          "water_intake": double.tryParse(_waterController.text.trim()),
+        "water_unit": _isLitresSelected ? "litres" : "glasses",
+        "mood": 4,
+        "energy": 4,
+        "nutrition_adherence": "mostly",
+        "movement_done": (_stepsController.text.trim().isNotEmpty && (int.tryParse(_stepsController.text.trim()) ?? 0) > 0),
+        "movement_type": "Brisk walk",
+        "meditation_done": _isMeditationDone ?? false,
+        if (_meditationNotesController.text.trim().isNotEmpty)
+          "meditation_notes": _meditationNotesController.text.trim(),
+        "journaling_done": _isJournalingDone ?? false,
+        "meals": meals,
+        "notes": _journalingNotesController.text.trim().isNotEmpty
+            ? _journalingNotesController.text.trim()
+            : "Felt energetic",
+      };
+
+      BlocProvider.of<SaveDailyCheckinBloc>(context).add(
+        UserSaveDailyCheckinEvent(
+          url: Urls.dailyCheckins,
+          body: body,
+        ),
+      );
     }
   }
 
@@ -195,107 +418,163 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
     }
   }
 
+  String? get _calculatedSleepDuration {
+    if (_bedtimeController.text.trim().isEmpty || _wakeUpController.text.trim().isEmpty) {
+      return null;
+    }
+    try {
+      final bedTime = DateFormat('hh:mm a').parse(_bedtimeController.text.trim());
+      final wakeTime = DateFormat('hh:mm a').parse(_wakeUpController.text.trim());
+      var diff = wakeTime.difference(bedTime);
+      if (diff.isNegative) {
+        diff += const Duration(days: 1);
+      }
+      final hours = diff.inMinutes / 60.0;
+      return "${hours.toStringAsFixed(1)} hrs logged";
+    } catch (_) {
+      try {
+        final bedTime = DateFormat.jm().parse(_bedtimeController.text.trim());
+        final wakeTime = DateFormat.jm().parse(_wakeUpController.text.trim());
+        var diff = wakeTime.difference(bedTime);
+        if (diff.isNegative) {
+          diff += const Duration(days: 1);
+        }
+        final hours = diff.inMinutes / 60.0;
+        return "${hours.toStringAsFixed(1)} hrs logged";
+      } catch (_) {
+        return null;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _onBack();
-      },
-      child: Scaffold(
-        backgroundColor: appColors.bgColor,
-        appBar: CommonAppBar(
-          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-          centerTitle: true,
-          leading: buildInkWell(
-            onTap: _onBack,
-            child: Container(
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.arrow_back,
-                size: 24,
-                color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<DailyCheckinBloc, DailyCheckinState>(
+          listener: (context, state) {
+            if (state is DailyCheckinSuccess) {
+              LoaderService.hide();
+              _populateFromDailyCheckin(state.model);
+            } else if (state is DailyCheckinFailed) {
+              LoaderService.hide();
+              _clearForm();
+            }
+          },
+        ),
+        BlocListener<SaveDailyCheckinBloc, SaveDailyCheckinState>(
+          listener: (context, state) {
+            if (state is SaveDailyCheckinSuccess) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: false, message: state.model.message ?? "Check-in saved successfully");
+              _onBack();
+            } else if (state is SaveDailyCheckinFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+      ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _onBack();
+        },
+        child: Scaffold(
+          backgroundColor: appColors.bgColor,
+          appBar: CommonAppBar(
+            appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+            centerTitle: true,
+            leading: buildInkWell(
+              onTap: _onBack,
+              child: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                  color: appColors.neutral,
+                ),
+              ),
+            ),
+            title: const CommonText(
+              "Daily Wellness Log",
+              fontFamily: fontPlayfairDisplay,
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF1D1B1A),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.24,
               ),
             ),
           ),
-          title: const CommonText(
-            "Daily Wellness Log",
-            fontFamily: fontPlayfairDisplay,
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF1D1B1A),
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.24,
-            ),
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            children: [
+              _buildDateSelection(),
+              const SizedBox(height: 24),
+              _buildCircadianRhythm(),
+              const SizedBox(height: 24),
+              _buildMovementAndHydration(),
+              const SizedBox(height: 24),
+              _buildMindsetAndRituals(),
+              const SizedBox(height: 24),
+              _buildMealCard(
+                title: "Morning / Breakfast",
+                icon: appIcons.morning,
+                timeController: _breakfastTimeController,
+                foodController: _breakfastFoodController,
+                timeError: _breakfastTimeError,
+                foodError: _breakfastFoodError,
+                foodHint: "e.g., 2 sourdough toasts with avocado, poached egg, and warm cinnamon latte",
+              ),
+              const SizedBox(height: 16),
+              _buildMealCard(
+                title: "Mid-Morning Nourishment",
+                icon: appIcons.afternoon, // Or snacks
+                timeController: _midMorningTimeController,
+                foodController: _midMorningFoodController,
+                timeError: _midMorningTimeError,
+                foodError: _midMorningFoodError,
+                foodHint: "e.g. Green tea & a small bowl of roasted walnuts",
+              ),
+              const SizedBox(height: 16),
+              _buildMealCard(
+                title: "Afternoon / Lunch",
+                icon: appIcons.afternoon,
+                timeController: _lunchTimeController,
+                foodController: _lunchFoodController,
+                timeError: _lunchTimeError,
+                foodError: _lunchFoodError,
+                foodHint: "e.g., Dal, brown rice, stir-fried spinach and cucumber raita",
+              ),
+              const SizedBox(height: 16),
+              _buildMealCard(
+                title: "Evening / Dinner",
+                icon: appIcons.evening,
+                timeController: _dinnerTimeController,
+                foodController: _dinnerFoodController,
+                timeError: _dinnerTimeError,
+                foodError: _dinnerFoodError,
+                foodHint: "e.g., Grilled paneer with roasted vegetables and warm herbal broth",
+              ),
+              const SizedBox(height: 32),
+              CommonButton(
+                name: "Save Daily Check-in",
+                onTap: _onSave,
+                icon: Icons.arrow_forward_rounded,
+                isIconFirst: false,
+                btnColor: const Color(0xFF8B484D),
+                fontColor: appColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                radius: 999,
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          children: [
-            _buildDateSelection(),
-            const SizedBox(height: 24),
-            _buildCircadianRhythm(),
-            const SizedBox(height: 24),
-            _buildMovementAndHydration(),
-            const SizedBox(height: 24),
-            _buildMindsetAndRituals(),
-            const SizedBox(height: 24),
-            _buildMealCard(
-              title: "Morning / Breakfast",
-              icon: appIcons.morning,
-              timeController: _breakfastTimeController,
-              foodController: _breakfastFoodController,
-              timeError: _breakfastTimeError,
-              foodError: _breakfastFoodError,
-              foodHint: "e.g., 2 sourdough toasts with avocado, poached egg, and warm cinnamon latte",
-            ),
-            const SizedBox(height: 16),
-            _buildMealCard(
-              title: "Mid-Morning Nourishment",
-              icon: appIcons.afternoon, // Or snacks
-              timeController: _midMorningTimeController,
-              foodController: _midMorningFoodController,
-              timeError: _midMorningTimeError,
-              foodError: _midMorningFoodError,
-              foodHint: "e.g. Green tea & a small bowl of roasted walnuts",
-            ),
-            const SizedBox(height: 16),
-            _buildMealCard(
-              title: "Afternoon / Lunch",
-              icon: appIcons.afternoon,
-              timeController: _lunchTimeController,
-              foodController: _lunchFoodController,
-              timeError: _lunchTimeError,
-              foodError: _lunchFoodError,
-              foodHint: "e.g., Dal, brown rice, stir-fried spinach and cucumber raita",
-            ),
-            const SizedBox(height: 16),
-            _buildMealCard(
-              title: "Evening / Dinner",
-              icon: appIcons.evening,
-              timeController: _dinnerTimeController,
-              foodController: _dinnerFoodController,
-              timeError: _dinnerTimeError,
-              foodError: _dinnerFoodError,
-              foodHint: "e.g., Grilled paneer with roasted vegetables and warm herbal broth",
-            ),
-            const SizedBox(height: 32),
-            CommonButton(
-              name: "Save Daily Check-in",
-              onTap: _onSave,
-              icon: Icons.arrow_forward_rounded,
-              isIconFirst: false,
-              btnColor: const Color(0xFF8B484D),
-              fontColor: appColors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              radius: 999,
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      )
+      ),
     );
   }
 
@@ -368,15 +647,17 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
             onTap: () async {
               DateTime? picked = await showDatePicker(
                 context: context,
-                initialDate: DateTime.now(),
+                initialDate: _selectedDate,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2101),
               );
               if (picked != null) {
                 setState(() {
+                  _selectedDate = picked;
                   _dateController.text = DateFormat('MMMM dd, yyyy').format(picked);
                   if (_dateError != null) _validate();
                 });
+                callDailyCheckinAPI();
               }
             },
           ),
@@ -482,11 +763,15 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                       isRequired: false,
                       isDense: true,
                       readOnly: true,
+                      hint: "--:-- --",
                       borderColor: Colors.transparent,
                       fillColor: appColors.white,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1D1B1A)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      onTap: () => _selectTime(_wakeUpController),
+                      onTap: () async {
+                        await _selectTime(_wakeUpController);
+                        setState(() {});
+                      },
                     ),
                   ],
                 ),
@@ -522,11 +807,15 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                       isRequired: false,
                       isDense: true,
                       readOnly: true,
+                      hint: "--:-- --",
                       borderColor: Colors.transparent,
                       fillColor: appColors.white,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1D1B1A)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      onTap: () => _selectTime(_bedtimeController),
+                      onTap: () async {
+                        await _selectTime(_bedtimeController);
+                        setState(() {});
+                      },
                     ),
                   ],
                 ),
@@ -542,10 +831,11 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
               "Sleep Quality Experience",
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1D1B1A)),
             ),
-            const CommonText(
-              "7.5 hrs logged",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8B484D)),
-            ),
+            if (_calculatedSleepDuration != null)
+              CommonText(
+                _calculatedSleepDuration!,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8B484D)),
+              ),
           ],
         ),
         const SizedBox(height: 12),
@@ -624,6 +914,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                 controller: _stepsController,
                 isRequired: false,
                 isDense: true,
+                hint: "e.g., 8000",
                 borderColor: Colors.transparent,
                 fillColor: appColors.white,
                 keyboardType: TextInputType.number,
@@ -659,6 +950,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                 controller: _waterController,
                 isRequired: false,
                 isDense: true,
+                hint: "e.g., 2.5",
                 borderColor: Colors.transparent,
                 fillColor: appColors.white,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -725,12 +1017,15 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
   Widget _buildRitualCard({
     required String title,
     required String icon,
-    required bool isDone,
+    required bool? isDone,
     required ValueChanged<bool> onDoneChanged,
     required String notesTitle,
     required String notesHint,
     required TextEditingController notesController,
   }) {
+    final bool isYes = isDone == true;
+    final bool isNo = isDone == false;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -759,9 +1054,9 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: isDone ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
+                      color: isYes ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: isDone ? [
+                      boxShadow: isYes ? [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.05),
                           offset: const Offset(0, 1), blurRadius: 1
@@ -775,10 +1070,10 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isDone ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
+                            color: isYes ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
                           ),
                         ),
-                        if (isDone) Container(
+                        if (isYes) Container(
                           width: 20, height: 20,
                           decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
                           child: const Icon(Icons.check, size: 12, color: Colors.white),
@@ -802,9 +1097,9 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     decoration: BoxDecoration(
-                      color: !isDone ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
+                      color: isNo ? const Color(0xFFFFDADB) : const Color(0xFFEDE7E5),
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: !isDone ? [
+                      boxShadow: isNo ? [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.05),
                           offset: const Offset(0, 1), blurRadius: 1
@@ -818,10 +1113,10 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: !isDone ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
+                            color: isNo ? const Color(0xFF713439) : const Color(0xFF1D1B1A),
                           ),
                         ),
-                        if (!isDone) Container(
+                        if (isNo) Container(
                           width: 20,
                           height: 20,
                           decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF8B484D)),
@@ -883,10 +1178,14 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           isRequired: false,
           isDense: true,
           readOnly: true,
+          hint: "Select Time",
           borderColor: timeError != null ? appColors.red : Colors.transparent,
           fillColor: const Color(0xFFF8F2F0),
           prefixIcon: const Icon(Icons.access_time, size: 16, color: Color(0xFF534343)),
-          onTap: () => _selectTime(timeController),
+          onTap: () async {
+            await _selectTime(timeController);
+            if (timeError != null) _validate();
+          },
         ),
         if (timeError != null) Padding(
           padding: const EdgeInsets.only(top: 4, left: 4),

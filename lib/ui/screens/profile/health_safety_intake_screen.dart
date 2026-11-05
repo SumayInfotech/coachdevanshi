@@ -136,8 +136,9 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
       if (answers.hasMovementLimitations != null) {
         _hasLimitations = answers.hasMovementLimitations!;
       }
-      if (answers.movementLimitationDetails != null) {
-        _limitationsController.text = answers.movementLimitationDetails!;
+      final limitationDetail = answers.movementLimitationsDetail ?? answers.movementLimitationDetails;
+      if (limitationDetail != null) {
+        _limitationsController.text = limitationDetail;
       }
       if (answers.hasPhysicianRestrictions != null) {
         _hasRestrictions = answers.hasPhysicianRestrictions!;
@@ -278,16 +279,21 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         }
       }
 
+      final String limitationDetail = _hasLimitations ? _limitationsController.text.trim() : "";
+
       BlocProvider.of<SaveChapterBloc>(context).add(
         UserSaveChapterEvent(
           url: Urls.onboardingChapter(chapterId: "3"),
           body: {
+            "movement_limitations_detail": limitationDetail,
             "answers": {
               "medical_diagnoses": _selectedDiagnoses.toList(),
               "family_medical_history": _selectedFamilyHistory.toList(),
               "taking_medications": _takingMedication,
               "medications": medicationPayload,
               "has_movement_limitations": _hasLimitations,
+              "movement_limitations_detail": limitationDetail,
+              "movement_limitation_details": limitationDetail,
               "has_physician_restrictions": _hasRestrictions,
               "physician_guidance": _restrictionsController.text.trim(),
               "recent_clinical_symptoms": _selectedSymptoms.toList(),

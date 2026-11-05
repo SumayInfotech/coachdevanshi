@@ -19,4 +19,10 @@ class Urls {
   static const onboardingStatus = "$baseUrl/onboarding/status";
   static const onboardingMasters = "$baseUrl/onboarding-masters";
   static String onboardingChapter({required String chapterId}) => "$baseUrl/onboarding/chapters/$chapterId";
+
+  static const dashboard = "$baseUrl/dashboard";
+
+
+  static const dailyCheckins = "$baseUrl/daily-checkins";
+  static String dailyCheck({required String date}) => "$baseUrl/daily-checkins/$date";
 }

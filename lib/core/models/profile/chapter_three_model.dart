@@ -79,6 +79,7 @@ class Answers {
     this.takingMedications,
     this.medications,
     this.hasMovementLimitations,
+    this.movementLimitationsDetail,
     this.movementLimitationDetails,
     this.hasPhysicianRestrictions,
     this.physicianGuidance,
@@ -95,6 +96,7 @@ class Answers {
   final bool? takingMedications;
   final List<MedicationItem>? medications;
   final bool? hasMovementLimitations;
+  final String? movementLimitationsDetail;
   final String? movementLimitationDetails;
   final bool? hasPhysicianRestrictions;
   final String? physicianGuidance;
@@ -118,7 +120,8 @@ class Answers {
           ? []
           : List<MedicationItem>.from(json["medications"]!.map((x) => MedicationItem.fromJson(x))),
       hasMovementLimitations: json["has_movement_limitations"],
-      movementLimitationDetails: json["movement_limitation_details"],
+      movementLimitationsDetail: json["movement_limitations_detail"] ?? json["movement_limitation_details"],
+      movementLimitationDetails: json["movement_limitations_detail"] ?? json["movement_limitation_details"],
       hasPhysicianRestrictions: json["has_physician_restrictions"],
       physicianGuidance: json["physician_guidance"],
       recentClinicalSymptoms: json["recent_clinical_symptoms"] == null
@@ -138,7 +141,8 @@ class Answers {
     "taking_medications": takingMedications,
     "medications": medications?.map((x) => x.toJson()).toList(),
     "has_movement_limitations": hasMovementLimitations,
-    "movement_limitation_details": movementLimitationDetails,
+    "movement_limitations_detail": movementLimitationsDetail ?? movementLimitationDetails,
+    "movement_limitation_details": movementLimitationDetails ?? movementLimitationsDetail,
     "has_physician_restrictions": hasPhysicianRestrictions,
     "physician_guidance": physicianGuidance,
     "recent_clinical_symptoms": recentClinicalSymptoms,

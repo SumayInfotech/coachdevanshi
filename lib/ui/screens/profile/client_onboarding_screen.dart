@@ -14,6 +14,7 @@ import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/services/auth_services.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
+import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
 import '../check-in/daily_wellness_log_screen.dart';
@@ -53,6 +54,23 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
   void _onBack(BuildContext context) {
     if (widget.isBack) {
       navigation.pop(context);
+    } else if (widget.isLogin) {
+      final masterStatus = onboardingMasterStatus.value?.data;
+      final chapters = masterStatus?.chapters ?? [];
+      final int total = masterStatus?.totalChapters ?? chapters.length;
+      final int completed = masterStatus?.completedChapters ??
+          chapters.where((c) => (c.status?.toLowerCase() == "completed" ||
+              c.status?.toLowerCase() == "complete" ||
+              c.completedAt != null)).length;
+      final bool allCompleted = (masterStatus?.isOnboardingCompleted == true) ||
+          (total > 0 && completed >= total) ||
+          (chapters.isNotEmpty && chapters.every((c) =>
+              c.status?.toLowerCase() == "completed" ||
+              c.status?.toLowerCase() == "complete" ||
+              c.completedAt != null));
+      if (allCompleted) {
+        navigation.pushAndRemoveUntilSlideAnimation(context, const BottomBarScreen());
+      }
     } else {
       bottomPageController.jumpToPage(BottomBarScreenIndex.home);
     }
@@ -234,6 +252,18 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                   valueListenable: onboardingMastersModel,
                   builder: (context, onboardingMasters, _) {
                     final List<Chapter> chapters = masterStatus?.chapters ?? [];
+                    final int total = masterStatus?.totalChapters ?? chapters.length;
+                    final int completed = masterStatus?.completedChapters ??
+                        chapters.where((c) => (c.status?.toLowerCase() == "completed" ||
+                            c.status?.toLowerCase() == "complete" ||
+                            c.completedAt != null)
+                        ).length;
+                    final bool allChaptersCompleted = (masterStatus?.isOnboardingCompleted == true) ||
+                        (total > 0 && completed >= total) ||
+                        (chapters.isNotEmpty && chapters.every((c) =>
+                            c.status?.toLowerCase() == "completed" ||
+                            c.status?.toLowerCase() == "complete" ||
+                            c.completedAt != null));
 
                     return ListView(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -241,7 +271,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                         // Top Bar (Profile)
                         Row(
                           children: [
-                            if (widget.isBack)
+                            if (widget.isBack || (widget.isLogin && allChaptersCompleted))
                               Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: buildInkWell(
@@ -302,12 +332,8 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                         if(chapters.isNotEmpty) ...[
                           // Onboarding Journey Progress Banner
                           _buildOnboardingJourneyBanner(
-                            total: masterStatus?.totalChapters ?? chapters.length,
-                            completed: masterStatus?.completedChapters ??
-                              chapters.where((c) => (c.status?.toLowerCase() == "completed" ||
-                                c.status?.toLowerCase() == "complete" ||
-                                c.completedAt != null)
-                              ).length,
+                            total: total,
+                            completed: completed,
                           ),
                           const SizedBox(height: 16),
 
@@ -485,6 +511,28 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                               context,
                               const BloodReportUploadScreen(isBack: true),
                             ),
+                          ),
+                        ],
+
+                        // Go to Home Button (when login and all chapters complete)
+                        if (widget.isLogin && allChaptersCompleted) ...[
+                          const SizedBox(height: 24),
+                          CommonButton(
+                            name: "Go to Home",
+                            icon: Icons.arrow_forward_rounded,
+                            isIconFirst: false,
+                            imageSize: 18,
+                            btnColor: appColors.primary,
+                            fontColor: appColors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            radius: 999,
+                            onTap: () {
+                              navigation.pushAndRemoveUntilSlideAnimation(
+                                context,
+                                const BottomBarScreen(),
+                              );
+                            },
                           ),
                         ],
 

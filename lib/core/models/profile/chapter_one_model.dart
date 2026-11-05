@@ -82,6 +82,8 @@ class Answers {
     required this.dob,
     required this.gender,
     required this.city,
+    this.cityId,
+    this.stateId,
     required this.country,
     required this.timezone,
     required this.dailyRhythm,
@@ -96,6 +98,8 @@ class Answers {
   final DateTime? dob;
   final String? gender;
   final String? city;
+  final dynamic cityId;
+  final dynamic stateId;
   final String? country;
   final String? timezone;
   final String? dailyRhythm;
@@ -111,6 +115,8 @@ class Answers {
       dob: DateTime.tryParse(json["dob"] ?? ""),
       gender: json["gender"],
       city: json["city"],
+      cityId: json["city_id"],
+      stateId: json["state_id"],
       country: json["country"],
       timezone: json["timezone"],
       dailyRhythm: json["daily_rhythm"],
@@ -127,6 +133,8 @@ class Answers {
     "dob": "${dob?.year.toString().padLeft(4, '0')}-${dob?.month.toString().padLeft(2, '0')}-${dob?.day.toString().padLeft(2, '0')}",
     "gender": gender,
     "city": city,
+    "city_id": cityId,
+    "state_id": stateId,
     "country": country,
     "timezone": timezone,
     "daily_rhythm": dailyRhythm,

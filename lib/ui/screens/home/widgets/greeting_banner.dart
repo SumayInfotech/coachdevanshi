@@ -7,8 +7,9 @@ import '../../bottom_bar_screen.dart';
 
 class GreetingBanner extends StatelessWidget {
   final String? dateText;
+  final String? greetingText;
 
-  const GreetingBanner({super.key, this.dateText});
+  const GreetingBanner({super.key, this.dateText, this.greetingText});
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +29,33 @@ class GreetingBanner extends StatelessWidget {
           fontFamily: fontFamilyPlusJakartaSans,
         ),
         const SizedBox(height: 2),
-        ValueListenableBuilder(
-          valueListenable: userData,
-          builder: (context, user, _) {
-            return CommonText(
-              "Good morning, ${user?.name?.split(" ").first ?? ""}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1D1B1A),
-                height: 1.4,
-              ),
-              fontFamily: 'serif',
-            );
-          }
-        ),
+        if (greetingText != null && greetingText!.isNotEmpty)
+          CommonText(
+            greetingText!,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1D1B1A),
+              height: 1.4,
+            ),
+            fontFamily: 'serif',
+          )
+        else
+          ValueListenableBuilder(
+            valueListenable: userData,
+            builder: (context, user, _) {
+              return CommonText(
+                "Good morning, ${user?.name?.split(" ").first ?? ""}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1D1B1A),
+                  height: 1.4,
+                ),
+                fontFamily: 'serif',
+              );
+            }
+          ),
       ],
     );
   }

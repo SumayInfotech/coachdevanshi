@@ -8,6 +8,9 @@ class TodayOverviewGrid extends StatelessWidget {
   final String? updatedTime;
   final String stepCount;
   final String weightText;
+  final String? microBadgeText;
+  final String? weeklyBadgeText;
+  final bool? isMicroDone;
   final VoidCallback? onStepsTap;
   final VoidCallback? onSyncTap;
   final VoidCallback? onWeightTap;
@@ -18,8 +21,11 @@ class TodayOverviewGrid extends StatelessWidget {
   const TodayOverviewGrid({
     super.key,
     this.updatedTime,
-    this.stepCount = "7,842",
-    this.weightText = "64.5 kg",
+    this.stepCount = "--",
+    this.weightText = "--",
+    this.microBadgeText,
+    this.weeklyBadgeText,
+    this.isMicroDone,
     this.onStepsTap,
     this.onSyncTap,
     this.onWeightTap,
@@ -166,9 +172,9 @@ class TodayOverviewGrid extends StatelessWidget {
                 ),
                 title: "Micro Check-in",
                 subtitle: "Daily mood & meals",
-                badgeText: "Due",
-                badgeBgColor: const Color(0xFFFFDADB),
-                badgeTextColor: const Color(0xFF713439),
+                badgeText: microBadgeText ?? (isMicroDone == true ? "Done" : "Due"),
+                badgeBgColor: (isMicroDone == true) ? const Color(0xFFD8E5BF) : const Color(0xFFFFDADB),
+                badgeTextColor: (isMicroDone == true) ? const Color(0xFF404A2F) : const Color(0xFF713439),
                 onTap: onMicroCheckinTap,
               ),
             ),
@@ -201,6 +207,13 @@ class TodayOverviewGrid extends StatelessWidget {
                 ),
                 title: "Weekly Check-in",
                 subtitle: "Baseline & Progress",
+                badgeText: weeklyBadgeText,
+                badgeBgColor: (weeklyBadgeText?.toLowerCase() == "due")
+                    ? const Color(0xFFFFDADB)
+                    : const Color(0xFFF2EDEB),
+                badgeTextColor: (weeklyBadgeText?.toLowerCase() == "due")
+                    ? const Color(0xFF713439)
+                    : const Color(0xFF534343),
                 onTap: onWeeklyCheckinTap,
               ),
             ),
