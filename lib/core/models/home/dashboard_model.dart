@@ -498,5 +498,4 @@ class Weight {
     "change": change,
     "trend": trend,
   };
-
 }
