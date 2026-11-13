@@ -542,8 +542,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
           hint: "e.g., 7.5 hours",
           controller: _durationController,
           isTimePicker: false,
-          keyboardType: .number,
-          inputFormatters: [digitalWithDot]
+          keyboardType: .text,
+          // inputFormatters: [digitalWithDot]
         ),
         if (_sleepError != null) Padding(
           padding: const EdgeInsets.only(bottom: 12),

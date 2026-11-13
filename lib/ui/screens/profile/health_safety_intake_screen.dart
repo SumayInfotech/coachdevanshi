@@ -295,7 +295,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
               "movement_limitations_detail": limitationDetail,
               "movement_limitation_details": limitationDetail,
               "has_physician_restrictions": _hasRestrictions,
-              "physician_guidance": _restrictionsController.text.trim(),
+              if (_restrictionsController.text.trim().isNotEmpty) "physician_guidance": _restrictionsController.text.trim(),
               "recent_clinical_symptoms": _selectedSymptoms.toList(),
               "allergies_intolerances": _selectedAllergy ?? "",
               "allergy_details": _allergyDetailsController.text.trim(),

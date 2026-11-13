@@ -55,6 +55,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
   String? _fullNameError;
   String? _mobileError;
   String? _dobError;
+  String? _genderError;
   String? _stateError;
   String? _cityError;
   String? _dailyRhythmError;
@@ -62,7 +63,7 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
 
   String selectedCountryCode = "+91";
 
-  String _selectedGender = 'Female';
+  String? _selectedGender;
   String? _selectedJourney;
   String _selectedCountry = 'India';
   String? _selectedState, _selectedCity;
@@ -261,6 +262,13 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
       _dobError = null;
     }
 
+    if (_selectedGender == null || _selectedGender!.isEmpty) {
+      _genderError = "Please select your gender";
+      isValid = false;
+    } else {
+      _genderError = null;
+    }
+
     if (_selectedState == null) {
       _stateError = "Please enter your State";
       isValid = false;
@@ -297,13 +305,13 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
     if (_validate()) {
       LoaderService.show(context);
 
-      String genderValue = _selectedGender;
+      String genderValue = _selectedGender ?? "";
       final genderField = _getField("gender");
-      if (genderField != null) {
+      if (genderField != null && _selectedGender != null) {
         for (final opt in genderField.options) {
-          if ((opt.value?.toLowerCase() == _selectedGender.toLowerCase()) ||
-              (opt.label?.toLowerCase() == _selectedGender.toLowerCase())) {
-            genderValue = opt.value ?? _selectedGender;
+          if ((opt.value?.toLowerCase() == _selectedGender!.toLowerCase()) ||
+              (opt.label?.toLowerCase() == _selectedGender!.toLowerCase())) {
+            genderValue = opt.value ?? _selectedGender!;
             break;
           }
         }
@@ -653,11 +661,23 @@ class _ProfileProgramSelectionScreenState extends State<ProfileProgramSelectionS
           _buildSelectionPill(
             label: genderOptions[i].label ?? "",
             icon: _getGenderIcon(genderOptions[i].value ?? genderOptions[i].label ?? ""),
-            isSelected: (_selectedGender.toLowerCase() == (genderOptions[i].value ?? "").toLowerCase()) ||
-                (_selectedGender.toLowerCase() == (genderOptions[i].label ?? "").toLowerCase()),
-            onTap: () => setState(() => _selectedGender = genderOptions[i].label ?? genderOptions[i].value ?? ""),
+            isSelected: _selectedGender != null &&
+                ((_selectedGender!.toLowerCase() == (genderOptions[i].value ?? "").toLowerCase()) ||
+                (_selectedGender!.toLowerCase() == (genderOptions[i].label ?? "").toLowerCase())),
+            onTap: () => setState(() {
+              _selectedGender = genderOptions[i].label ?? genderOptions[i].value ?? "";
+              if (_genderError != null) _validate();
+            }),
           ),
         ],
+        if (_genderError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: CommonText(
+              _genderError!,
+              style: TextStyle(color: appColors.red, fontSize: 12),
+            ),
+          ),
       ],
     );
   }

@@ -68,10 +68,11 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
             if(state is ProfileSuccess) {
               LoaderService.hide();
               userData.value = state.model.data?.user;
+              appPrint("isProfileCompleted :: ${state.model.data?.user?.isProfileCompleted}");
               if(!(state.model.data?.user?.isProfileCompleted ?? false)) {
-                // navigation.pushAndRemoveUntilSlideAnimation(context,
-                //   ClientOnboardingScreen(isLogin: true)
-                // );
+                navigation.pushAndRemoveUntilSlideAnimation(context,
+                  ClientOnboardingScreen(isLogin: true)
+                );
               }
             } else if(state is ProfileFailed) {
               LoaderService.hide();
