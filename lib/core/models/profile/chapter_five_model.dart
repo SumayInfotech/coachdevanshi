@@ -76,6 +76,7 @@ class Answers {
     this.wakeTime,
     this.sleepDuration,
     this.sleepNightWaking,
+    this.sleepNightWakingOther,
     this.sleepFirstHour,
     this.activityLevel,
     this.activityDailySteps,
@@ -86,15 +87,18 @@ class Answers {
     this.activityAvailableDays,
     this.stressSources,
     this.stressFirstChanges,
+    this.stressFirstChangesOther,
     this.stressRecovery,
     this.readinessScore,
     this.consistencyInterrupters,
+    this.consistencyInterruptersOther,
   });
 
   final String? bedtime;
   final String? wakeTime;
   final String? sleepDuration;
   final String? sleepNightWaking;
+  final String? sleepNightWakingOther;
   final String? sleepFirstHour;
   final String? activityLevel;
   final String? activityDailySteps;
@@ -105,9 +109,11 @@ class Answers {
   final String? activityAvailableDays;
   final List<String>? stressSources;
   final List<String>? stressFirstChanges;
+  final String? stressFirstChangesOther;
   final String? stressRecovery;
   final String? readinessScore;
   final List<String>? consistencyInterrupters;
+  final String? consistencyInterruptersOther;
 
   factory Answers.fromJson(Map<String, dynamic> json){
     return Answers(
@@ -115,6 +121,7 @@ class Answers {
       wakeTime: json["wake_time"],
       sleepDuration: json["sleep_duration"],
       sleepNightWaking: json["sleep_night_waking"]?.toString(),
+      sleepNightWakingOther: json["sleep_night_waking_other"],
       sleepFirstHour: json["sleep_first_hour"]?.toString(),
       activityLevel: json["activity_level"]?.toString(),
       activityDailySteps: json["activity_daily_steps"]?.toString(),
@@ -129,11 +136,13 @@ class Answers {
       stressFirstChanges: json["stress_first_changes"] == null
           ? []
           : List<String>.from(json["stress_first_changes"]!.map((x) => x.toString())),
+      stressFirstChangesOther: json["stress_first_changes_other"],
       stressRecovery: json["stress_recovery"],
       readinessScore: json["readiness_score"]?.toString(),
       consistencyInterrupters: json["consistency_interrupters"] == null
           ? []
           : List<String>.from(json["consistency_interrupters"]!.map((x) => x.toString())),
+      consistencyInterruptersOther: json["consistency_interrupters_other"],
     );
   }
 
@@ -142,6 +151,7 @@ class Answers {
     "wake_time": wakeTime,
     "sleep_duration": sleepDuration,
     "sleep_night_waking": sleepNightWaking,
+    "sleep_night_waking_other": sleepNightWakingOther,
     "sleep_first_hour": sleepFirstHour,
     "activity_level": activityLevel,
     "activity_daily_steps": activityDailySteps,
@@ -152,9 +162,11 @@ class Answers {
     "activity_available_days": activityAvailableDays,
     "stress_sources": stressSources,
     "stress_first_changes": stressFirstChanges,
+    "stress_first_changes_other": stressFirstChangesOther,
     "stress_recovery": stressRecovery,
     "readiness_score": readinessScore,
     "consistency_interrupters": consistencyInterrupters,
+    "consistency_interrupters_other": consistencyInterruptersOther,
   };
 }
 

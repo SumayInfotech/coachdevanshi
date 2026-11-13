@@ -79,8 +79,10 @@ class Answers {
     this.weight,
     this.weightUnit,
     this.approachesTried,
+    this.approachesTriedOther,
     this.approachesLearning,
     this.confidentAreas,
+    this.confidentAreasOther,
     this.confusingAreas,
     this.whatHelped,
   });
@@ -90,8 +92,10 @@ class Answers {
   final dynamic weight;
   final String? weightUnit;
   final List<String>? approachesTried;
+  final String? approachesTriedOther;
   final String? approachesLearning;
   final List<String>? confidentAreas;
+  final String? confidentAreasOther;
   final String? confusingAreas;
   final String? whatHelped;
 
@@ -102,8 +106,10 @@ class Answers {
       weight: json["weight"],
       weightUnit: json["weight_unit"],
       approachesTried: json["approaches_tried"] == null ? [] : List<String>.from(json["approaches_tried"]!.map((x) => x.toString())),
+      approachesTriedOther: json["approaches_tried_other"],
       approachesLearning: json["approaches_learning"],
       confidentAreas: json["confident_areas"] == null ? [] : List<String>.from(json["confident_areas"]!.map((x) => x.toString())),
+      confidentAreasOther: json["confident_areas_other"],
       confusingAreas: json["confusing_areas"],
       whatHelped: json["what_helped"],
     );
@@ -115,8 +121,10 @@ class Answers {
     "weight": weight,
     "weight_unit": weightUnit,
     "approaches_tried": approachesTried,
+    "approaches_tried_other": approachesTriedOther,
     "approaches_learning": approachesLearning,
     "confident_areas": confidentAreas,
+    "confident_areas_other": confidentAreasOther,
     "confusing_areas": confusingAreas,
     "what_helped": whatHelped,
   };

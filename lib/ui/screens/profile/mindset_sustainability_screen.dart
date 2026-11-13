@@ -31,6 +31,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
 
   // 1. Goal-Oriented Mindset
   final Set<String> _selectedMindsets = {};
+  final TextEditingController _goalMindsetOtherController = TextEditingController();
   String? _mindsetError;
 
   // 2. Navigating Slow Progress
@@ -71,6 +72,9 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
       if (answers.goalMindset != null && answers.goalMindset!.isNotEmpty) {
         _selectedMindsets.clear();
         _selectedMindsets.addAll(answers.goalMindset!);
+      }
+      if (answers.goalMindsetOther != null) {
+        _goalMindsetOtherController.text = answers.goalMindsetOther!;
       }
       if (answers.slowProgressResponse != null) {
         _slowProgressController.text = answers.slowProgressResponse!;
@@ -149,6 +153,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
           body: {
             "answers": {
               "goal_mindset": _selectedMindsets.toList(),
+              "goal_mindset_other": _goalMindsetOtherController.text.trim(),
               "slow_progress_response": _slowProgressController.text.trim(),
               "one_change_to_start": _startChangeController.text.trim(),
               "not_ready_to_change": _notReadyChangeController.text.trim(),
@@ -163,6 +168,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
 
   @override
   void dispose() {
+    _goalMindsetOtherController.dispose();
     _slowProgressController.dispose();
     _startChangeController.dispose();
     _notReadyChangeController.dispose();
@@ -293,6 +299,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
                         if (_selectedMindsets.length < 3) {
                           if (e.value != null) _selectedMindsets.add(e.value!);
                         } else {
+                          showSnackBar(context: context, isError: true, message: "Can only select up to 3 option");
                           appLog("Can only select up to 3 options");
                         }
                       }
@@ -311,6 +318,7 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
                         if (_selectedMindsets.length < 3) {
                           _selectedMindsets.add(e.uuid ?? "0");
                         } else {
+                          showSnackBar(context: context, isError: true, message: "Can only select up to 3 option");
                           appLog("Can only select up to 3 options");
                         }
                       }
@@ -319,6 +327,17 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
                   },
                 )).toList(),
         ),
+        if (_hasSelectedGoalMindsetOther(dynamicMindsets)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify",
+            controller: _goalMindsetOtherController,
+            hint: "Please specify your goal mindset",
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_mindsetError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_mindsetError!,
@@ -327,6 +346,37 @@ class _MindsetSustainabilityScreenState extends State<MindsetSustainabilityScree
         ),
       ],
     );
+  }
+
+  bool _isOtherOption({String? value, String? label, String? title}) {
+    final l = (label ?? title ?? value ?? '').trim().toLowerCase();
+    final v = (value ?? '').trim().toLowerCase();
+    return l == 'other' ||
+        l == 'others' ||
+        l.startsWith('other ') ||
+        l.startsWith('other(') ||
+        l.startsWith('other (') ||
+        v == 'other' ||
+        v == 'others';
+  }
+
+  bool _hasSelectedGoalMindsetOther(List<Option> dynamicMindsets) {
+    if (dynamicMindsets.isNotEmpty) {
+      for (final opt in dynamicMindsets) {
+        if (_selectedMindsets.contains(opt.value) &&
+            _isOtherOption(value: opt.value, label: opt.label)) {
+          return true;
+        }
+      }
+    } else {
+      for (final item in widget.goalMindset) {
+        if (_selectedMindsets.contains(item.uuid) &&
+            _isOtherOption(value: item.uuid, title: item.title)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   Widget _buildSlowProgressSection() {

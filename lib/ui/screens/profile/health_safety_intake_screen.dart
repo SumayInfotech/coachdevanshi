@@ -58,10 +58,12 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
 
   // Medical Diagnoses
   final Set<String> _selectedDiagnoses = {};
+  final TextEditingController _medicalDiagnosesOtherController = TextEditingController();
   String? _diagnosesError;
 
   // Family History
   final Set<String> _selectedFamilyHistory = {};
+  final TextEditingController _familyHistoryOtherController = TextEditingController();
   String? _familyHistoryError;
 
   // Medications
@@ -81,6 +83,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
 
   // Recent Clinical Symptoms
   final Set<String> _selectedSymptoms = {};
+  final TextEditingController _symptomsOtherController = TextEditingController();
   String? _symptomsError;
 
   // Allergies
@@ -91,6 +94,7 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
 
   // Hormonal Stage
   String? _selectedHormonalStage;
+  final TextEditingController _hormonalStageOtherController = TextEditingController();
   String? _hormonalStageError;
 
   @override
@@ -115,9 +119,15 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         _selectedDiagnoses.clear();
         _selectedDiagnoses.addAll(answers.medicalDiagnoses!);
       }
+      if (answers.medicalDiagnosesOther != null && answers.medicalDiagnosesOther!.isNotEmpty) {
+        _medicalDiagnosesOtherController.text = answers.medicalDiagnosesOther!;
+      }
       if (answers.familyMedicalHistory != null && answers.familyMedicalHistory!.isNotEmpty) {
         _selectedFamilyHistory.clear();
         _selectedFamilyHistory.addAll(answers.familyMedicalHistory!);
+      }
+      if (answers.familyHistoryOther != null && answers.familyHistoryOther!.isNotEmpty) {
+        _familyHistoryOtherController.text = answers.familyHistoryOther!;
       }
       if (answers.takingMedications != null) {
         _takingMedication = answers.takingMedications!;
@@ -150,6 +160,9 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         _selectedSymptoms.clear();
         _selectedSymptoms.addAll(answers.recentClinicalSymptoms!);
       }
+      if (answers.recentClinicalSymptomsOther != null && answers.recentClinicalSymptomsOther!.isNotEmpty) {
+        _symptomsOtherController.text = answers.recentClinicalSymptomsOther!;
+      }
       if (answers.allergiesIntolerances != null && answers.allergiesIntolerances!.isNotEmpty) {
         _selectedAllergy = answers.allergiesIntolerances;
       }
@@ -158,6 +171,9 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
       }
       if (answers.hormonalLifeStage != null && answers.hormonalLifeStage!.isNotEmpty) {
         _selectedHormonalStage = answers.hormonalLifeStage;
+      }
+      if (answers.hormonalLifeStageOther != null && answers.hormonalLifeStageOther!.isNotEmpty) {
+        _hormonalStageOtherController.text = answers.hormonalLifeStageOther!;
       }
     }
   }
@@ -288,18 +304,22 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
             "movement_limitations_detail": limitationDetail,
             "answers": {
               "medical_diagnoses": _selectedDiagnoses.toList(),
+              "medical_diagnoses_other": _medicalDiagnosesOtherController.text.trim(),
               "family_medical_history": _selectedFamilyHistory.toList(),
+              "family_history_other": _familyHistoryOtherController.text.trim(),
               "taking_medications": _takingMedication,
               "medications": medicationPayload,
               "has_movement_limitations": _hasLimitations,
               "movement_limitations_detail": limitationDetail,
               "movement_limitation_details": limitationDetail,
               "has_physician_restrictions": _hasRestrictions,
-              "physician_guidance": _restrictionsController.text.trim(),
+              if (_restrictionsController.text.trim().isNotEmpty) "physician_guidance": _restrictionsController.text.trim(),
               "recent_clinical_symptoms": _selectedSymptoms.toList(),
+              "recent_clinical_symptoms_other": _symptomsOtherController.text.trim(),
               "allergies_intolerances": _selectedAllergy ?? "",
               "allergy_details": _allergyDetailsController.text.trim(),
-              "hormonal_life_stage": _selectedHormonalStage ?? ""
+              "hormonal_life_stage": _selectedHormonalStage ?? "",
+              "hormonal_life_stage_other": _hormonalStageOtherController.text.trim(),
             }
           },
         ),
@@ -316,6 +336,10 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
     _limitationsController.dispose();
     _restrictionsController.dispose();
     _allergyDetailsController.dispose();
+    _medicalDiagnosesOtherController.dispose();
+    _familyHistoryOtherController.dispose();
+    _symptomsOtherController.dispose();
+    _hormonalStageOtherController.dispose();
     super.dispose();
   }
 
@@ -526,6 +550,17 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedDiagnosesOther(dynamicDiagnoses)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other diagnosis",
+            hint: "Enter other diagnoses",
+            controller: _medicalDiagnosesOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_diagnosesError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_diagnosesError!, style: TextStyle(
@@ -580,6 +615,17 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedFamilyHistoryOther(dynamicFamily)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other family medical history",
+            hint: "Enter other family medical history",
+            controller: _familyHistoryOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_familyHistoryError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_familyHistoryError!, style: TextStyle(
@@ -862,6 +908,17 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedSymptomsOther(dynamicSymptoms)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other symptoms",
+            hint: "Enter other recent clinical symptoms",
+            controller: _symptomsOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_symptomsError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_symptomsError!, style: TextStyle(
@@ -974,6 +1031,17 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
               });
             },
           )),
+        if (_isHormonalStageOtherSelected(dynamicHormonal)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other hormonal or life stage",
+            hint: "Enter your life stage details",
+            controller: _hormonalStageOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_hormonalStageError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_hormonalStageError!, style: TextStyle(
@@ -982,5 +1050,66 @@ class _HealthSafetyIntakeScreenState extends State<HealthSafetyIntakeScreen> {
         ),
       ],
     );
+  }
+
+  bool _isOtherOption({String? value, String? label, String? title}) {
+    final l = (label ?? title ?? value ?? '').trim().toLowerCase();
+    final v = (value ?? '').trim().toLowerCase();
+    return l == 'other' || l == 'others' || l.startsWith('other ') || l.startsWith('other(') || l.startsWith('other (') || v == 'other' || v == 'others';
+  }
+
+  bool _hasSelectedDiagnosesOther(List<Option> dynamicOptions) {
+    for (final val in _selectedDiagnoses) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in widget.medicalDiagnoses) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _hasSelectedFamilyHistoryOther(List<Option> dynamicOptions) {
+    for (final val in _selectedFamilyHistory) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in widget.familyMedicalHistory) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _hasSelectedSymptomsOther(List<Option> dynamicOptions) {
+    for (final val in _selectedSymptoms) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in widget.recentClinicalSymptoms) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isHormonalStageOtherSelected(List<Option> dynamicOptions) {
+    if (_selectedHormonalStage == null) return false;
+    if (_isOtherOption(value: _selectedHormonalStage)) return true;
+    for (final opt in dynamicOptions) {
+      if (opt.value == _selectedHormonalStage && _isOtherOption(value: opt.value, label: opt.label)) {
+        return true;
+      }
+    }
+    for (final item in widget.hormonalLifeStage) {
+      if (item.uuid == _selectedHormonalStage && _isOtherOption(value: item.uuid, title: item.title)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -73,6 +73,7 @@ class Data {
 class Answers {
   Answers({
     this.goalMindset,
+    this.goalMindsetOther,
     this.slowProgressResponse,
     this.oneChangeToStart,
     this.notReadyToChange,
@@ -81,6 +82,7 @@ class Answers {
   });
 
   final List<String>? goalMindset;
+  final String? goalMindsetOther;
   final String? slowProgressResponse;
   final String? oneChangeToStart;
   final String? notReadyToChange;
@@ -92,6 +94,7 @@ class Answers {
       goalMindset: json["goal_mindset"] == null
           ? []
           : List<String>.from(json["goal_mindset"]!.map((x) => x.toString())),
+      goalMindsetOther: json["goal_mindset_other"],
       slowProgressResponse: json["slow_progress_response"],
       oneChangeToStart: json["one_change_to_start"],
       notReadyToChange: json["not_ready_to_change"],
@@ -102,6 +105,7 @@ class Answers {
 
   Map<String, dynamic> toJson() => {
     "goal_mindset": goalMindset,
+    "goal_mindset_other": goalMindsetOther,
     "slow_progress_response": slowProgressResponse,
     "one_change_to_start": oneChangeToStart,
     "not_ready_to_change": notReadyToChange,

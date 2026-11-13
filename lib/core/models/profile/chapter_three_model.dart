@@ -84,9 +84,11 @@ class Answers {
     this.hasPhysicianRestrictions,
     this.physicianGuidance,
     this.recentClinicalSymptoms,
+    this.recentClinicalSymptomsOther,
     this.allergiesIntolerances,
     this.allergyDetails,
     this.hormonalLifeStage,
+    this.hormonalLifeStageOther,
   });
 
   final List<String>? medicalDiagnoses;
@@ -101,9 +103,11 @@ class Answers {
   final bool? hasPhysicianRestrictions;
   final String? physicianGuidance;
   final List<String>? recentClinicalSymptoms;
+  final String? recentClinicalSymptomsOther;
   final String? allergiesIntolerances;
   final String? allergyDetails;
   final String? hormonalLifeStage;
+  final String? hormonalLifeStageOther;
 
   factory Answers.fromJson(Map<String, dynamic> json){
     return Answers(
@@ -127,9 +131,11 @@ class Answers {
       recentClinicalSymptoms: json["recent_clinical_symptoms"] == null
           ? []
           : List<String>.from(json["recent_clinical_symptoms"]!.map((x) => x.toString())),
+      recentClinicalSymptomsOther: json["recent_clinical_symptoms_other"],
       allergiesIntolerances: json["allergies_intolerances"]?.toString(),
       allergyDetails: json["allergy_details"],
       hormonalLifeStage: json["hormonal_life_stage"]?.toString(),
+      hormonalLifeStageOther: json["hormonal_life_stage_other"],
     );
   }
 
@@ -146,9 +152,11 @@ class Answers {
     "has_physician_restrictions": hasPhysicianRestrictions,
     "physician_guidance": physicianGuidance,
     "recent_clinical_symptoms": recentClinicalSymptoms,
+    "recent_clinical_symptoms_other": recentClinicalSymptomsOther,
     "allergies_intolerances": allergiesIntolerances,
     "allergy_details": allergyDetails,
     "hormonal_life_stage": hormonalLifeStage,
+    "hormonal_life_stage_other": hormonalLifeStageOther,
   };
 }
 

@@ -35,6 +35,8 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
   final TextEditingController _learnedController = TextEditingController();
   final TextEditingController _confusingController = TextEditingController();
   final TextEditingController _helpedController = TextEditingController();
+  final TextEditingController _approachesOtherController = TextEditingController();
+  final TextEditingController _confidentOtherController = TextEditingController();
 
   String? _heightError;
   String? _weightError;
@@ -85,12 +87,18 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         _selectedApproaches.clear();
         _selectedApproaches.addAll(answers.approachesTried!);
       }
+      if (answers.approachesTriedOther != null && answers.approachesTriedOther!.isNotEmpty) {
+        _approachesOtherController.text = answers.approachesTriedOther!;
+      }
       if (answers.approachesLearning != null && answers.approachesLearning!.isNotEmpty) {
         _learnedController.text = answers.approachesLearning!;
       }
       if (answers.confidentAreas != null && answers.confidentAreas!.isNotEmpty) {
         _selectedConfident.clear();
         _selectedConfident.addAll(answers.confidentAreas!);
+      }
+      if (answers.confidentAreasOther != null && answers.confidentAreasOther!.isNotEmpty) {
+        _confidentOtherController.text = answers.confidentAreasOther!;
       }
       if (answers.confusingAreas != null && answers.confusingAreas!.isNotEmpty) {
         _confusingController.text = answers.confusingAreas!;
@@ -184,8 +192,10 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
               "weight": weightValue,
               "weight_unit": _isKgSelected ? "kg" : "lbs",
               "approaches_tried": _selectedApproaches.toList(),
+              "approaches_tried_other": _approachesOtherController.text.trim(),
               "approaches_learning": _learnedController.text.trim(),
               "confident_areas": _selectedConfident.toList(),
+              "confident_areas_other": _confidentOtherController.text.trim(),
               "confusing_areas": _confusingController.text.trim(),
               "what_helped": _helpedController.text.trim(),
             }
@@ -202,6 +212,8 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
     _learnedController.dispose();
     _confusingController.dispose();
     _helpedController.dispose();
+    _approachesOtherController.dispose();
+    _confidentOtherController.dispose();
     super.dispose();
   }
 
@@ -597,6 +609,17 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedApproachesOther(dynamicApproaches)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other approaches",
+            hint: "Enter other approaches tried",
+            controller: _approachesOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_approachesError != null)
           Padding(
             padding: const EdgeInsets.only(top: 4, left: 4),
@@ -673,6 +696,17 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedConfidentOther(dynamicConfident)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other confident areas",
+            hint: "Enter other areas of confidence",
+            controller: _confidentOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_confidentError != null)
           Padding(
             padding: const EdgeInsets.only(top: 4, left: 4),
@@ -719,5 +753,37 @@ class _GoalsStartingPointScreenState extends State<GoalsStartingPointScreen> {
         ),
       ],
     );
+  }
+
+  bool _isOtherOption({String? value, String? label, String? title}) {
+    final l = (label ?? title ?? value ?? '').trim().toLowerCase();
+    final v = (value ?? '').trim().toLowerCase();
+    return l == 'other' || l == 'others' || l.startsWith('other ') || l.startsWith('other(') || l.startsWith('other (') || v == 'other' || v == 'others';
+  }
+
+  bool _hasSelectedApproachesOther(List<Option> dynamicOptions) {
+    for (final val in _selectedApproaches) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in widget.approachesTried) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _hasSelectedConfidentOther(List<Option> dynamicOptions) {
+    for (final val in _selectedConfident) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in widget.confidentAreas) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
   }
 }

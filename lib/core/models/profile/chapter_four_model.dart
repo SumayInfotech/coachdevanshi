@@ -75,12 +75,14 @@ class Answers {
     this.eatingPattern,
     this.eatingPatternOther,
     this.culturalFastingPractices,
+    this.culturalFastingPracticesOther,
     this.weekdayMeals,
     this.weekendRoutine,
     this.foodsEnjoyed,
     this.foodsDisliked,
     this.foodsNotReadyToGiveUp,
     this.foodEnvWhoCooks,
+    this.foodEnvWhoCooksOther,
     this.foodEnvShareMealsWith,
     this.foodEnvSupportLevel,
     this.foodEnvMealsOutPerWeek,
@@ -90,18 +92,22 @@ class Answers {
     this.intakeCaffeine,
     this.intakeSugary,
     this.substanceHabits,
+    this.substanceHabitsOther,
     this.digestiveHealth,
+    this.digestiveHealthOther,
   });
 
   final String? eatingPattern;
   final String? eatingPatternOther;
   final List<String>? culturalFastingPractices;
+  final String? culturalFastingPracticesOther;
   final WeekdayMeals? weekdayMeals;
   final String? weekendRoutine;
   final String? foodsEnjoyed;
   final String? foodsDisliked;
   final String? foodsNotReadyToGiveUp;
   final String? foodEnvWhoCooks;
+  final String? foodEnvWhoCooksOther;
   final String? foodEnvShareMealsWith;
   final String? foodEnvSupportLevel;
   final String? foodEnvMealsOutPerWeek;
@@ -111,7 +117,9 @@ class Answers {
   final String? intakeCaffeine;
   final String? intakeSugary;
   final List<String>? substanceHabits;
+  final String? substanceHabitsOther;
   final List<String>? digestiveHealth;
+  final String? digestiveHealthOther;
 
   factory Answers.fromJson(Map<String, dynamic> json){
     return Answers(
@@ -120,12 +128,14 @@ class Answers {
       culturalFastingPractices: json["cultural_fasting_practices"] == null
           ? []
           : List<String>.from(json["cultural_fasting_practices"]!.map((x) => x.toString())),
+      culturalFastingPracticesOther: json["cultural_fasting_practices_other"],
       weekdayMeals: json["weekday_meals"] == null ? null : WeekdayMeals.fromJson(json["weekday_meals"]),
       weekendRoutine: json["weekend_routine"],
       foodsEnjoyed: json["foods_enjoyed"],
       foodsDisliked: json["foods_disliked"],
       foodsNotReadyToGiveUp: json["foods_not_ready_to_give_up"],
       foodEnvWhoCooks: json["food_env_who_cooks"]?.toString(),
+      foodEnvWhoCooksOther: json["food_env_who_cooks_other"],
       foodEnvShareMealsWith: json["food_env_share_meals_with"],
       foodEnvSupportLevel: json["food_env_support_level"]?.toString(),
       foodEnvMealsOutPerWeek: json["food_env_meals_out_per_week"]?.toString(),
@@ -137,9 +147,11 @@ class Answers {
       substanceHabits: json["substance_habits"] == null
           ? []
           : List<String>.from(json["substance_habits"]!.map((x) => x.toString())),
+      substanceHabitsOther: json["substance_habits_other"],
       digestiveHealth: json["digestive_health"] == null
           ? []
           : List<String>.from(json["digestive_health"]!.map((x) => x.toString())),
+      digestiveHealthOther: json["digestive_health_other"],
     );
   }
 
@@ -147,12 +159,14 @@ class Answers {
     "eating_pattern": eatingPattern,
     "eating_pattern_other": eatingPatternOther,
     "cultural_fasting_practices": culturalFastingPractices,
+    "cultural_fasting_practices_other": culturalFastingPracticesOther,
     "weekday_meals": weekdayMeals?.toJson(),
     "weekend_routine": weekendRoutine,
     "foods_enjoyed": foodsEnjoyed,
     "foods_disliked": foodsDisliked,
     "foods_not_ready_to_give_up": foodsNotReadyToGiveUp,
     "food_env_who_cooks": foodEnvWhoCooks,
+    "food_env_who_cooks_other": foodEnvWhoCooksOther,
     "food_env_share_meals_with": foodEnvShareMealsWith,
     "food_env_support_level": foodEnvSupportLevel,
     "food_env_meals_out_per_week": foodEnvMealsOutPerWeek,
@@ -162,7 +176,9 @@ class Answers {
     "intake_caffeine": intakeCaffeine,
     "intake_sugary": intakeSugary,
     "substance_habits": substanceHabits,
+    "substance_habits_other": substanceHabitsOther,
     "digestive_health": digestiveHealth,
+    "digestive_health_other": digestiveHealthOther,
   };
 }
 

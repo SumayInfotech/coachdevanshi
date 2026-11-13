@@ -49,6 +49,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _bedtimeController = TextEditingController();
   final TextEditingController _wakeTimeController = TextEditingController();
   final TextEditingController _durationController = TextEditingController();
+  final TextEditingController _sleepNightWakingOtherController = TextEditingController();
   String? _sleepError;
 
   String? _selectedNightWaking;
@@ -73,6 +74,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   final TextEditingController _stress1Controller = TextEditingController();
   final TextEditingController _stress2Controller = TextEditingController();
   final TextEditingController _stress3Controller = TextEditingController();
+  final TextEditingController _stressChangesOtherController = TextEditingController();
   String? _stressSourcesError;
 
   final Set<String> _selectedStressChanges = {};
@@ -85,6 +87,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
   String? _readinessScore, _readinessError;
 
   final Set<String> _selectedInterruptions = {};
+  final TextEditingController _interruptionsOtherController = TextEditingController();
   String? _interruptionsError;
 
   @override
@@ -116,6 +119,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       }
       if (answers.sleepNightWaking != null && answers.sleepNightWaking!.isNotEmpty) {
         _selectedNightWaking = answers.sleepNightWaking;
+      }
+      if (answers.sleepNightWakingOther != null && answers.sleepNightWakingOther!.isNotEmpty) {
+        _sleepNightWakingOtherController.text = answers.sleepNightWakingOther!;
       }
       if (answers.sleepFirstHour != null && answers.sleepFirstHour!.isNotEmpty) {
         _selectedFirstHour = answers.sleepFirstHour;
@@ -150,6 +156,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         _selectedStressChanges.clear();
         _selectedStressChanges.addAll(answers.stressFirstChanges!);
       }
+      if (answers.stressFirstChangesOther != null && answers.stressFirstChangesOther!.isNotEmpty) {
+        _stressChangesOtherController.text = answers.stressFirstChangesOther!;
+      }
       if (answers.stressRecovery != null) {
         _decompressionController.text = answers.stressRecovery!;
       }
@@ -159,6 +168,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
       if (answers.consistencyInterrupters != null && answers.consistencyInterrupters!.isNotEmpty) {
         _selectedInterruptions.clear();
         _selectedInterruptions.addAll(answers.consistencyInterrupters!);
+      }
+      if (answers.consistencyInterruptersOther != null && answers.consistencyInterruptersOther!.isNotEmpty) {
+        _interruptionsOtherController.text = answers.consistencyInterruptersOther!;
       }
     }
   }
@@ -315,6 +327,7 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
               "wake_time": _wakeTimeController.text.trim(),
               "sleep_duration": _durationController.text.trim(),
               "sleep_night_waking": _selectedNightWaking ?? "",
+              "sleep_night_waking_other": _sleepNightWakingOtherController.text.trim(),
               "sleep_first_hour": _selectedFirstHour ?? "",
               "activity_level": _selectedDailyActivity ?? "",
               "activity_daily_steps": _selectedAvgSteps ?? "",
@@ -325,9 +338,11 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
               "activity_available_days": _selectedRealisticCapacity ?? "",
               "stress_sources": stressSources,
               "stress_first_changes": _selectedStressChanges.toList(),
+              "stress_first_changes_other": _stressChangesOtherController.text.trim(),
               "stress_recovery": _decompressionController.text.trim(),
               "readiness_score": _readinessScore ?? "",
-              "consistency_interrupters": _selectedInterruptions.toList()
+              "consistency_interrupters": _selectedInterruptions.toList(),
+              "consistency_interrupters_other": _interruptionsOtherController.text.trim(),
             }
           },
         ),
@@ -347,6 +362,9 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
     _stress2Controller.dispose();
     _stress3Controller.dispose();
     _decompressionController.dispose();
+    _sleepNightWakingOtherController.dispose();
+    _stressChangesOtherController.dispose();
+    _interruptionsOtherController.dispose();
     super.dispose();
   }
 
@@ -542,8 +560,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
           hint: "e.g., 7.5 hours",
           controller: _durationController,
           isTimePicker: false,
-          keyboardType: .number,
-          inputFormatters: [digitalWithDot]
+          keyboardType: .text,
+          // inputFormatters: [digitalWithDot],
         ),
         if (_sleepError != null) Padding(
           padding: const EdgeInsets.only(bottom: 12),
@@ -583,6 +601,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                   },
                 )).toList(),
         ),
+        if (_isSingleOtherSelected(_selectedNightWaking, dynamicNightWaking, widget.sleepNightWaking)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify night waking details",
+            hint: "Enter night waking details",
+            controller: _sleepNightWakingOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_nightWakingError != null) Padding(
           padding: const EdgeInsets.only(top: 4),
           child: CommonText(_nightWakingError!,
@@ -920,6 +949,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                   },
                 )).toList(),
         ),
+        if (_hasSelectedOther(_selectedStressChanges, dynamicStressChanges, widget.stressFirstChanges)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify what changes first",
+            hint: "Enter what changes when stress is high",
+            controller: _stressChangesOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_stressChangeError != null) Padding(
           padding: const EdgeInsets.only(top: 8, bottom: 12),
           child: CommonText(_stressChangeError!,
@@ -1070,7 +1110,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                         if (_selectedInterruptions.length < 3) {
                           if (e.value != null) _selectedInterruptions.add(e.value!);
                         } else {
-                          appLog("Can only select up to 3 options");
+                          showSnackBar(context: context, isError: true, message: "Can only select up to 3 option");
+                          // appLog("Can only select up to 3 options");
                         }
                       }
                       if (_interruptionsError != null) _validate();
@@ -1088,7 +1129,8 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                         if (_selectedInterruptions.length < 3) {
                           _selectedInterruptions.add(e.uuid ?? "0");
                         } else {
-                          appLog("Can only select up to 3 options");
+                          showSnackBar(context: context, isError: true, message: "Can only select up to 3 option");
+                          // appLog("Can only select up to 3 options");
                         }
                       }
                       if (_interruptionsError != null) _validate();
@@ -1096,6 +1138,17 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
                   },
                 )).toList(),
         ),
+        if (_hasSelectedOther(_selectedInterruptions, dynamicInterruptions, widget.consistencyInterrupters)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other interruptions",
+            hint: "Enter what interrupts your consistency",
+            controller: _interruptionsOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_interruptionsError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_interruptionsError!,
@@ -1104,5 +1157,36 @@ class _LifestyleCoachingFitScreenState extends State<LifestyleCoachingFitScreen>
         ),
       ],
     );
+  }
+
+  bool _isOtherOption({String? value, String? label, String? title}) {
+    final l = (label ?? title ?? value ?? '').trim().toLowerCase();
+    final v = (value ?? '').trim().toLowerCase();
+    return l == 'other' || l == 'others' || l.startsWith('other ') || l.startsWith('other(') || l.startsWith('other (') || v == 'other' || v == 'others';
+  }
+
+  bool _hasSelectedOther(Set<String> selectedValues, List<Option> dynamicOptions, List<OnboardingData> fallbackOptions) {
+    for (final val in selectedValues) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in fallbackOptions) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isSingleOtherSelected(String? selectedValue, List<Option> dynamicOptions, List<OnboardingData> fallbackOptions) {
+    if (selectedValue == null) return false;
+    if (_isOtherOption(value: selectedValue)) return true;
+    for (final opt in dynamicOptions) {
+      if (opt.value == selectedValue && _isOtherOption(value: opt.value, label: opt.label)) return true;
+    }
+    for (final item in fallbackOptions) {
+      if (item.uuid == selectedValue && _isOtherOption(value: item.uuid, title: item.title)) return true;
+    }
+    return false;
   }
 }

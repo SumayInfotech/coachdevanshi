@@ -81,6 +81,7 @@ class Answers {
     required this.mobile,
     required this.dob,
     required this.gender,
+    this.genderOther,
     required this.city,
     this.cityId,
     this.stateId,
@@ -97,6 +98,7 @@ class Answers {
   final String? mobile;
   final DateTime? dob;
   final String? gender;
+  final String? genderOther;
   final String? city;
   final dynamic cityId;
   final dynamic stateId;
@@ -114,6 +116,7 @@ class Answers {
       mobile: json["mobile"],
       dob: DateTime.tryParse(json["dob"] ?? ""),
       gender: json["gender"],
+      genderOther: json["gender_other"],
       city: json["city"],
       cityId: json["city_id"],
       stateId: json["state_id"],
@@ -132,6 +135,7 @@ class Answers {
     "mobile": mobile,
     "dob": "${dob?.year.toString().padLeft(4, '0')}-${dob?.month.toString().padLeft(2, '0')}-${dob?.day.toString().padLeft(2, '0')}",
     "gender": gender,
+    "gender_other": genderOther,
     "city": city,
     "city_id": cityId,
     "state_id": stateId,

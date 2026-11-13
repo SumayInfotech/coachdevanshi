@@ -48,10 +48,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
 
   // 1. Eating Pattern
   String? _selectedEatingPattern;
+  final TextEditingController _eatingPatternOtherController = TextEditingController();
   String? _eatingPatternError;
 
   // 2. Cultural & Fasting Practices
   final Set<String> _selectedFasting = {};
+  final TextEditingController _fastingOtherController = TextEditingController();
   String? _fastingError;
 
   // 3. Weekday Meal Rhythms
@@ -75,6 +77,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
 
   // 6. Food Environment
   String? _selectedWhoCooks;
+  final TextEditingController _whoCooksOtherController = TextEditingController();
   String? _whoCooksError;
 
   final TextEditingController _shareMealsController = TextEditingController();
@@ -91,10 +94,12 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
 
   // 8. Substance Habits
   final Set<String> _selectedSubstances = {};
+  final TextEditingController _substancesOtherController = TextEditingController();
   String? _substanceError;
 
   // 9. Digestive Health
   final Set<String> _selectedDigestion = {};
+  final TextEditingController _digestionOtherController = TextEditingController();
   String? _digestionError;
 
   @override
@@ -118,9 +123,15 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       if (answers.eatingPattern != null && answers.eatingPattern!.isNotEmpty) {
         _selectedEatingPattern = answers.eatingPattern;
       }
+      if (answers.eatingPatternOther != null && answers.eatingPatternOther!.isNotEmpty) {
+        _eatingPatternOtherController.text = answers.eatingPatternOther!;
+      }
       if (answers.culturalFastingPractices != null && answers.culturalFastingPractices!.isNotEmpty) {
         _selectedFasting.clear();
         _selectedFasting.addAll(answers.culturalFastingPractices!);
+      }
+      if (answers.culturalFastingPracticesOther != null && answers.culturalFastingPracticesOther!.isNotEmpty) {
+        _fastingOtherController.text = answers.culturalFastingPracticesOther!;
       }
       if (answers.weekdayMeals != null) {
         _firstFoodController.text = answers.weekdayMeals!.firstIntake ?? "";
@@ -145,6 +156,9 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
       }
       if (answers.foodEnvWhoCooks != null && answers.foodEnvWhoCooks!.isNotEmpty) {
         _selectedWhoCooks = answers.foodEnvWhoCooks;
+      }
+      if (answers.foodEnvWhoCooksOther != null && answers.foodEnvWhoCooksOther!.isNotEmpty) {
+        _whoCooksOtherController.text = answers.foodEnvWhoCooksOther!;
       }
       if (answers.foodEnvShareMealsWith != null) {
         _shareMealsController.text = answers.foodEnvShareMealsWith!;
@@ -174,9 +188,15 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         _selectedSubstances.clear();
         _selectedSubstances.addAll(answers.substanceHabits!);
       }
+      if (answers.substanceHabitsOther != null && answers.substanceHabitsOther!.isNotEmpty) {
+        _substancesOtherController.text = answers.substanceHabitsOther!;
+      }
       if (answers.digestiveHealth != null && answers.digestiveHealth!.isNotEmpty) {
         _selectedDigestion.clear();
         _selectedDigestion.addAll(answers.digestiveHealth!);
+      }
+      if (answers.digestiveHealthOther != null && answers.digestiveHealthOther!.isNotEmpty) {
+        _digestionOtherController.text = answers.digestiveHealthOther!;
       }
     }
   }
@@ -264,7 +284,9 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
           body: {
             "answers": {
               "eating_pattern": _selectedEatingPattern ?? "",
+              "eating_pattern_other": _eatingPatternOtherController.text.trim(),
               "cultural_fasting_practices": _selectedFasting.toList(),
+              "cultural_fasting_practices_other": _fastingOtherController.text.trim(),
               "weekday_meals": {
                 "first_intake": _firstFoodController.text.trim(),
                 "breakfast": _breakfastController.text.trim(),
@@ -279,6 +301,7 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
               "foods_disliked": _foodsDislikeController.text.trim(),
               "foods_not_ready_to_give_up": _foodsKeepController.text.trim(),
               "food_env_who_cooks": _selectedWhoCooks ?? "",
+              "food_env_who_cooks_other": _whoCooksOtherController.text.trim(),
               "food_env_share_meals_with": _shareMealsController.text.trim(),
               "food_env_support_level": _selectedSupport ?? "",
               "food_env_meals_out_per_week": _selectedMealsOut ?? "",
@@ -288,7 +311,9 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
               "intake_caffeine": _intakeCaffeine ?? "",
               "intake_sugary": _intakeSugar ?? "",
               "substance_habits": _selectedSubstances.toList(),
-              "digestive_health": _selectedDigestion.toList()
+              "substance_habits_other": _substancesOtherController.text.trim(),
+              "digestive_health": _selectedDigestion.toList(),
+              "digestive_health_other": _digestionOtherController.text.trim(),
             }
           },
         ),
@@ -310,6 +335,11 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
     _foodsDislikeController.dispose();
     _foodsKeepController.dispose();
     _shareMealsController.dispose();
+    _eatingPatternOtherController.dispose();
+    _fastingOtherController.dispose();
+    _whoCooksOtherController.dispose();
+    _substancesOtherController.dispose();
+    _digestionOtherController.dispose();
     super.dispose();
   }
 
@@ -475,6 +505,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
               });
             },
           )),
+        if (_isSingleOtherSelected(_selectedEatingPattern, dynamicEating, widget.eatingPattern)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify eating pattern",
+            hint: "Enter your eating pattern",
+            controller: _eatingPatternOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_eatingPatternError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_eatingPatternError!,
@@ -550,6 +591,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedOther(_selectedFasting, dynamicFasting, widget.culturalFastingPractices)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify fasting practices",
+            hint: "Enter cultural or fasting practices",
+            controller: _fastingOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_fastingError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_fastingError!,
@@ -745,6 +797,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   }),
                 )).toList(),
         ),
+        if (_isSingleOtherSelected(_selectedWhoCooks, dynamicWhoCooks, widget.foodEnvWhoCooks)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify who usually cooks",
+            hint: "Enter who prepares most meals",
+            controller: _whoCooksOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         const SizedBox(height: 16),
         CommonText("Who you share most meals with",
           style: const TextStyle(
@@ -974,6 +1037,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedOther(_selectedSubstances, dynamicSubstances, widget.substanceHabits)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other substances",
+            hint: "Enter other substance details",
+            controller: _substancesOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_substanceError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_substanceError!,
@@ -1049,6 +1123,17 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
                   },
                 )).toList(),
         ),
+        if (_hasSelectedOther(_selectedDigestion, dynamicDigestion, widget.digestiveHealth)) ...[
+          const SizedBox(height: 12),
+          CommonTextField(
+            label: "Please specify other digestive concerns",
+            hint: "Enter other digestive issues",
+            controller: _digestionOtherController,
+            fillColor: appColors.textFieldBgColor,
+            borderColor: Colors.transparent,
+            isRequired: false,
+          ),
+        ],
         if (_digestionError != null) Padding(
           padding: const EdgeInsets.only(top: 8),
           child: CommonText(_digestionError!,
@@ -1057,5 +1142,36 @@ class _FoodDigestionIntakeScreenState extends State<FoodDigestionIntakeScreen> {
         ),
       ],
     );
+  }
+
+  bool _isOtherOption({String? value, String? label, String? title}) {
+    final l = (label ?? title ?? value ?? '').trim().toLowerCase();
+    final v = (value ?? '').trim().toLowerCase();
+    return l == 'other' || l == 'others' || l.startsWith('other ') || l.startsWith('other(') || l.startsWith('other (') || v == 'other' || v == 'others';
+  }
+
+  bool _hasSelectedOther(Set<String> selectedValues, List<Option> dynamicOptions, List<OnboardingData> fallbackOptions) {
+    for (final val in selectedValues) {
+      if (_isOtherOption(value: val)) return true;
+      for (final opt in dynamicOptions) {
+        if (opt.value == val && _isOtherOption(value: opt.value, label: opt.label)) return true;
+      }
+      for (final item in fallbackOptions) {
+        if (item.uuid == val && _isOtherOption(value: item.uuid, title: item.title)) return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isSingleOtherSelected(String? selectedValue, List<Option> dynamicOptions, List<OnboardingData> fallbackOptions) {
+    if (selectedValue == null) return false;
+    if (_isOtherOption(value: selectedValue)) return true;
+    for (final opt in dynamicOptions) {
+      if (opt.value == selectedValue && _isOtherOption(value: opt.value, label: opt.label)) return true;
+    }
+    for (final item in fallbackOptions) {
+      if (item.uuid == selectedValue && _isOtherOption(value: item.uuid, title: item.title)) return true;
+    }
+    return false;
   }
 }
