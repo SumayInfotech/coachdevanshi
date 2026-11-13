@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
         : null;
 
     final String stepCount = today?.steps != null ? today!.steps.toString() : "--";
-    final String weightText = today?.weight != null ? "${today!.weight} kg" : "--";
+    final String weightText = today?.weight != null ? "${today!.weight?.current} kg" : "--";
 
     final String? microBadgeText = checkins?.micro?.status != null
         ? (checkins!.micro!.status![0].toUpperCase() + checkins.micro!.status!.substring(1))

@@ -203,7 +203,7 @@ class TodayOverview {
   final String? stepsSyncedAt;
   final bool? isHealthConnected;
   final String? healthSource;
-  final dynamic weight;
+  final Weight? weight;
 
   factory TodayOverview.fromJson(Map<String, dynamic> json) {
     return TodayOverview(
@@ -212,7 +212,8 @@ class TodayOverview {
       stepsSyncedAt: json["steps_synced_at"],
       isHealthConnected: json["is_health_connected"],
       healthSource: json["health_source"],
-      weight: json["weight"],
+      // weight: json["weight"],
+      weight: json["weight"] == null ? null : Weight.fromJson(json["weight"]),
     );
   }
 
@@ -222,7 +223,7 @@ class TodayOverview {
     "steps_synced_at": stepsSyncedAt,
     "is_health_connected": isHealthConnected,
     "health_source": healthSource,
-    "weight": weight,
+    "weight": weight?.toJson(),
   };
 }
 
@@ -453,6 +454,49 @@ class CoachNote {
     "uuid": uuid,
     "note": note,
     "created_at": createdAt,
+  };
+
+}
+
+class Weight {
+  Weight({
+    required this.current,
+    required this.unit,
+    required this.recordedOn,
+    required this.source,
+    required this.isRecordedToday,
+    required this.change,
+    required this.trend,
+  });
+
+  final int? current;
+  final String? unit;
+  final String? recordedOn;
+  final String? source;
+  final bool? isRecordedToday;
+  final dynamic change;
+  final dynamic trend;
+
+  factory Weight.fromJson(Map<String, dynamic> json){
+    return Weight(
+      current: json["current"],
+      unit: json["unit"],
+      recordedOn: json["recorded_on"],
+      source: json["source"],
+      isRecordedToday: json["is_recorded_today"],
+      change: json["change"],
+      trend: json["trend"],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "current": current,
+    "unit": unit,
+    "recorded_on": recordedOn,
+    "source": source,
+    "is_recorded_today": isRecordedToday,
+    "change": change,
+    "trend": trend,
   };
 
 }
