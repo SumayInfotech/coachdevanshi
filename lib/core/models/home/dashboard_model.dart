@@ -469,7 +469,7 @@ class Weight {
     required this.trend,
   });
 
-  final int? current;
+  final num? current;
   final String? unit;
   final String? recordedOn;
   final String? source;

@@ -25,4 +25,21 @@ class Urls {
 
   static const dailyCheckins = "$baseUrl/daily-checkins";
   static String dailyCheck({required String date}) => "$baseUrl/daily-checkins/$date";
+
+  static const weeklyCheckins = "$baseUrl/weekly-checkins";
+  static String weeklyCheck({required String date}) => "$baseUrl/weekly-checkins/$date";
+  static const progressPhotos = "$baseUrl/progress-photos";
+  static const getProgressPhotos = "$baseUrl/progress-photos";
+  static const foodDiary = "$baseUrl/food-diary";
+  static const getFoodDiary = "$baseUrl/food-diary";
+
+  static const bloodReports = "$baseUrl/blood-reports";
+  static const getBloodReports = "$baseUrl/blood-reports";
+  static String deleteFileBloodReports({required String id}) => "$baseUrl/blood-reports/files/$id/delete";
+
+
+  static const pathways = "$baseUrl/pathways";
+  static String pathwaysProtocol({required String pathwayUuid}) => "$baseUrl/pathways/$pathwayUuid/protocol";
+
+  static const healthSync = "$baseUrl/health/sync";
 }

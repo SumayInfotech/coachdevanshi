@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/coach/rooted_recovery_new_moms/rooted_recovery_new_moms_bloc.dart';
+import '../../../core/blocs/coach/rooted_recovery_new_moms/rooted_recovery_new_moms_event.dart';
+import '../../../core/blocs/coach/rooted_recovery_new_moms/rooted_recovery_new_moms_state.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_bloc.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_event.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_state.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/coach/rooted_recovery_new_moms_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -10,44 +20,42 @@ import '../../widgets/common_text_field.dart';
 import '../profile/widget/profile_section_card.dart';
 
 class RootedRecoveryScreen extends StatefulWidget {
-  const RootedRecoveryScreen({super.key});
+  final String pathwayUuid;
+
+  const RootedRecoveryScreen({
+    super.key,
+    this.pathwayUuid = "",
+  });
 
   @override
   State<RootedRecoveryScreen> createState() => _RootedRecoveryScreenState();
 }
 
 class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
+  RootedRecoveryNewMomsData? _protocolData;
+  List<RootedRecoveryNewMomsFormField> _fields = [];
+
   // Section 1: Delivery & Timeline
-  final TextEditingController _deliveryDateController = TextEditingController(text: "September 14, 2024");
+  final TextEditingController _deliveryDateController = TextEditingController();
   String? _deliveryDateError;
   String? _typeOfDelivery;
   String? _typeOfDeliveryError;
-  final List<String> _deliveryTypes = ["Vaginal Birth", "Assisted Vaginal Birth", "C-section", "Prefer Not to Answer"];
 
   // Section 2: Lactation & Feeding Support
   String? _feedingSupport;
   String? _feedingSupportError;
-  final List<String> _feedingSupportOptions = ["Direct feeding or exclusive pumping", "Combination feeding", "Occasionally", "No"];
 
   // Section 3: Complications
   bool? _hasComplications;
   String? _hasComplicationsError;
   final TextEditingController _complicationsDetailsController = TextEditingController();
+  String? _complicationsDetailsError;
 
   // Section 4: Medical Exercise Clearance
   String? _exerciseClearance;
   String? _exerciseClearanceError;
-  final List<String> _exerciseClearanceOptions = ["Yes", "No", "Not yet discussed", "Exercise clearance is not currently relevant"];
 
   // Section 5: Current Postpartum Sensations
-  final List<String> _sensationsList = [
-    "Pelvic-floor heaviness or leaking",
-    "Abdominal separation or diastase concern",
-    "C-section or scar discomfort",
-    "Back, hip or pelvic pain",
-    "Very low mood, anxiety or feeling unable to cope",
-    "None of these"
-  ];
   final Set<String> _selectedSensations = {};
   String? _sensationsError;
 
@@ -57,73 +65,233 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
   String? _sleepStretchError;
 
   // Section 7: Top Priority Outcomes (Max 2)
-  final List<String> _prioritiesList = [
-    "Recovery", "Energy", "Strength", "Milk Supply",
-    "Digestion", "Gentle Inch Loss", "Sleep & Routine", "Feeling Myself"
-  ];
   final Set<String> _selectedPriorities = {};
   String? _prioritiesError;
   final TextEditingController _otherPriorityController = TextEditingController();
 
+  // Fallbacks
+  final List<RootedRecoveryNewMomsOption> _defaultDeliveryTypes = [
+    RootedRecoveryNewMomsOption(value: "vaginal", label: "Vaginal Birth"),
+    RootedRecoveryNewMomsOption(value: "assisted_vaginal", label: "Assisted Vaginal Birth"),
+    RootedRecoveryNewMomsOption(value: "c_section", label: "C-section"),
+    RootedRecoveryNewMomsOption(value: "prefer_not_to_answer", label: "Prefer Not to Answer"),
+  ];
+
+  final List<RootedRecoveryNewMomsOption> _defaultFeedingOptions = [
+    RootedRecoveryNewMomsOption(value: "direct_or_pumping", label: "Direct feeding or exclusive pumping"),
+    RootedRecoveryNewMomsOption(value: "combination", label: "Combination feeding"),
+    RootedRecoveryNewMomsOption(value: "occasionally", label: "Occasionally"),
+    RootedRecoveryNewMomsOption(value: "no", label: "No"),
+  ];
+
+  final List<RootedRecoveryNewMomsOption> _defaultExerciseClearanceOptions = [
+    RootedRecoveryNewMomsOption(value: "yes", label: "Yes"),
+    RootedRecoveryNewMomsOption(value: "no", label: "No"),
+    RootedRecoveryNewMomsOption(value: "not_discussed", label: "Not yet discussed"),
+    RootedRecoveryNewMomsOption(value: "not_relevant", label: "Exercise clearance is not currently relevant"),
+  ];
+
+  final List<RootedRecoveryNewMomsOption> _defaultSensationsList = [
+    RootedRecoveryNewMomsOption(value: "pelvic_floor", label: "Pelvic-floor heaviness or leaking"),
+    RootedRecoveryNewMomsOption(value: "diastasis", label: "Abdominal separation or diastase concern"),
+    RootedRecoveryNewMomsOption(value: "c_section_discomfort", label: "C-section or scar discomfort"),
+    RootedRecoveryNewMomsOption(value: "back_hip_pelvic_pain", label: "Back, hip or pelvic pain"),
+    RootedRecoveryNewMomsOption(value: "low_mood", label: "Very low mood, anxiety or feeling unable to cope"),
+    RootedRecoveryNewMomsOption(value: "none", label: "None of these"),
+  ];
+
+  final List<RootedRecoveryNewMomsOption> _defaultPrioritiesList = [
+    RootedRecoveryNewMomsOption(value: "recovery", label: "Recovery"),
+    RootedRecoveryNewMomsOption(value: "energy", label: "Energy"),
+    RootedRecoveryNewMomsOption(value: "strength", label: "Strength"),
+    RootedRecoveryNewMomsOption(value: "milk_supply", label: "Milk Supply"),
+    RootedRecoveryNewMomsOption(value: "digestion", label: "Digestion"),
+    RootedRecoveryNewMomsOption(value: "gentle_inch_loss", label: "Gentle Inch Loss"),
+    RootedRecoveryNewMomsOption(value: "sleep_routine", label: "Sleep & Routine"),
+    RootedRecoveryNewMomsOption(value: "feeling_myself", label: "Feeling Myself"),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    callGetProtocolFormAPI();
+  }
+
+  void callGetProtocolFormAPI() {
+    if (widget.pathwayUuid.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LoaderService.show(context);
+        BlocProvider.of<RootedRecoveryNewMomsBloc>(context).add(
+          UserGetRootedRecoveryNewMomsEvent(
+            url: Urls.pathwaysProtocol(pathwayUuid: widget.pathwayUuid),
+          ),
+        );
+      });
+    }
+  }
+
+  void _populateAnswers(RootedRecoveryNewMomsAnswers? answers) {
+    if (answers == null) return;
+
+    if (answers.deliveryDate != null && answers.deliveryDate!.isNotEmpty) {
+      _deliveryDateController.text = answers.deliveryDate!;
+    }
+
+    if (answers.deliveryType != null && answers.deliveryType!.isNotEmpty) {
+      _typeOfDelivery = answers.deliveryType;
+    }
+
+    if (answers.feedingStatus != null && answers.feedingStatus!.isNotEmpty) {
+      _feedingSupport = answers.feedingStatus;
+    }
+
+    if (answers.hasComplications != null) {
+      _hasComplications = answers.hasComplications;
+    }
+
+    if (answers.complicationDetails != null && answers.complicationDetails!.isNotEmpty) {
+      _complicationsDetailsController.text = answers.complicationDetails!;
+    }
+
+    if (answers.exerciseClearance != null && answers.exerciseClearance!.isNotEmpty) {
+      _exerciseClearance = answers.exerciseClearance;
+    }
+
+    if (answers.postpartumSensations != null && answers.postpartumSensations!.isNotEmpty) {
+      _selectedSensations.clear();
+      _selectedSensations.addAll(answers.postpartumSensations!);
+    }
+
+    if (answers.longestSleepStretch != null && answers.longestSleepStretch!.isNotEmpty) {
+      _sleepStretchController.text = answers.longestSleepStretch!;
+    }
+
+    if (answers.caregivingSupport != null && answers.caregivingSupport!.isNotEmpty) {
+      _caregivingSupportController.text = answers.caregivingSupport!;
+    }
+
+    if (answers.topPriorities != null && answers.topPriorities!.isNotEmpty) {
+      _selectedPriorities.clear();
+      _selectedPriorities.addAll(answers.topPriorities!);
+    }
+
+    if (answers.otherPriority != null && answers.otherPriority!.isNotEmpty) {
+      _otherPriorityController.text = answers.otherPriority!;
+    }
+  }
+
+  RootedRecoveryNewMomsFormField? _getField(String key) {
+    try {
+      return _fields.firstWhere((f) => f.key == key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _getOptionValue(String? selected, List<RootedRecoveryNewMomsOption> options) {
+    if (selected == null) return null;
+    final found = options.firstWhere(
+      (o) => o.value == selected || o.label?.toLowerCase() == selected.toLowerCase(),
+      orElse: () => RootedRecoveryNewMomsOption(value: selected),
+    );
+    return found.value ?? selected;
+  }
+
+  List<String> _getOptionValues(Set<String> selectedSet, List<RootedRecoveryNewMomsOption> options) {
+    return selectedSet.map((item) {
+      final found = options.firstWhere(
+        (o) => o.value == item || o.label?.toLowerCase() == item.toLowerCase(),
+        orElse: () => RootedRecoveryNewMomsOption(value: item),
+      );
+      return found.value ?? item;
+    }).toList();
+  }
+
   bool _validate() {
     bool isValid = true;
 
-    // Section 1
-    if (_deliveryDateController.text.trim().isEmpty) {
+    // Delivery Date
+    final deliveryDateField = _getField("delivery_date");
+    if ((deliveryDateField?.required ?? true) && _deliveryDateController.text.trim().isEmpty) {
       _deliveryDateError = "Required";
       isValid = false;
     } else {
       _deliveryDateError = null;
     }
-    if (_typeOfDelivery == null) {
+
+    // Delivery Type
+    final deliveryTypeField = _getField("delivery_type");
+    if ((deliveryTypeField?.required ?? true) && (_typeOfDelivery == null || _typeOfDelivery!.isEmpty)) {
       _typeOfDeliveryError = "Required";
       isValid = false;
     } else {
       _typeOfDeliveryError = null;
     }
 
-    // Section 2
-    if (_feedingSupport == null) {
+    // Feeding Status
+    final feedingField = _getField("feeding_status");
+    if ((feedingField?.required ?? true) && (_feedingSupport == null || _feedingSupport!.isEmpty)) {
       _feedingSupportError = "Required";
       isValid = false;
     } else {
       _feedingSupportError = null;
     }
 
-    // Section 3
-    if (_hasComplications == null) {
+    // Complications
+    final complicationsField = _getField("has_complications");
+    if ((complicationsField?.required ?? true) && _hasComplications == null) {
       _hasComplicationsError = "Required";
       isValid = false;
     } else {
       _hasComplicationsError = null;
     }
 
-    // Section 4
-    if (_exerciseClearance == null) {
+    // Complication Details
+    final detailsField = _getField("complication_details");
+    bool detailsRequired = detailsField?.required ?? false;
+    if (detailsField?.requiredIf != null &&
+        detailsField!.requiredIf!.field == "has_complications" &&
+        detailsField.requiredIf!.value == true &&
+        _hasComplications == true) {
+      detailsRequired = true;
+    }
+    if (detailsRequired && _complicationsDetailsController.text.trim().isEmpty) {
+      _complicationsDetailsError = "Required";
+      isValid = false;
+    } else {
+      _complicationsDetailsError = null;
+    }
+
+    // Exercise Clearance
+    final clearanceField = _getField("exercise_clearance");
+    if ((clearanceField?.required ?? true) && (_exerciseClearance == null || _exerciseClearance!.isEmpty)) {
       _exerciseClearanceError = "Required";
       isValid = false;
     } else {
       _exerciseClearanceError = null;
     }
 
-    // Section 5
-    if (_selectedSensations.isEmpty) {
+    // Postpartum Sensations
+    final sensationsField = _getField("postpartum_sensations");
+    if ((sensationsField?.required ?? true) && _selectedSensations.isEmpty) {
       _sensationsError = "Please select at least one";
       isValid = false;
     } else {
       _sensationsError = null;
     }
 
-    // Section 6
-    if (_sleepStretchController.text.trim().isEmpty) {
+    // Longest Sleep Stretch
+    final sleepField = _getField("longest_sleep_stretch");
+    if ((sleepField?.required ?? true) && _sleepStretchController.text.trim().isEmpty) {
       _sleepStretchError = "Required";
       isValid = false;
     } else {
       _sleepStretchError = null;
     }
 
-    // Section 7
-    if (_selectedPriorities.isEmpty) {
+    // Top Priorities (max 2)
+    final prioritiesField = _getField("top_priorities");
+    if ((prioritiesField?.required ?? true) && _selectedPriorities.isEmpty) {
       _prioritiesError = "Select at least 1 priority";
       isValid = false;
     } else {
@@ -135,12 +303,55 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
   }
 
   void _onSave() {
-    if (_validate()) {
-      showSnackBar(context: context, isError: false, message: 'Rooted Recovery for New Moms Submitted!');
-      navigation.pop(context);
-    } else {
+    if (!_validate()) {
       showSnackBar(context: context, isError: true, message: 'Please complete all required fields.');
+      return;
     }
+
+    if (widget.pathwayUuid.isEmpty) {
+      showSnackBar(context: context, isError: true, message: 'Pathway ID is missing.');
+      return;
+    }
+
+    final deliveryTypeField = _getField("delivery_type");
+    final feedingField = _getField("feeding_status");
+    final clearanceField = _getField("exercise_clearance");
+    final sensationsField = _getField("postpartum_sensations");
+    final prioritiesField = _getField("top_priorities");
+
+    final RootedRecoveryNewMomsAnswers answers = RootedRecoveryNewMomsAnswers(
+      deliveryDate: _deliveryDateController.text.trim().isNotEmpty ? _deliveryDateController.text.trim() : null,
+      deliveryType: _getOptionValue(_typeOfDelivery, deliveryTypeField?.options ?? _defaultDeliveryTypes),
+      feedingStatus: _getOptionValue(_feedingSupport, feedingField?.options ?? _defaultFeedingOptions),
+      hasComplications: _hasComplications ?? false,
+      complicationDetails: _complicationsDetailsController.text.trim().isNotEmpty
+          ? _complicationsDetailsController.text.trim()
+          : null,
+      exerciseClearance: _getOptionValue(_exerciseClearance, clearanceField?.options ?? _defaultExerciseClearanceOptions),
+      postpartumSensations: _getOptionValues(_selectedSensations, sensationsField?.options ?? _defaultSensationsList),
+      longestSleepStretch: _sleepStretchController.text.trim().isNotEmpty
+          ? _sleepStretchController.text.trim()
+          : null,
+      caregivingSupport: _caregivingSupportController.text.trim().isNotEmpty
+          ? _caregivingSupportController.text.trim()
+          : null,
+      topPriorities: _getOptionValues(_selectedPriorities, prioritiesField?.options ?? _defaultPrioritiesList),
+      otherPriority: _otherPriorityController.text.trim().isNotEmpty
+          ? _otherPriorityController.text.trim()
+          : null,
+    );
+
+    final Map<String, dynamic> body = {
+      "answers": answers.toJson(),
+    };
+
+    LoaderService.show(context);
+    BlocProvider.of<SaveProtocolFormBloc>(context).add(
+      UserSaveProtocolFormEvent(
+        url: Urls.pathwaysProtocol(pathwayUuid: widget.pathwayUuid),
+        body: body,
+      ),
+    );
   }
 
   @override
@@ -155,68 +366,116 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<RootedRecoveryNewMomsBloc, RootedRecoveryNewMomsState>(
+          listener: (context, state) {
+            if (state is RootedRecoveryNewMomsSuccess) {
+              LoaderService.hide();
+              _protocolData = state.model.data;
+              _fields = state.model.data?.fields ?? [];
+              _populateAnswers(state.model.data?.answers);
+              setState(() {});
+            } else if (state is RootedRecoveryNewMomsFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<SaveProtocolFormBloc, SaveProtocolFormState>(
+          listener: (context, state) {
+            if (state is SaveProtocolFormSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? 'Rooted Recovery for New Moms Submitted!',
+              );
+              navigation.pop(context);
+            } else if (state is SaveProtocolFormFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+      ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          LoaderService.hide();
+          navigation.pop(context);
+        },
+        child: Scaffold(
+          backgroundColor: appColors.bgColor,
+          appBar: CommonAppBar(
+            appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+            centerTitle: true,
+            leading: buildInkWell(
+              onTap: () {
+                LoaderService.hide();
+                navigation.pop(context);
+              },
+              child: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                  color: appColors.neutral,
+                ),
+              ),
+            ),
+            title: CommonText(
+              _protocolData?.title ?? "Rooted Recovery for New Moms",
+              fontFamily: fontPlayfairDisplay,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Color(0xFF1D1B1A),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.24,
+              ),
             ),
           ),
-        ),
-        title: const CommonText(
-          "Rooted Recovery for New Moms",
-          fontFamily: fontPlayfairDisplay,
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF1D1B1A),
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.24,
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            children: [
+              _buildDeliveryAndTimeline(),
+              const SizedBox(height: 24),
+              _buildLactationSupport(),
+              const SizedBox(height: 24),
+              _buildComplications(),
+              const SizedBox(height: 24),
+              _buildMedicalClearance(),
+              const SizedBox(height: 24),
+              _buildPostpartumSensations(),
+              const SizedBox(height: 24),
+              _buildSleepAndSupport(),
+              const SizedBox(height: 24),
+              _buildPriorityOutcomes(),
+              const SizedBox(height: 32),
+              CommonButton(
+                name: "Save & Submit Rooted Recovery Protocol",
+                onTap: _onSave,
+                icon: Icons.arrow_forward_rounded,
+                isIconFirst: false,
+                btnColor: const Color(0xFF8B484D),
+                fontColor: appColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                radius: 999,
+              ),
+              SizedBox(height: bottomPadding(context)),
+            ],
           ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        children: [
-          _buildDeliveryAndTimeline(),
-          const SizedBox(height: 24),
-          _buildLactationSupport(),
-          const SizedBox(height: 24),
-          _buildComplications(),
-          const SizedBox(height: 24),
-          _buildMedicalClearance(),
-          const SizedBox(height: 24),
-          _buildPostpartumSensations(),
-          const SizedBox(height: 24),
-          _buildSleepAndSupport(),
-          const SizedBox(height: 24),
-          _buildPriorityOutcomes(),
-          const SizedBox(height: 32),
-          CommonButton(
-            name: "Save & Submit Rooted Recovery Protocol",
-            onTap: _onSave,
-            icon: Icons.arrow_forward_rounded,
-            isIconFirst: false,
-            btnColor: const Color(0xFF8B484D),
-            fontColor: appColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            radius: 999,
-          ),
-          SizedBox(height: bottomPadding(context)),
-        ],
       ),
     );
   }
 
   Widget _buildDeliveryAndTimeline() {
+    final deliveryTypeField = _getField("delivery_type");
+    final deliveryTypes = deliveryTypeField?.options ?? _defaultDeliveryTypes;
+
     return ProfileSectionCard(
       title: "Delivery & Timeline",
       icon: appIcons.calender,
@@ -234,7 +493,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
           borderColor: _deliveryDateError != null ? appColors.red : Colors.transparent,
           fillColor: const Color(0xFFF8F2F0),
           suffixIcon: const Icon(Icons.calendar_today_outlined, size: 16, color: Color(0xFF1D1B1A)),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF9A8687)),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF1D1B1A)),
           onTap: () async {
             DateTime? picked = await showDatePicker(
               context: context,
@@ -244,7 +503,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
             );
             if (picked != null) {
               setState(() {
-                _deliveryDateController.text = DateFormat('MMMM dd, yyyy').format(picked);
+                _deliveryDateController.text = DateFormat('yyyy-MM-dd').format(picked);
                 if (_deliveryDateError != null) _validate();
               });
             }
@@ -259,12 +518,16 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         const CommonText("Type of Delivery", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1D1B1A))),
         const SizedBox(height: 8),
         Column(
-          children: _deliveryTypes.map((type) => _buildRadioRow(type, _typeOfDelivery, (val) {
-            setState(() {
-              _typeOfDelivery = val;
-              if (_typeOfDeliveryError != null) _validate();
+          children: deliveryTypes.map((opt) {
+            final String val = opt.value ?? "";
+            final String label = opt.label ?? val;
+            return _buildRadioRow(val, label, _typeOfDelivery, (newVal) {
+              setState(() {
+                _typeOfDelivery = newVal;
+                if (_typeOfDeliveryError != null) _validate();
+              });
             });
-          })).toList(),
+          }).toList(),
         ),
         if (_typeOfDeliveryError != null)
           Padding(
@@ -276,6 +539,9 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
   }
 
   Widget _buildLactationSupport() {
+    final feedingField = _getField("feeding_status");
+    final feedingOptions = feedingField?.options ?? _defaultFeedingOptions;
+
     return ProfileSectionCard(
       title: "Lactation & Feeding Support",
       icon: appIcons.drop,
@@ -283,12 +549,16 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         buildRequiredLabel("Are you currently breastfeeding or expressing milk?", color: const Color(0xFF534343)),
         const SizedBox(height: 16),
         Column(
-          children: _feedingSupportOptions.map((type) => _buildRadioRow(type, _feedingSupport, (val) {
-            setState(() {
-              _feedingSupport = val;
-              if (_feedingSupportError != null) _validate();
+          children: feedingOptions.map((opt) {
+            final String val = opt.value ?? "";
+            final String label = opt.label ?? val;
+            return _buildRadioRow(val, label, _feedingSupport, (newVal) {
+              setState(() {
+                _feedingSupport = newVal;
+                if (_feedingSupportError != null) _validate();
+              });
             });
-          })).toList(),
+          }).toList(),
         ),
         if (_feedingSupportError != null)
           Padding(
@@ -340,14 +610,26 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
           controller: _complicationsDetailsController,
           hint: "e.g. Mild gestational hypertension during third trimester; now monitored by OB-GYN and resolving steadily.",
           maxLines: 4,
-          borderColor: Colors.transparent,
+          borderColor: _complicationsDetailsError != null ? appColors.red : Colors.transparent,
           fillColor: const Color(0xFFF8F2F0),
+          onChanged: (v) {
+            setState(() {});
+            if (_complicationsDetailsError != null) _validate();
+          },
         ),
+        if (_complicationsDetailsError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
+            child: CommonText(_complicationsDetailsError!, style: TextStyle(color: appColors.red, fontSize: 12)),
+          ),
       ],
     );
   }
 
   Widget _buildMedicalClearance() {
+    final clearanceField = _getField("exercise_clearance");
+    final clearanceOptions = clearanceField?.options ?? _defaultExerciseClearanceOptions;
+
     return ProfileSectionCard(
       title: "Medical Exercise Clearance",
       icon: appIcons.movement,
@@ -355,12 +637,16 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         buildRequiredLabel("Have you received formal medical clearance from your OB-GYN or midwife to begin or resume intentional exercise?", color: const Color(0xFF534343)),
         const SizedBox(height: 16),
         Column(
-          children: _exerciseClearanceOptions.map((type) => _buildRadioRow(type, _exerciseClearance, (val) {
-            setState(() {
-              _exerciseClearance = val;
-              if (_exerciseClearanceError != null) _validate();
+          children: clearanceOptions.map((opt) {
+            final String val = opt.value ?? "";
+            final String label = opt.label ?? val;
+            return _buildRadioRow(val, label, _exerciseClearance, (newVal) {
+              setState(() {
+                _exerciseClearance = newVal;
+                if (_exerciseClearanceError != null) _validate();
+              });
             });
-          })).toList(),
+          }).toList(),
         ),
         if (_exerciseClearanceError != null)
           Padding(
@@ -403,6 +689,9 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
   }
 
   Widget _buildPostpartumSensations() {
+    final sensationsField = _getField("postpartum_sensations");
+    final sensations = sensationsField?.options ?? _defaultSensationsList;
+
     return ProfileSectionCard(
       title: "Current Postpartum Sensations",
       icon: appIcons.maintenance,
@@ -410,22 +699,30 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         buildRequiredLabel("Are you currently experiencing any physical or emotional symptoms?", color: const Color(0xFF534343)),
         const SizedBox(height: 16),
         Column(
-          children: _sensationsList.map((item) => _buildCheckboxRow(item, _selectedSensations.contains(item), () {
-            setState(() {
-              if (_selectedSensations.contains(item)) {
-                _selectedSensations.remove(item);
-              } else {
-                if (item == "None of these") {
-                  _selectedSensations.clear();
-                  _selectedSensations.add(item);
+          children: sensations.map((opt) {
+            final String val = opt.value ?? "";
+            final String label = opt.label ?? val;
+            final bool isSelected = _selectedSensations.contains(val) || _selectedSensations.contains(label);
+
+            return _buildCheckboxRow(label, isSelected, () {
+              setState(() {
+                if (isSelected) {
+                  _selectedSensations.remove(val);
+                  _selectedSensations.remove(label);
                 } else {
-                  _selectedSensations.remove("None of these");
-                  _selectedSensations.add(item);
+                  if (val == "none" || label.toLowerCase() == "none of these") {
+                    _selectedSensations.clear();
+                    _selectedSensations.add(val);
+                  } else {
+                    _selectedSensations.remove("none");
+                    _selectedSensations.remove("None of these");
+                    _selectedSensations.add(val);
+                  }
                 }
-              }
-              if (_sensationsError != null) _validate();
+                if (_sensationsError != null) _validate();
+              });
             });
-          })).toList(),
+          }).toList(),
         ),
         if (_sensationsError != null)
           Padding(
@@ -477,6 +774,9 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
   }
 
   Widget _buildPriorityOutcomes() {
+    final prioritiesField = _getField("top_priorities");
+    final priorities = prioritiesField?.options ?? _defaultPrioritiesList;
+
     return ProfileSectionCard(
       title: "What are your top two priorities right now?",
       icon: appIcons.compass,
@@ -486,26 +786,30 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: _prioritiesList.map((item) {
-            bool isSelected = _selectedPriorities.contains(item);
-            double chipWidth = (MediaQuery.of(context).size.width - 40 - 40 - 10) / 2; // Responsive 2 cols
+          children: priorities.map((opt) {
+            final String val = opt.value ?? "";
+            final String label = opt.label ?? val;
+            final bool isSelected = _selectedPriorities.contains(val) || _selectedPriorities.contains(label);
+            final double chipWidth = (MediaQuery.of(context).size.width - 40 - 40 - 10) / 2;
+
             return SizedBox(
               width: chipWidth,
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     if (isSelected) {
-                      _selectedPriorities.remove(item);
+                      _selectedPriorities.remove(val);
+                      _selectedPriorities.remove(label);
                     } else {
                       if (_selectedPriorities.length < 2) {
-                        _selectedPriorities.add(item);
+                        _selectedPriorities.add(val);
                       }
                     }
                     if (_prioritiesError != null) _validate();
                   });
                 },
                 child: Container(
-                  height: 54, // Fixed height to handle wraps effectively
+                  height: 54,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   alignment: Alignment.centerLeft,
                   decoration: BoxDecoration(
@@ -520,7 +824,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
                     children: [
                       Flexible(
                         child: CommonText(
-                          item,
+                          label,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -542,7 +846,11 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
                           margin: const EdgeInsets.only(left: 4),
                           width: 20,
                           height: 20,
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white, border: Border.all(color: const Color(0xFF857373))),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            border: Border.all(color: const Color(0xFF857373)),
+                          ),
                         ),
                     ],
                   ),
@@ -570,10 +878,10 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
 
   // --- Reusable Control Helpers ---
 
-  Widget _buildRadioRow(String value, String? groupValue, ValueChanged<String> onChanged) {
-    bool isSelected = groupValue == value;
+  Widget _buildRadioRow(String val, String label, String? groupValue, ValueChanged<String> onChanged) {
+    bool isSelected = groupValue == val || groupValue?.toLowerCase() == label.toLowerCase();
     return GestureDetector(
-      onTap: () => onChanged(value),
+      onTap: () => onChanged(val),
       child: Container(
         padding: const EdgeInsets.all(14),
         margin: const EdgeInsets.only(bottom: 10),
@@ -589,7 +897,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
           children: [
             Expanded(
               child: CommonText(
-                value,
+                label,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,
@@ -613,7 +921,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
     );
   }
 
-  Widget _buildCheckboxRow(String value, bool isSelected, VoidCallback onTap) {
+  Widget _buildCheckboxRow(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -631,7 +939,7 @@ class _RootedRecoveryScreenState extends State<RootedRecoveryScreen> {
           children: [
             Expanded(
               child: CommonText(
-                value,
+                label,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,

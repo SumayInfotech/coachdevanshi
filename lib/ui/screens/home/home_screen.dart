@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
+import '../../../core/blocs/home/health_sync/health_sync_bloc.dart';
 import '../../../core/constants/urls.dart';
+import '../../../core/constants/utils.dart';
 import '../../../core/models/home/dashboard_model.dart';
+import '../../../core/services/health_service.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../main.dart';
 import '../bottom_bar_screen.dart';
@@ -46,20 +51,69 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _handleHealthSync() async {
+    LoaderService.show(context);
+    final payload = await HealthService.getTodayHealthSyncPayload();
+    if (!mounted) return;
+
+    if (payload == null) {
+      LoaderService.hide();
+      showSnackBar(
+        context: context,
+        isError: true,
+        message:
+            "Unable to read health data. Please grant permissions in ${Platform.isAndroid ? 'Health Connect' : 'Apple Health'}.",
+      );
+      return;
+    }
+
+    BlocProvider.of<HealthSyncBloc>(context).add(
+      UserHealthSyncEvent(
+        url: Urls.healthSync,
+        body: payload,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DashboardBloc, DashboardState>(
-      listener: (context, state) {
-        if (state is DashboardSuccess) {
-          LoaderService.hide();
-          setState(() {
-            dashboardModel = state.model;
-          });
-        } else if (state is DashboardFailed) {
-          LoaderService.hide();
-          appLog(state.message);
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<DashboardBloc, DashboardState>(
+          listener: (context, state) {
+            if (state is DashboardSuccess) {
+              LoaderService.hide();
+              setState(() {
+                dashboardModel = state.model;
+              });
+            } else if (state is DashboardFailed) {
+              LoaderService.hide();
+              appLog(state.message);
+            }
+          },
+        ),
+        BlocListener<HealthSyncBloc, HealthSyncState>(
+          listener: (context, state) {
+            if (state is HealthSyncSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "Health data synced successfully!",
+              );
+              // Refresh dashboard after successful sync
+              callDashboardAPI();
+            } else if (state is HealthSyncFailed) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: appColors.bgColor,
         body: SafeArea(
@@ -104,7 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
         : null;
 
     final String stepCount = today?.steps != null ? today!.steps.toString() : "--";
-    // final String weightText = today?.weight != null ? "${today!.weight} kg" : "--";
     final String weightText = today?.weight != null ? "${today!.weight?.current} ${today.weight?.unit ?? 'kg'}" : "--";
 
     final String? microBadgeText = checkins?.micro?.status != null
@@ -164,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isMicroDone: checkins?.micro?.isDone,
             updatedTime: today?.stepsSyncedAt,
             onStepsTap: () => appLog("Daily steps card tapped"),
-            onSyncTap: () => appLog("Sync steps tapped"),
+            onSyncTap: _handleHealthSync,
             onWeightTap: () => appLog("Weight card tapped"),
             onAddWeightTap: () => appLog("Add weight tapped"),
             onMicroCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),

@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We need access to your health data to sync your daily steps, distance, and calories.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>We need access to your health data to sync your daily activity progress.</string>
 </dict>
 </plist>

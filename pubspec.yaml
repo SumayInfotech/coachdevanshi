@@ -65,6 +65,7 @@ dependencies:
   shimmer: ^4.0.0
   pinput: ^6.0.2
   country_code_picker: ^3.4.1
+  health: ^13.3.2
 
 dev_dependencies:
   flutter_test:

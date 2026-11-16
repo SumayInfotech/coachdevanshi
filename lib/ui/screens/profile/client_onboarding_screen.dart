@@ -478,9 +478,8 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             subtitle: "Upload Progress photos to monitor your coaching progress",
                             buttonText: "Add Photos",
                             isPrimaryButton: true,
-                            onTapButton: () => navigation.pushSlideAnimation(
-                              context,
-                              const TrackWeeklyProgressScreen(),
+                            onTapButton: () => navigation.pushSlideAnimation(context,
+                              const TrackWeeklyProgressScreen(isBack: true),
                             ),
                           ),
                           const SizedBox(height: 12),

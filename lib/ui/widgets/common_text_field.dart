@@ -171,6 +171,12 @@ InputDecoration buildInputDecoration({
     labelStyle: style ?? TextStyle(color: appColors.black, fontSize: 14),
     errorText: error,
     errorMaxLines: 3,
+    errorStyle: TextStyle(
+      color: appColors.red,
+      fontSize: 12,
+      fontFamily: fontFamilyPlusJakartaSans,
+      fontWeight: FontWeight.w400,
+    ),
     contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     suffixText: suffixText,
     suffixStyle: TextStyle(

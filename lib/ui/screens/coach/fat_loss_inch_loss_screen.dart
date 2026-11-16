@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/coach/fat_loss_inch_loss/fat_loss_inch_loss_bloc.dart';
+import '../../../core/blocs/coach/fat_loss_inch_loss/fat_loss_inch_loss_event.dart';
+import '../../../core/blocs/coach/fat_loss_inch_loss/fat_loss_inch_loss_state.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_bloc.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_event.dart';
+import '../../../core/blocs/coach/save_protocol_form/save_protocol_form_state.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/coach/fat_loss_inch_loss_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -10,18 +20,27 @@ import '../profile/widget/profile_section_card.dart';
 import 'widget/habit_matrix_item.dart';
 
 class FatLossInchLossScreen extends StatefulWidget {
-  const FatLossInchLossScreen({super.key});
+  final String pathwayUuid;
+
+  const FatLossInchLossScreen({
+    super.key,
+    this.pathwayUuid = "",
+  });
 
   @override
   State<FatLossInchLossScreen> createState() => _FatLossInchLossScreenState();
 }
 
 class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
+  FatLossInchLossData? _protocolData;
+  List<FatLossInchLossFormField> _fields = [];
+
   // Section 1: Weight History & Natural Rhythms
-  final TextEditingController _highestWeightController = TextEditingController(text: "74.0");
-  final TextEditingController _highestYearController = TextEditingController(text: "2021");
-  final TextEditingController _lowestWeightController = TextEditingController(text: "58.5");
-  final TextEditingController _lowestYearController = TextEditingController(text: "2018");
+  String _weightUnit = "kg";
+  final TextEditingController _highestWeightController = TextEditingController();
+  final TextEditingController _highestYearController = TextEditingController();
+  final TextEditingController _lowestWeightController = TextEditingController();
+  final TextEditingController _lowestYearController = TextEditingController();
   final TextEditingController _weightPeriodsController = TextEditingController();
 
   String? _highestWeightError;
@@ -33,7 +52,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
 
   // Section 3: Habit Readiness & Boundary Matrix
   String _eatingOutReady = "";
-  String _lateNightEatingReady = "Could reduce with support";
+  String _lateNightEatingReady = "";
   String _sweetsReady = "";
   String _packagedFoodsReady = "";
   String _alcoholReady = "";
@@ -44,17 +63,107 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
   final TextEditingController _momentumController = TextEditingController();
   String? _momentumError;
 
+  @override
+  void initState() {
+    super.initState();
+    callGetProtocolFormAPI();
+  }
+
+  void callGetProtocolFormAPI() {
+    if (widget.pathwayUuid.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        LoaderService.show(context);
+        BlocProvider.of<FatLossInchLossBloc>(context).add(
+          UserGetFatLossInchLossEvent(
+            url: Urls.pathwaysProtocol(pathwayUuid: widget.pathwayUuid),
+          ),
+        );
+      });
+    }
+  }
+
+  void _populateAnswers(FatLossInchLossAnswers? answers) {
+    if (answers == null) return;
+
+    if (answers.weightUnit != null && answers.weightUnit!.isNotEmpty) {
+      _weightUnit = answers.weightUnit!;
+    }
+
+    if (answers.highestWeight != null) {
+      _highestWeightController.text = answers.highestWeight.toString();
+    }
+    if (answers.highestWeightYear != null) {
+      _highestYearController.text = answers.highestWeightYear.toString();
+    }
+    if (answers.lowestWeight != null) {
+      _lowestWeightController.text = answers.lowestWeight.toString();
+    }
+    if (answers.lowestWeightYear != null) {
+      _lowestYearController.text = answers.lowestWeightYear.toString();
+    }
+    if (answers.majorWeightPeriods != null && answers.majorWeightPeriods!.isNotEmpty) {
+      _weightPeriodsController.text = answers.majorWeightPeriods!;
+    }
+    if (answers.pastTransitions != null && answers.pastTransitions!.isNotEmpty) {
+      _pastTransitionsController.text = answers.pastTransitions!;
+    }
+
+    if (answers.habitReadiness != null) {
+      final habits = answers.habitReadiness!;
+      if (habits.eatingOut != null) _eatingOutReady = habits.eatingOut!;
+      if (habits.lateNightEating != null) _lateNightEatingReady = habits.lateNightEating!;
+      if (habits.sweets != null) _sweetsReady = habits.sweets!;
+      if (habits.packagedFoods != null) _packagedFoodsReady = habits.packagedFoods!;
+      if (habits.alcohol != null) _alcoholReady = habits.alcohol!;
+      if (habits.skippingMeals != null) _skippingMealsReady = habits.skippingMeals!;
+    }
+
+    if (answers.maintenanceSupport != null && answers.maintenanceSupport!.isNotEmpty) {
+      _momentumController.text = answers.maintenanceSupport!;
+    }
+  }
+
+  FatLossInchLossFormField? _getField(String key) {
+    try {
+      return _fields.firstWhere((f) => f.key == key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  FatLossInchLossFormField? _getNestedField(String groupKey, String key) {
+    try {
+      final group = _getField(groupKey);
+      return group?.fields?.firstWhere((f) => f.key == key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  List<HabitMatrixOption>? _getHabitOptions(String subFieldKey) {
+    final field = _getNestedField("habit_readiness", subFieldKey);
+    if (field?.options != null && field!.options!.isNotEmpty) {
+      return field.options!
+          .map((o) => HabitMatrixOption(value: o.value ?? "", label: o.label ?? ""))
+          .toList();
+    }
+    return null;
+  }
+
   bool _validate() {
     bool isValid = true;
 
     // Weight History
-    if (_highestWeightController.text.trim().isEmpty) {
+    final highestField = _getField("highest_weight");
+    if ((highestField?.required ?? false) && _highestWeightController.text.trim().isEmpty) {
       _highestWeightError = "Required";
       isValid = false;
     } else {
       _highestWeightError = null;
     }
-    if (_lowestWeightController.text.trim().isEmpty) {
+
+    final lowestField = _getField("lowest_weight");
+    if ((lowestField?.required ?? false) && _lowestWeightController.text.trim().isEmpty) {
       _lowestWeightError = "Required";
       isValid = false;
     } else {
@@ -62,7 +171,8 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
     }
 
     // Past Transitions
-    if (_pastTransitionsController.text.trim().isEmpty) {
+    final pastTransitionsField = _getField("past_transitions");
+    if ((pastTransitionsField?.required ?? true) && _pastTransitionsController.text.trim().isEmpty) {
       _pastTransitionsError = "Required";
       isValid = false;
     } else {
@@ -70,17 +180,21 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
     }
 
     // Habit Readiness
-    if (_eatingOutReady.isEmpty || _lateNightEatingReady.isEmpty || 
-        _sweetsReady.isEmpty || _packagedFoodsReady.isEmpty || 
-        _alcoholReady.isEmpty || _skippingMealsReady.isEmpty) {
+    if (_eatingOutReady.isEmpty ||
+        _lateNightEatingReady.isEmpty ||
+        _sweetsReady.isEmpty ||
+        _packagedFoodsReady.isEmpty ||
+        _alcoholReady.isEmpty ||
+        _skippingMealsReady.isEmpty) {
       _habitMatrixError = "Please select readiness for all habits";
       isValid = false;
     } else {
       _habitMatrixError = null;
     }
 
-    // Momentum
-    if (_momentumController.text.trim().isEmpty) {
+    // Sustainable Momentum
+    final maintenanceField = _getField("maintenance_support");
+    if ((maintenanceField?.required ?? true) && _momentumController.text.trim().isEmpty) {
       _momentumError = "Required";
       isValid = false;
     } else {
@@ -92,12 +206,52 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
   }
 
   void _onSave() {
-    if (_validate()) {
-      showSnackBar(context: context, isError: false, message: 'Fat Loss and Inch Loss Submitted!');
-      navigation.pop(context);
-    } else {
+    if (!_validate()) {
       showSnackBar(context: context, isError: true, message: 'Please complete all required fields.');
+      return;
     }
+
+    if (widget.pathwayUuid.isEmpty) {
+      showSnackBar(context: context, isError: true, message: 'Pathway ID is missing.');
+      return;
+    }
+
+    final FatLossInchLossAnswers answers = FatLossInchLossAnswers(
+      weightUnit: _weightUnit,
+      highestWeight: num.tryParse(_highestWeightController.text.trim()),
+      highestWeightYear: int.tryParse(_highestYearController.text.trim()),
+      lowestWeight: num.tryParse(_lowestWeightController.text.trim()),
+      lowestWeightYear: int.tryParse(_lowestYearController.text.trim()),
+      majorWeightPeriods: _weightPeriodsController.text.trim().isNotEmpty
+          ? _weightPeriodsController.text.trim()
+          : null,
+      pastTransitions: _pastTransitionsController.text.trim().isNotEmpty
+          ? _pastTransitionsController.text.trim()
+          : null,
+      habitReadiness: HabitReadinessAnswers(
+        eatingOut: _eatingOutReady.isNotEmpty ? _eatingOutReady : null,
+        lateNightEating: _lateNightEatingReady.isNotEmpty ? _lateNightEatingReady : null,
+        sweets: _sweetsReady.isNotEmpty ? _sweetsReady : null,
+        packagedFoods: _packagedFoodsReady.isNotEmpty ? _packagedFoodsReady : null,
+        alcohol: _alcoholReady.isNotEmpty ? _alcoholReady : null,
+        skippingMeals: _skippingMealsReady.isNotEmpty ? _skippingMealsReady : null,
+      ),
+      maintenanceSupport: _momentumController.text.trim().isNotEmpty
+          ? _momentumController.text.trim()
+          : null,
+    );
+
+    final Map<String, dynamic> body = {
+      "answers": answers.toJson(),
+    };
+
+    LoaderService.show(context);
+    BlocProvider.of<SaveProtocolFormBloc>(context).add(
+      UserSaveProtocolFormEvent(
+        url: Urls.pathwaysProtocol(pathwayUuid: widget.pathwayUuid),
+        body: body,
+      ),
+    );
   }
 
   Future<void> _selectYear(BuildContext context, TextEditingController controller) async {
@@ -139,57 +293,102 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<FatLossInchLossBloc, FatLossInchLossState>(
+          listener: (context, state) {
+            if (state is FatLossInchLossSuccess) {
+              LoaderService.hide();
+              _protocolData = state.model.data;
+              _fields = state.model.data?.fields ?? [];
+              _populateAnswers(state.model.data?.answers);
+              setState(() {});
+            } else if (state is FatLossInchLossFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<SaveProtocolFormBloc, SaveProtocolFormState>(
+          listener: (context, state) {
+            if (state is SaveProtocolFormSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? 'Fat Loss and Inch Loss Submitted!',
+              );
+              navigation.pop(context);
+            } else if (state is SaveProtocolFormFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+      ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          LoaderService.hide();
+          navigation.pop(context);
+        },
+        child: Scaffold(
+          backgroundColor: appColors.bgColor,
+          appBar: CommonAppBar(
+            appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+            centerTitle: true,
+            leading: buildInkWell(
+              onTap: () {
+                LoaderService.hide();
+                navigation.pop(context);
+              },
+              child: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                  color: appColors.neutral,
+                ),
+              ),
+            ),
+            title: CommonText(
+              _protocolData?.title ?? "Fat Loss Inch Loss Protocol",
+              fontFamily: fontPlayfairDisplay,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Color(0xFF1D1B1A),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.24,
+              ),
             ),
           ),
-        ),
-        title: const CommonText(
-          "Fat Loss Inch Loss Protocol",
-          fontFamily: fontPlayfairDisplay,
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF1D1B1A),
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.24,
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            children: [
+              _buildWeightHistorySection(),
+              const SizedBox(height: 24),
+              _buildPastTransitionsSection(),
+              const SizedBox(height: 24),
+              _buildHabitReadinessSection(),
+              const SizedBox(height: 24),
+              _buildSustainableMomentumSection(),
+              const SizedBox(height: 32),
+              CommonButton(
+                name: "Save & Submit Fat Loss Protocol",
+                onTap: _onSave,
+                icon: Icons.arrow_forward_rounded,
+                isIconFirst: false,
+                btnColor: const Color(0xFF8B484D),
+                fontColor: appColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                radius: 999,
+              ),
+              SizedBox(height: bottomPadding(context)),
+            ],
           ),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        children: [
-          _buildWeightHistorySection(),
-          const SizedBox(height: 24),
-          _buildPastTransitionsSection(),
-          const SizedBox(height: 24),
-          _buildHabitReadinessSection(),
-          const SizedBox(height: 24),
-          _buildSustainableMomentumSection(),
-          const SizedBox(height: 32),
-          CommonButton(
-            name: "Save & Submit Fat Loss Protocol",
-            onTap: _onSave,
-            icon: Icons.arrow_forward_rounded,
-            isIconFirst: false,
-            btnColor: const Color(0xFF8B484D),
-            fontColor: appColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            radius: 999,
-          ),
-          SizedBox(height: bottomPadding(context)),
-        ],
       ),
     );
   }
@@ -201,7 +400,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
       children: [
         const CommonText(
           "What has your weight pattern looked like over the past few years?",
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF534343), height: 20/13),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF534343), height: 20 / 13),
         ),
         const SizedBox(height: 16),
         _buildWeightYearRow(
@@ -261,7 +460,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
                   fillColor: appColors.white,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [digitalWithDot],
-                  suffixText: "kg",
+                  suffixText: _weightUnit,
                   onChanged: (v) {
                     setState(() {});
                     if (error != null) _validate();
@@ -341,6 +540,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "1. Eating out",
           selectedValue: _eatingOutReady,
+          options: _getHabitOptions("eating_out"),
           onChanged: (v) {
             setState(() {
               _eatingOutReady = v;
@@ -352,6 +552,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "2. Late-night eating",
           selectedValue: _lateNightEatingReady,
+          options: _getHabitOptions("late_night_eating"),
           onChanged: (v) {
             setState(() {
               _lateNightEatingReady = v;
@@ -363,6 +564,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "3. Sweets & Confectionery",
           selectedValue: _sweetsReady,
+          options: _getHabitOptions("sweets"),
           onChanged: (v) {
             setState(() {
               _sweetsReady = v;
@@ -374,6 +576,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "4. Packaged & Processed foods",
           selectedValue: _packagedFoodsReady,
+          options: _getHabitOptions("packaged_foods"),
           onChanged: (v) {
             setState(() {
               _packagedFoodsReady = v;
@@ -385,6 +588,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "5. Alcohol consumption",
           selectedValue: _alcoholReady,
+          options: _getHabitOptions("alcohol"),
           onChanged: (v) {
             setState(() {
               _alcoholReady = v;
@@ -396,6 +600,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
         HabitMatrixItem(
           title: "6. Skipping meals",
           selectedValue: _skippingMealsReady,
+          options: _getHabitOptions("skipping_meals"),
           onChanged: (v) {
             setState(() {
               _skippingMealsReady = v;
@@ -415,7 +620,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
   Widget _buildSustainableMomentumSection() {
     return ProfileSectionCard(
       title: "Sustainable Momentum & Maintenance",
-      icon: appIcons.flag, // Placeholder
+      icon: appIcons.flag,
       children: [
         buildRequiredLabel("Once you reach your goal, what would help you maintain it?", color: const Color(0xFF534343)),
         const SizedBox(height: 16),

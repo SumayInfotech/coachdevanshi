@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/progress/food_diary_model.dart';
+import '../../../core/services/loader_service.dart';
+import '../../../core/blocs/progress/get_food_diary/get_food_diary_bloc.dart';
+import '../../../core/blocs/progress/save_food_diary/save_food_diary_bloc.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -51,6 +57,168 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
   final Set<String> _selectedSensations = {};
 
   final TextEditingController _notesController = TextEditingController();
+
+  List<FoodDiaryDayItem> _daysList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    callGetFoodDiaryAPI();
+  }
+
+  void callGetFoodDiaryAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<GetFoodDiaryBloc>(context).add(
+        const UserGetFoodDiaryEvent(url: Urls.getFoodDiary),
+      );
+    });
+  }
+
+  String _mapKeyToSensation(String key) {
+    switch (key.toLowerCase()) {
+      case "light_energized":
+        return "✓ Light & energized";
+      case "calm_nourished":
+        return "✓ Calm & nourished";
+      case "bloating":
+        return "Bloating";
+      case "brain_fog":
+        return "Brain fog";
+      case "acid_reflux":
+        return "Acid reflux";
+      case "sluggish":
+        return "Sluggish";
+      default:
+        return key;
+    }
+  }
+
+  void _populateForSelectedDate() {
+    final String dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+
+    // Find first day that has an entry with matching record_date
+    final matchingDay = _daysList.cast<FoodDiaryDayItem?>().firstWhere(
+      (d) => d?.entry != null && d?.entry?.recordDate == dateStr,
+      orElse: () => null,
+    );
+
+    if (matchingDay != null && matchingDay.entry != null) {
+      if (matchingDay.dayNumber != null && matchingDay.dayNumber! >= 1 && matchingDay.dayNumber! <= 3) {
+        _selectedDayIndex = matchingDay.dayNumber! - 1;
+      }
+      _populateEntry(matchingDay.entry!);
+    } else {
+      // Check current tab's entry
+      final currentDay = _daysList.cast<FoodDiaryDayItem?>().firstWhere(
+        (d) => d?.dayNumber == (_selectedDayIndex + 1),
+        orElse: () => null,
+      );
+      if (currentDay != null && currentDay.entry != null && currentDay.entry?.recordDate == dateStr) {
+        _populateEntry(currentDay.entry!);
+      } else {
+        _clearForm();
+      }
+    }
+    setState(() {});
+  }
+
+  void _onDaySelected(int index) {
+    setState(() {
+      _selectedDayIndex = index;
+      final dayItem = _daysList.cast<FoodDiaryDayItem?>().firstWhere(
+        (d) => d?.dayNumber == (index + 1),
+        orElse: () => null,
+      );
+      if (dayItem != null && dayItem.entry != null) {
+        _populateEntry(dayItem.entry!);
+      } else {
+        _clearForm();
+      }
+    });
+  }
+
+  void _populateEntry(FoodDiaryEntry entry) {
+    if (entry.recordDate != null && entry.recordDate!.isNotEmpty) {
+      try {
+        _selectedDate = DateFormat('yyyy-MM-dd').parse(entry.recordDate!);
+        _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+      } catch (_) {}
+    }
+
+    _m1TimeController.text = entry.meals?.breakfast?.time ?? "";
+    _m1FoodController.text = entry.meals?.breakfast?.items ?? "";
+
+    _m2TimeController.text = entry.meals?.lunch?.time ?? "";
+    _m2FoodController.text = entry.meals?.lunch?.items ?? "";
+
+    _m3TimeController.text = entry.meals?.dinner?.time ?? "";
+    _m3FoodController.text = entry.meals?.dinner?.items ?? "";
+
+    _snacksController.text = entry.meals?.snacks?.items ?? "";
+
+    _selectedSensations.clear();
+    if (entry.sensations != null) {
+      for (var s in entry.sensations!) {
+        _selectedSensations.add(_mapKeyToSensation(s));
+      }
+    }
+
+    _notesController.text = entry.contextNotes ?? "";
+
+    _dateError = null;
+    _m1TimeError = null;
+    _m1FoodError = null;
+    _m2TimeError = null;
+    _m2FoodError = null;
+    _m3TimeError = null;
+    _m3FoodError = null;
+  }
+
+  void _clearForm() {
+    _m1TimeController.clear();
+    _m1FoodController.clear();
+    _m2TimeController.clear();
+    _m2FoodController.clear();
+    _m3TimeController.clear();
+    _m3FoodController.clear();
+    _snacksController.clear();
+    _selectedSensations.clear();
+    _notesController.clear();
+
+    _dateError = null;
+    _m1TimeError = null;
+    _m1FoodError = null;
+    _m2TimeError = null;
+    _m2FoodError = null;
+    _m3TimeError = null;
+    _m3FoodError = null;
+  }
+
+  String _mapSensationToKey(String sensation) {
+    switch (sensation) {
+      case "✓ Light & energized":
+        return "light_energized";
+      case "✓ Calm & nourished":
+        return "calm_nourished";
+      case "Bloating":
+        return "bloating";
+      case "Brain fog":
+        return "brain_fog";
+      case "Acid reflux":
+        return "acid_reflux";
+      case "Sluggish":
+        return "sluggish";
+      default:
+        return sensation
+            .replaceAll('✓', '')
+            .trim()
+            .toLowerCase()
+            .replaceAll('&', '')
+            .replaceAll(RegExp(r'\s+'), '_');
+    }
+  }
 
   bool _validate() {
     bool isValid = true;
@@ -110,8 +278,45 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
 
   void _onSave() {
     if (_validate()) {
-      appLog("Food Diary Saved!");
-      navigation.pop(context);
+      LoaderService.show(context);
+
+      final Map<String, dynamic> meals = {
+        "breakfast": {
+          "time": _m1TimeController.text.trim(),
+          "items": _m1FoodController.text.trim(),
+        },
+        "lunch": {
+          "time": _m2TimeController.text.trim(),
+          "items": _m2FoodController.text.trim(),
+        },
+        "dinner": {
+          "time": _m3TimeController.text.trim(),
+          "items": _m3FoodController.text.trim(),
+        },
+        if (_snacksController.text.trim().isNotEmpty)
+          "snacks": {
+            "items": _snacksController.text.trim(),
+          },
+      };
+
+      final String? contextNotes = _notesController.text.trim().isNotEmpty
+          ? _notesController.text.trim()
+          : null;
+
+      final Map<String, dynamic> body = {
+        "day_number": _selectedDayIndex + 1,
+        "record_date": DateFormat('yyyy-MM-dd').format(_selectedDate),
+        "meals": meals,
+        "sensations": _selectedSensations.map(_mapSensationToKey).toList(),
+        "context_notes": ?contextNotes,
+      };
+
+      BlocProvider.of<SaveFoodDiaryBloc>(context).add(
+        UserSaveFoodDiaryEvent(
+          url: Urls.foodDiary,
+          body: body,
+        ),
+      );
     }
   }
 
@@ -123,12 +328,13 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
       lastDate: DateTime.now(),
     );
 
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
         _dateController.text = DateFormat('MMMM dd, yyyy').format(picked);
         if (_dateError != null) _validate();
       });
+      _populateForSelectedDate();
     }
   }
 
@@ -161,102 +367,138 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: appColors.bgColor,
-      appBar: CommonAppBar(
-        appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-        centerTitle: true,
-        leading: buildInkWell(
-          onTap: () => navigation.pop(context),
-          child: Container(
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.arrow_back,
-              size: 24,
-              color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GetFoodDiaryBloc, GetFoodDiaryState>(
+          listener: (context, state) {
+            if (state is GetFoodDiarySuccess) {
+              LoaderService.hide();
+              _daysList = state.model.data?.days ?? [];
+              _populateForSelectedDate();
+            } else if (state is GetFoodDiaryFailed) {
+              LoaderService.hide();
+              _clearForm();
+            }
+          },
+        ),
+        BlocListener<SaveFoodDiaryBloc, SaveFoodDiaryState>(
+          listener: (context, state) {
+            if (state is SaveFoodDiarySuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "Food diary saved successfully",
+              );
+              navigation.pop(context);
+            } else if (state is SaveFoodDiaryFailed) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: appColors.bgColor,
+        appBar: CommonAppBar(
+          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+          centerTitle: true,
+          leading: buildInkWell(
+            onTap: () => navigation.pop(context),
+            child: Container(
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.arrow_back,
+                size: 24,
+                color: appColors.neutral,
+              ),
+            ),
+          ),
+          title: CommonText(
+            "Three-day Food Diary",
+            fontFamily: fontPlayfairDisplay,
+            style: TextStyle(
+              fontSize: 16,
+              color: const Color(0xFF1D1B1A),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        title: CommonText(
-          "Three-day Food Diary",
-          fontFamily: fontPlayfairDisplay,
-          style: TextStyle(
-            fontSize: 16,
-            color: const Color(0xFF1D1B1A),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              children: [
-                _buildDaySelector(),
-                const SizedBox(height: 16),
-                _buildDateRecordCard(),
-                const SizedBox(height: 24),
-                _buildMealCard(
-                  title: "Morning / Breakfast",
-                  icon: appIcons.morning,
-                  timeController: _m1TimeController,
-                  foodController: _m1FoodController,
-                  timeError: _m1TimeError,
-                  foodError: _m1FoodError,
-                  foodHint: "e.g., 2 sourdough toasts with avocado, poached egg...",
-                ),
-                const SizedBox(height: 20),
-                _buildMealCard(
-                  title: "Afternoon / Lunch",
-                  icon: appIcons.afternoon,
-                  timeController: _m2TimeController,
-                  foodController: _m2FoodController,
-                  timeError: _m2TimeError,
-                  foodError: _m2FoodError,
-                  foodHint: "e.g., Dal, brown rice, stir-fried spinach...",
-                ),
-                const SizedBox(height: 20),
-                _buildMealCard(
-                  title: "Evening / Dinner",
-                  icon: appIcons.evening,
-                  timeController: _m3TimeController,
-                  foodController: _m3FoodController,
-                  timeError: _m3TimeError,
-                  foodError: _m3FoodError,
-                  foodHint: "e.g., Grilled paneer with roasted vegetables...",
-                ),
-                const SizedBox(height: 20),
-                _buildSnacksCard(),
-                const SizedBox(height: 20),
-                _buildReflectionsCard(),
-                const SizedBox(height: 24),
-                CommonButton(
-                  name: "Save Food Diary Entry",
-                  icon: Icons.arrow_forward_rounded,
-                  isIconFirst: false,
-                  imageSize: 16,
-                  btnColor: appColors.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  onTap: _onSave,
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: CommonText(
-                    "You can update or edit your entries anytime before your\ncoaching review.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: const Color(0xFF534343),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                children: [
+                  _buildDaySelector(),
+                  const SizedBox(height: 16),
+                  _buildDateRecordCard(),
+                  const SizedBox(height: 24),
+                  _buildMealCard(
+                    title: "Morning / Breakfast",
+                    icon: appIcons.morning,
+                    timeController: _m1TimeController,
+                    foodController: _m1FoodController,
+                    timeError: _m1TimeError,
+                    foodError: _m1FoodError,
+                    foodHint: "e.g., 2 sourdough toasts with avocado, poached egg...",
+                  ),
+                  const SizedBox(height: 20),
+                  _buildMealCard(
+                    title: "Afternoon / Lunch",
+                    icon: appIcons.afternoon,
+                    timeController: _m2TimeController,
+                    foodController: _m2FoodController,
+                    timeError: _m2TimeError,
+                    foodError: _m2FoodError,
+                    foodHint: "e.g., Dal, brown rice, stir-fried spinach...",
+                  ),
+                  const SizedBox(height: 20),
+                  _buildMealCard(
+                    title: "Evening / Dinner",
+                    icon: appIcons.evening,
+                    timeController: _m3TimeController,
+                    foodController: _m3FoodController,
+                    timeError: _m3TimeError,
+                    foodError: _m3FoodError,
+                    foodHint: "e.g., Grilled paneer with roasted vegetables...",
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSnacksCard(),
+                  const SizedBox(height: 20),
+                  _buildReflectionsCard(),
+                  const SizedBox(height: 24),
+                  CommonButton(
+                    name: "Save Food Diary Entry",
+                    icon: Icons.arrow_forward_rounded,
+                    isIconFirst: false,
+                    imageSize: 16,
+                    btnColor: appColors.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    onTap: _onSave,
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: CommonText(
+                      "You can update or edit your entries anytime before your\ncoaching review.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: const Color(0xFF534343),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: bottomPadding(context)),
-              ],
+                  SizedBox(height: bottomPadding(context)),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -316,7 +558,7 @@ class _ThreeDayFoodDiaryScreenState extends State<ThreeDayFoodDiaryScreen> {
     bool isSelected = _selectedDayIndex == index;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedDayIndex = index),
+        onTap: () => _onDaySelected(index),
         child: Stack(
           clipBehavior: Clip.none,
           children: [

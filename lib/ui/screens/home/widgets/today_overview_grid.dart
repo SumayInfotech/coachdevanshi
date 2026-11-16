@@ -40,28 +40,14 @@ class TodayOverviewGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const CommonText(
-              "Today's Overview",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1D1B1A),
-              ),
-              fontFamily: 'serif',
-            ),
-            if (updatedTime != null && updatedTime!.isNotEmpty)CommonText(
-              updatedTime!,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF534343),
-              ),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
-          ],
+        const CommonText(
+          "Today's Overview",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1D1B1A),
+          ),
+          fontFamily: 'serif',
         ),
         const SizedBox(height: 12),
         // Row 1: Steps & Weight Cards

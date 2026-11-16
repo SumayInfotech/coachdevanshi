@@ -13,7 +13,7 @@ class FormDataHelper {
 
         formMap[entry.key] = await MultipartFile.fromFile(
           file.path,
-          filename: file.path.split('/').last,
+          filename: file.path.split(RegExp(r'[/\\]')).last,
         );
       }
       /// MULTIPLE FILES
@@ -23,7 +23,7 @@ class FormDataHelper {
         formMap[entry.key] = await Future.wait(
           files.map((file) async => MultipartFile.fromFile(
               file.path,
-              filename: file.path.split('/').last,
+              filename: file.path.split(RegExp(r'[/\\]')).last,
             ),
           ),
         );

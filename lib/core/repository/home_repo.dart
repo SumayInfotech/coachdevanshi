@@ -76,4 +76,32 @@ class HomeRepo extends BaseRepository {
       return ApiResponse.failure(message: e.toString());
     }
   }
+
+  Future<ApiResponse<dynamic>> syncHealthData({
+    required String url,
+    required Map<String, dynamic> body,
+  }) async {
+    final response = await networkService.request(
+      requestType: RequestType.post,
+      url: url,
+      body: body,
+    );
+
+    if (response.data == null) {
+      return ApiResponse.failure(message: response.message);
+    }
+
+    try {
+      CommonModel model = CommonModel.fromJson(response.data);
+
+      if (model.success == true) {
+        return ApiResponse.success(data: model, message: model.message ?? "");
+      } else {
+        return ApiResponse.failure(message: model.message ?? "");
+      }
+    } catch (e) {
+      appLog(name: "HomeRepo syncHealthData Exception", e.toString());
+      return ApiResponse.failure(message: e.toString());
+    }
+  }
 }

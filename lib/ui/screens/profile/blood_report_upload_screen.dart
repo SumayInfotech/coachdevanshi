@@ -2,11 +2,24 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/profile/delete_file_blood_reports/delete_file_blood_reports_bloc.dart';
+import '../../../core/blocs/profile/delete_file_blood_reports/delete_file_blood_reports_event.dart';
+import '../../../core/blocs/profile/delete_file_blood_reports/delete_file_blood_reports_state.dart';
+import '../../../core/blocs/profile/get_blood_reports/get_blood_reports_bloc.dart';
+import '../../../core/blocs/profile/get_blood_reports/get_blood_reports_event.dart';
+import '../../../core/blocs/profile/get_blood_reports/get_blood_reports_state.dart';
+import '../../../core/blocs/profile/upload_blood_report/upload_blood_report_bloc.dart';
+import '../../../core/blocs/profile/upload_blood_report/upload_blood_report_event.dart';
+import '../../../core/blocs/profile/upload_blood_report/upload_blood_report_state.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/profile/blood_reports_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -17,16 +30,20 @@ import '../bottom_bar_screen.dart';
 import 'widget/profile_section_card.dart';
 
 class UploadedReportFile {
+  final String? id;
   final String name;
   final String size;
   final String? path;
+  final String? url;
   final int bytes;
   final String extension;
 
   UploadedReportFile({
+    this.id,
     required this.name,
     required this.size,
     this.path,
+    this.url,
     required this.bytes,
     required this.extension,
   });
@@ -44,7 +61,8 @@ class BloodReportUploadScreen extends StatefulWidget {
 
 class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
   static const int maxFileSizeInBytes = 25 * 1024 * 1024; // 25 MB
-  static const List<String> allowedExtensions = ['pdf'];
+  static const int maxFilesCount = 3;
+  static const List<String> allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
 
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -53,11 +71,77 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
   String? _dateError;
 
   final List<UploadedReportFile> _uploadedFiles = [];
+  List<BloodReportItem> _reportsList = [];
 
   @override
   void initState() {
     super.initState();
     _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    callGetBloodReportsAPI();
+  }
+
+  void callGetBloodReportsAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      BlocProvider.of<GetBloodReportsBloc>(context).add(
+        const UserGetBloodReportsEvent(url: Urls.getBloodReports),
+      );
+    });
+  }
+
+  void _populateForSelectedDate() {
+    final String dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final BloodReportItem? report = _reportsList.cast<BloodReportItem?>().firstWhere(
+      (r) => r?.reportDate == dateStr,
+      orElse: () => null,
+    );
+
+    if (report != null) {
+      _populateReport(report);
+    } else {
+      _clearForm();
+    }
+    setState(() {});
+  }
+
+  void _populateReport(BloodReportItem report) {
+    if (report.reportDate != null && report.reportDate!.isNotEmpty) {
+      try {
+        _selectedDate = DateFormat('yyyy-MM-dd').parse(report.reportDate!);
+        _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+      } catch (_) {}
+    }
+
+    _notesController.text = report.notes ?? "";
+    _uploadedFiles.clear();
+
+    if (report.files != null && report.files!.isNotEmpty) {
+      for (final file in report.files!) {
+        final int fileSize = file.size ?? 0;
+        final String fileName = file.originalName ?? "Blood Report";
+        final String ext = fileName.split('.').last.toLowerCase();
+
+        _uploadedFiles.add(
+          UploadedReportFile(
+            id: file.uuid,
+            name: fileName,
+            size: _formatFileSize(fileSize),
+            path: null,
+            url: file.url,
+            bytes: fileSize,
+            extension: ext,
+          ),
+        );
+      }
+    }
+
+    _dateError = null;
+  }
+
+  void _clearForm() {
+    _notesController.clear();
+    _uploadedFiles.clear();
+    _dateError = null;
   }
 
   @override
@@ -88,16 +172,25 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
         _dateController.text = DateFormat('MMMM dd, yyyy').format(picked);
         _dateError = null;
       });
+      _populateForSelectedDate();
     }
   }
 
   Future<void> _pickDocuments() async {
+    if (_uploadedFiles.length >= maxFilesCount) {
+      showSnackBar(
+        context: context,
+        isError: true,
+        message: "You can upload a maximum of $maxFilesCount files.",
+      );
+      return;
+    }
     try {
       final List<PlatformFile> files = await FilePicker.pickFiles(
         type: FileType.custom,
@@ -106,6 +199,16 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
 
       if (files.isNotEmpty) {
         for (final PlatformFile pFile in files) {
+          if (_uploadedFiles.length >= maxFilesCount) {
+            if (mounted) {
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: "Maximum $maxFilesCount files allowed. Additional files were skipped.",
+              );
+            }
+            break;
+          }
           final int fileSize = pFile.lengthSync() ?? (await pFile.length()) ?? 0;
           final String fileName = pFile.name;
           final String ext = (pFile.extension ?? fileName.split('.').last).toLowerCase();
@@ -158,6 +261,14 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
   }
 
   Future<void> _pickImageFromSource(ImageSource source) async {
+    if (_uploadedFiles.length >= maxFilesCount) {
+      showSnackBar(
+        context: context,
+        isError: true,
+        message: "You can upload a maximum of $maxFilesCount files.",
+      );
+      return;
+    }
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: source);
@@ -228,7 +339,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 ),
                 const SizedBox(height: 4),
                 const CommonText(
-                  "Supports PDF, JPG, PNG up to 25MB",
+                  "Supports PDF, JPG, PNG up to 25MB (max 3 files)",
                   style: TextStyle(
                     fontSize: 12,
                     color: Color(0xFF6D615C),
@@ -326,9 +437,30 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
   }
 
   void _removeFile(int index) {
-    setState(() {
-      _uploadedFiles.removeAt(index);
-    });
+    final file = _uploadedFiles[index];
+    commonDialog(
+      context: context,
+      icon: Icons.delete_outline_rounded,
+      isDanger: true,
+      title: "Delete File",
+      subtitle: "Are you sure you want to delete this report file?",
+      confirmBtnText: "Yes",
+      cancelBtnText: "Cancel",
+      onPressed: () {
+        if (file.id != null && file.id!.isNotEmpty) {
+          LoaderService.show(context);
+          BlocProvider.of<DeleteFileBloodReportsBloc>(context).add(
+            UserDeleteFileBloodReportsEvent(
+              url: Urls.deleteFileBloodReports(id: file.id!),
+            ),
+          );
+        } else {
+          setState(() {
+            _uploadedFiles.removeAt(index);
+          });
+        }
+      },
+    );
   }
 
   bool _validate() {
@@ -347,6 +479,13 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
         message: "Please upload at least one report file (PDF, JPG, or PNG up to 25MB)",
       );
       isValid = false;
+    } else if (_uploadedFiles.length > maxFilesCount) {
+      showSnackBar(
+        context: context,
+        isError: true,
+        message: "You can upload a maximum of $maxFilesCount files.",
+      );
+      isValid = false;
     }
 
     setState(() {});
@@ -355,79 +494,148 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
 
   void _onSave() {
     if (_validate()) {
-      appLog("Blood Report Uploaded Successfully with ${_uploadedFiles.length} file(s)!");
-      showSnackBar(
-        context: context,
-        isError: false,
-        message: "Blood Report Uploaded Successfully!",
+      LoaderService.show(context);
+
+      final List<File> files = _uploadedFiles
+          .where((e) => e.path != null && e.path!.isNotEmpty)
+          .map((e) => File(e.path!))
+          .toList();
+
+      final Map<String, dynamic> body = {
+        "report_date": DateFormat('yyyy-MM-dd').format(_selectedDate),
+        if (files.isNotEmpty) "files[]": files,
+        if (_notesController.text.trim().isNotEmpty)
+          "notes": _notesController.text.trim(),
+      };
+
+      BlocProvider.of<UploadBloodReportBloc>(context).add(
+        UserUploadBloodReportEvent(
+          url: Urls.bloodReports,
+          body: body,
+        ),
       );
-      _onBack();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _onBack();
-      },
-      child: Scaffold(
-        backgroundColor: appColors.bgColor,
-        appBar: CommonAppBar(
-          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-          centerTitle: true,
-          leading: buildInkWell(
-            onTap: _onBack,
-            child: Container(
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.arrow_back,
-                size: 24,
-                color: appColors.neutral,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<GetBloodReportsBloc, GetBloodReportsState>(
+          listener: (context, state) {
+            if (state is GetBloodReportsSuccess) {
+              LoaderService.hide();
+              _reportsList = state.model.data?.reports ?? [];
+              _populateForSelectedDate();
+            } else if (state is GetBloodReportsFailed) {
+              LoaderService.hide();
+              _clearForm();
+            }
+          },
+        ),
+        BlocListener<DeleteFileBloodReportsBloc, DeleteFileBloodReportsState>(
+          listener: (context, state) {
+            if (state is DeleteFileBloodReportsSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "File deleted successfully",
+              );
+              callGetBloodReportsAPI();
+            } else if (state is DeleteFileBloodReportsFailed) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: state.message,
+              );
+            }
+          },
+        ),
+        BlocListener<UploadBloodReportBloc, UploadBloodReportState>(
+          listener: (context, state) {
+            if (state is UploadBloodReportSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "Blood Report Uploaded Successfully!",
+              );
+              _onBack();
+            } else if (state is UploadBloodReportFailed) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _onBack();
+        },
+        child: Scaffold(
+          backgroundColor: appColors.bgColor,
+          appBar: CommonAppBar(
+            appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+            centerTitle: true,
+            leading: buildInkWell(
+              onTap: _onBack,
+              child: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                  color: appColors.neutral,
+                ),
+              ),
+            ),
+            title: const CommonText(
+              "Blood Report Upload",
+              fontFamily: fontPlayfairDisplay,
+              style: TextStyle(
+                fontSize: 18,
+                color: Color(0xFF1D1B1A),
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          title: const CommonText(
-            "Blood Report Upload",
-            fontFamily: fontPlayfairDisplay,
-            style: TextStyle(
-              fontSize: 18,
-              color: Color(0xFF1D1B1A),
-              fontWeight: FontWeight.w600,
-            ),
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            children: [
+              // Card 1: Report / Collection Date
+              _buildReportDateSection(),
+              const SizedBox(height: 16),
+
+              // Card 2: Upload Report Files (PDF, JPG, PNG up to 25MB)
+              _buildUploadFilesSection(),
+              const SizedBox(height: 16),
+
+              // Card 3: Notes or Symptoms for Your Coach
+              _buildNotesSection(),
+              const SizedBox(height: 32),
+
+              // Bottom Button: Save & Upload Blood Report
+              CommonButton(
+                name: "Save & Upload Blood Report",
+                icon: Icons.arrow_forward_rounded,
+                isIconFirst: false,
+                imageSize: 16,
+                btnColor: appColors.primary,
+                radius: 999,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                onTap: _onSave,
+              ),
+              SizedBox(height: bottomPadding(context) + 16),
+            ],
           ),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            // Card 1: Report / Collection Date
-            _buildReportDateSection(),
-            const SizedBox(height: 16),
-
-            // Card 2: Upload Report Files (PDF, JPG, PNG up to 25MB)
-            _buildUploadFilesSection(),
-            const SizedBox(height: 16),
-
-            // Card 3: Notes or Symptoms for Your Coach
-            _buildNotesSection(),
-            const SizedBox(height: 32),
-
-            // Bottom Button: Save & Upload Blood Report
-            CommonButton(
-              name: "Save & Upload Blood Report",
-              icon: Icons.arrow_forward_rounded,
-              isIconFirst: false,
-              imageSize: 16,
-              btnColor: appColors.primary,
-              radius: 999,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              onTap: _onSave,
-            ),
-            SizedBox(height: bottomPadding(context) + 16),
-          ],
         ),
       ),
     );
@@ -541,7 +749,7 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
                 ),
                 const SizedBox(height: 6),
                 const CommonText(
-                  "Supports PDF, JPG, PNG up to 25MB (multiple pages allowed)",
+                  "Supports PDF, JPG, PNG up to 25MB (max 3 files)",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -563,13 +771,21 @@ class _BloodReportUploadScreenState extends State<BloodReportUploadScreen> {
             final file = _uploadedFiles[index];
             return buildInkWell(
               onTap: () {
-                if(file.isPdf) {
-                  navigation.pushSlideAnimation(context, PDFViewerScreen(
-                    assetsPDF: file.path,
-                  ));
+                if (file.isPdf) {
+                  navigation.pushSlideAnimation(
+                    context,
+                    PDFViewerScreen(
+                      assetsPDF: file.path,
+                      url: file.url,
+                    ),
+                  );
                 } else {
-                  navigation.pushSlideAnimation(context,
-                    OpenFullImage(file: file.path!),
+                  navigation.pushSlideAnimation(
+                    context,
+                    OpenFullImage(
+                      file: file.path,
+                      image: file.url,
+                    ),
                   );
                 }
               },

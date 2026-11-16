@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/progress/save_weekly_checkin/save_weekly_checkin_bloc.dart';
+import '../../../core/blocs/progress/weekly_checkin/weekly_checkin_bloc.dart';
+import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/progress/weekly_checkin_model.dart';
+import '../../../core/services/loader_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
@@ -45,6 +51,11 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   String? _chestError;
   String? _abdomenError;
   String? _hipError;
+  String? _selfConfidenceError;
+  String? _cravingLevelError;
+  String? _weeklyWinsError;
+  String? _proudMomentsError;
+  String? _obstaclesError;
 
   bool _isKgSelected = true;
   bool _isChestCmSelected = true;
@@ -57,7 +68,129 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
   @override
   void initState() {
     super.initState();
-    // _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+    callWeeklyCheckinAPI();
+  }
+
+  void callWeeklyCheckinAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LoaderService.show(context);
+      final String dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      BlocProvider.of<WeeklyCheckinBloc>(context).add(
+        UserWeeklyCheckinEvent(url: Urls.weeklyCheck(date: dateStr)),
+      );
+    });
+  }
+
+  void _populateFromWeeklyCheckin(WeeklyCheckinModel model) {
+    final data = model.data;
+    if (data == null) {
+      _clearForm();
+      return;
+    }
+
+    if (data.recordDate != null && data.recordDate!.isNotEmpty) {
+      try {
+        _selectedDate = DateFormat('yyyy-MM-dd').parse(data.recordDate!);
+        _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
+      } catch (_) {}
+    }
+
+    if (data.weight != null) {
+      _weightController.text = data.weight.toString();
+    } else {
+      _weightController.clear();
+    }
+
+    if (data.weightUnit != null) {
+      _isKgSelected = data.weightUnit?.toLowerCase() == "kg";
+    }
+
+    if (data.measurements != null) {
+      _chestController.text = data.measurements?.chest != null ? data.measurements!.chest.toString() : "";
+      _abdomenController.text = data.measurements?.abdomen != null ? data.measurements!.abdomen.toString() : "";
+      _hipController.text = data.measurements?.hip != null ? data.measurements!.hip.toString() : "";
+
+      if (data.measurements?.unit != null) {
+        final isCm = data.measurements?.unit?.toLowerCase() == "cm";
+        _isChestCmSelected = isCm;
+        _isAbdomenCmSelected = isCm;
+        _isHipCmSelected = isCm;
+      }
+    } else {
+      _chestController.clear();
+      _abdomenController.clear();
+      _hipController.clear();
+    }
+
+    _selfConfidenceController.text = data.selfConfidence ?? "";
+
+    if (data.lastPeriodStart != null && data.lastPeriodStart!.isNotEmpty) {
+      try {
+        _selectedPeriodDate = DateFormat('yyyy-MM-dd').parse(data.lastPeriodStart!);
+        _periodStartController.text = DateFormat('MM/dd/yyyy').format(_selectedPeriodDate!);
+      } catch (_) {
+        _periodStartController.text = data.lastPeriodStart!;
+      }
+    } else {
+      _selectedPeriodDate = null;
+      _periodStartController.clear();
+    }
+
+    _cycleLengthController.text = data.cycleDay ?? "";
+    _cycleNotesController.text = data.cycleNotes ?? "";
+
+    if (data.cravingsLevel != null) {
+      final level = data.cravingsLevel!.toLowerCase();
+      if (level.contains("none")) {
+        _selectedCravingLevel = "None / Calm";
+      } else if (level.contains("mild")) {
+        _selectedCravingLevel = "Mild & manageable";
+      } else if (level.contains("moderate")) {
+        _selectedCravingLevel = "Moderate";
+      } else if (level.contains("intense")) {
+        _selectedCravingLevel = "Intense / late evening";
+      } else {
+        _selectedCravingLevel = data.cravingsLevel;
+      }
+    } else {
+      _selectedCravingLevel = null;
+    }
+
+    _cravingFoodController.text = data.cravingsNotes ?? "";
+    _didTravel = data.travelled ?? true;
+    _travelDetailsController.text = data.travelNotes ?? "";
+    _weeklyWinsController.text = data.wins ?? "";
+    _proudMomentsController.text = data.proudMoments ?? "";
+    _obstaclesController.text = data.struggles ?? "";
+    _notesController.text = data.notes ?? "";
+
+    setState(() {});
+  }
+
+  void _clearForm() {
+    _weightController.clear();
+    _chestController.clear();
+    _abdomenController.clear();
+    _hipController.clear();
+    _selfConfidenceController.clear();
+    _periodStartController.clear();
+    _selectedPeriodDate = null;
+    _cycleLengthController.clear();
+    _cycleNotesController.clear();
+    _selectedCravingLevel = null;
+    _cravingFoodController.clear();
+    _didTravel = true;
+    _travelDetailsController.clear();
+    _weeklyWinsController.clear();
+    _proudMomentsController.clear();
+    _obstaclesController.clear();
+    _notesController.clear();
+    _isKgSelected = true;
+    _isChestCmSelected = true;
+    _isAbdomenCmSelected = true;
+    _isHipCmSelected = true;
+    setState(() {});
   }
 
   bool _validate() {
@@ -98,14 +231,113 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       _hipError = null;
     }
 
+    if (_selfConfidenceController.text.trim().isEmpty) {
+      _selfConfidenceError = "Self-confidence reflection is required";
+      isValid = false;
+    } else {
+      _selfConfidenceError = null;
+    }
+
+    if (_selectedCravingLevel == null) {
+      _cravingLevelError = "Please select cravings level";
+      isValid = false;
+    } else {
+      _cravingLevelError = null;
+    }
+
+    if (_weeklyWinsController.text.trim().isEmpty) {
+      _weeklyWinsError = "Weekly win or positive outcome is required";
+      isValid = false;
+    } else {
+      _weeklyWinsError = null;
+    }
+
+    if (_proudMomentsController.text.trim().isEmpty) {
+      _proudMomentsError = "Proud moment reflection is required";
+      isValid = false;
+    } else {
+      _proudMomentsError = null;
+    }
+
+    if (_obstaclesController.text.trim().isEmpty) {
+      _obstaclesError = "Weekly obstacle or struggle is required";
+      isValid = false;
+    } else {
+      _obstaclesError = null;
+    }
+
     setState(() {});
     return isValid;
   }
 
   void _onSave() {
     if (_validate()) {
-      appLog("Baseline & Progress Saved!");
-      navigation.pushSlideAnimation(context, const TrackWeeklyProgressScreen());
+      LoaderService.show(context);
+
+      String? cravingsLevel;
+      if (_selectedCravingLevel != null) {
+        final lower = _selectedCravingLevel!.toLowerCase();
+        if (lower.contains("none")) {
+          cravingsLevel = "none";
+        } else if (lower.contains("mild")) {
+          cravingsLevel = "mild";
+        } else if (lower.contains("moderate")) {
+          cravingsLevel = "moderate";
+        } else if (lower.contains("intense")) {
+          cravingsLevel = "intense";
+        } else {
+          cravingsLevel = lower;
+        }
+      }
+
+      final double? weightVal = double.tryParse(_weightController.text.trim());
+      final double? chestVal = double.tryParse(_chestController.text.trim());
+      final double? abdomenVal = double.tryParse(_abdomenController.text.trim());
+      final double? hipVal = double.tryParse(_hipController.text.trim());
+      final String? lastPeriodDate = _selectedPeriodDate != null
+          ? DateFormat('yyyy-MM-dd').format(_selectedPeriodDate!)
+          : null;
+      final String? cycleDay = _cycleLengthController.text.trim().isNotEmpty
+          ? _cycleLengthController.text.trim()
+          : null;
+      final String? cravingsNotes = _cravingFoodController.text.trim().isNotEmpty
+          ? _cravingFoodController.text.trim()
+          : null;
+      final String? travelNotes = _travelDetailsController.text.trim().isNotEmpty
+          ? _travelDetailsController.text.trim()
+          : null;
+      final String? notes = _notesController.text.trim().isNotEmpty
+          ? _notesController.text.trim()
+          : null;
+
+      final Map<String, dynamic> body = {
+        "record_date": DateFormat('yyyy-MM-dd').format(_selectedDate),
+        "weight": ?weightVal,
+        "weight_unit": _isKgSelected ? "kg" : "lbs",
+        "chest": ?chestVal,
+        "abdomen": ?abdomenVal,
+        "waist": ?abdomenVal,
+        "hip": ?hipVal,
+        "measurement_unit": _isChestCmSelected ? "cm" : "in",
+        "self_confidence": _selfConfidenceController.text.trim(),
+        "last_period_start": ?lastPeriodDate,
+        "cycle_day": ?cycleDay,
+        "cravings_level": ?cravingsLevel,
+        "cravings_notes": ?cravingsNotes,
+        "travelled": _didTravel,
+        "travel_notes": ?travelNotes,
+        "wins": _weeklyWinsController.text.trim(),
+        "proud_moments": _proudMomentsController.text.trim(),
+        "struggles": _obstaclesController.text.trim(),
+        "notes": ?notes,
+      };
+
+      BlocProvider.of<SaveWeeklyCheckinBloc>(context).add(
+        UserSaveWeeklyCheckinEvent(
+          url: Urls.weeklyCheckins,
+          body: body,
+        ),
+      );
     }
   }
 
@@ -140,149 +372,184 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _onBack();
-      },
-      child: Scaffold(
-        backgroundColor: appColors.bgColor,
-        appBar: CommonAppBar(
-          appBarColor: appColors.bgColor.withValues(alpha: 0.85),
-          centerTitle: true,
-          leading: buildInkWell(
-            onTap: _onBack,
-            child: Container(
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.arrow_back,
-                size: 24,
-                color: appColors.neutral,
-              ),
-            ),
-          ),
-          title: const CommonText(
-            "Baseline & Progress",
-            fontFamily: fontPlayfairDisplay,
-            style: TextStyle(
-              fontSize: 18,
-              color: Color(0xFF1D1B1A),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<WeeklyCheckinBloc, WeeklyCheckinState>(
+          listener: (context, state) {
+            if (state is WeeklyCheckinSuccess) {
+              LoaderService.hide();
+              _populateFromWeeklyCheckin(state.model);
+            } else if (state is WeeklyCheckinFailed) {
+              LoaderService.hide();
+              _clearForm();
+            }
+          },
         ),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          children: [
-            // Measurement Date
-            _buildDateSection(),
-            const SizedBox(height: 24),
-
-            // Section 1: Physical Measurements
-            const CommonText(
-              "Physical Measurements",
+        BlocListener<SaveWeeklyCheckinBloc, SaveWeeklyCheckinState>(
+          listener: (context, state) {
+            if (state is SaveWeeklyCheckinSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "Weekly check-in saved successfully",
+              );
+              navigation.pushSlideAnimation(context, const TrackWeeklyProgressScreen());
+            } else if (state is SaveWeeklyCheckinFailed) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: true,
+                message: state.message,
+              );
+            }
+          },
+        ),
+      ],
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _onBack();
+        },
+        child: Scaffold(
+          backgroundColor: appColors.bgColor,
+          appBar: CommonAppBar(
+            appBarColor: appColors.bgColor.withValues(alpha: 0.85),
+            centerTitle: true,
+            leading: buildInkWell(
+              onTap: _onBack,
+              child: Container(
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                  color: appColors.neutral,
+                ),
+              ),
+            ),
+            title: const CommonText(
+              "Baseline & Progress",
               fontFamily: fontPlayfairDisplay,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
+                fontSize: 18,
                 color: Color(0xFF1D1B1A),
-              ),
-            ),
-            const SizedBox(height: 4),
-            const CommonText(
-              "Take readings in the morning before meals for highest consistency.",
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF534343),
-              ),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
-            const SizedBox(height: 16),
-
-            // Weight Card
-            _buildWeightSection(),
-            const SizedBox(height: 16),
-
-            // Chest Card
-            _buildChestSection(),
-            const SizedBox(height: 16),
-
-            // Abdomen Card
-            _buildAbdomenSection(),
-            const SizedBox(height: 16),
-
-            // Hip Card
-            _buildHipSection(),
-            const SizedBox(height: 28),
-
-            // Section 2: Weekly Reflections
-            const CommonText(
-              "Weekly Reflections",
-              fontFamily: fontPlayfairDisplay,
-              style: TextStyle(
-                fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1D1B1A),
               ),
             ),
-            const SizedBox(height: 4),
-            const CommonText(
-              "How your body, mind, and habits felt over the past 7 days.",
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF534343),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            children: [
+              // Measurement Date
+              _buildDateSection(),
+              const SizedBox(height: 24),
+
+              // Section 1: Physical Measurements
+              const CommonText(
+                "Physical Measurements",
+                fontFamily: fontPlayfairDisplay,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1D1B1A),
+                ),
               ),
-              fontFamily: fontFamilyPlusJakartaSans,
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              const CommonText(
+                "Take readings in the morning before meals for highest consistency.",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF534343),
+                ),
+                fontFamily: fontFamilyPlusJakartaSans,
+              ),
+              const SizedBox(height: 16),
 
-            // Self-Confidence & Body Relationship
-            _buildSelfConfidenceSection(),
-            const SizedBox(height: 16),
+              // Weight Card
+              _buildWeightSection(),
+              const SizedBox(height: 16),
 
-            // Menstrual Cycle Dynamics
-            _buildMenstrualCycleSection(),
-            const SizedBox(height: 16),
+              // Chest Card
+              _buildChestSection(),
+              const SizedBox(height: 16),
 
-            // Cravings & Food Sensations
-            _buildCravingsSection(),
-            const SizedBox(height: 16),
+              // Abdomen Card
+              _buildAbdomenSection(),
+              const SizedBox(height: 16),
 
-            // Travel & Routine Shifts
-            _buildTravelSection(),
-            const SizedBox(height: 16),
+              // Hip Card
+              _buildHipSection(),
+              const SizedBox(height: 28),
 
-            // Weekly Wins & Positive Outcomes
-            _buildWeeklyWinsSection(),
-            const SizedBox(height: 16),
+              // Section 2: Weekly Reflections
+              const CommonText(
+                "Weekly Reflections",
+                fontFamily: fontPlayfairDisplay,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1D1B1A),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const CommonText(
+                "How your body, mind, and habits felt over the past 7 days.",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF534343),
+                ),
+                fontFamily: fontFamilyPlusJakartaSans,
+              ),
+              const SizedBox(height: 16),
 
-            // Proud Moments to Celebrate
-            _buildProudMomentsSection(),
-            const SizedBox(height: 16),
+              // Self-Confidence & Body Relationship
+              _buildSelfConfidenceSection(),
+              const SizedBox(height: 16),
 
-            // Weekly Obstacles & Struggles
-            _buildObstaclesSection(),
-            const SizedBox(height: 16),
+              // Menstrual Cycle Dynamics
+              _buildMenstrualCycleSection(),
+              const SizedBox(height: 16),
 
-            // Notes or Remarks
-            _buildNotesSection(),
-            const SizedBox(height: 32),
+              // Cravings & Food Sensations
+              _buildCravingsSection(),
+              const SizedBox(height: 16),
 
-            // Submit Button
-            CommonButton(
-              name: "Save & Submit Check-in",
-              icon: Icons.arrow_forward_rounded,
-              isIconFirst: false,
-              imageSize: 16,
-              btnColor: appColors.primary,
-              radius: 999,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              onTap: _onSave,
-            ),
-            SizedBox(height: bottomPadding(context) + 16),
-          ],
+              // Travel & Routine Shifts
+              _buildTravelSection(),
+              const SizedBox(height: 16),
+
+              // Weekly Wins & Positive Outcomes
+              _buildWeeklyWinsSection(),
+              const SizedBox(height: 16),
+
+              // Proud Moments to Celebrate
+              _buildProudMomentsSection(),
+              const SizedBox(height: 16),
+
+              // Weekly Obstacles & Struggles
+              _buildObstaclesSection(),
+              const SizedBox(height: 16),
+
+              // Notes or Remarks
+              _buildNotesSection(),
+              const SizedBox(height: 32),
+
+              // Submit Button
+              CommonButton(
+                name: "Save & Submit Check-in",
+                icon: Icons.arrow_forward_rounded,
+                isIconFirst: false,
+                imageSize: 16,
+                btnColor: appColors.primary,
+                radius: 999,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                onTap: _onSave,
+              ),
+              SizedBox(height: bottomPadding(context) + 16),
+            ],
+          ),
         ),
       ),
     );
@@ -350,32 +617,49 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
     required String hint,
     int minLines = 3,
     int maxLines = 4,
+    String? error,
+    ValueChanged<String>? onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: appColors.textFieldBgColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        minLines: minLines,
-        style: TextStyle(
-          fontSize: 13,
-          color: const Color(0xFF1D1B1A),
-          fontFamily: fontFamilyPlusJakartaSans,
-        ),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: hint,
-          hintStyle: const TextStyle(
-            fontSize: 13,
-            color: Color(0xFF857373),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: appColors.textFieldBgColor,
+            borderRadius: BorderRadius.circular(12),
+            border: error != null ? Border.all(color: appColors.red) : null,
           ),
-          isDense: true,
+          child: TextField(
+            controller: controller,
+            maxLines: maxLines,
+            minLines: minLines,
+            onChanged: onChanged,
+            style: TextStyle(
+              fontSize: 13,
+              color: const Color(0xFF1D1B1A),
+              fontFamily: fontFamilyPlusJakartaSans,
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: hint,
+              hintStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF857373),
+              ),
+              isDense: true,
+            ),
+          ),
         ),
-      ),
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: CommonText(
+              error,
+              style: TextStyle(color: appColors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 
@@ -386,12 +670,13 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
         _dateController.text = DateFormat('MMMM dd, yyyy').format(picked);
         if (_dateError != null) _validate();
       });
+      callWeeklyCheckinAPI();
     }
   }
 
@@ -424,6 +709,7 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
           fillColor: appColors.textFieldBgColor,
           borderColor: Colors.transparent,
           readOnly: true,
+          onTap: () => _selectDate(context),
           suffixIcon: IconButton(
             icon: Icon(Icons.edit_calendar_outlined, size: 18, color: appColors.primary),
             onPressed: () => _selectDate(context),
@@ -543,6 +829,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         _buildTextArea(
           controller: _selfConfidenceController,
           hint: "e.g., Feeling significantly lighter around the waist, favourite linen trousers fit comfortably without pinching, feeling calm and confident in social gatherings",
+          error: _selfConfidenceError,
+          onChanged: (v) {
+            if (_selfConfidenceError != null) _validate();
+          },
         ),
       ],
     );
@@ -662,7 +952,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
           children: levels.map((level) {
             final isSelected = _selectedCravingLevel == level;
             return GestureDetector(
-              onTap: () => setState(() => _selectedCravingLevel = level),
+              onTap: () => setState(() {
+                _selectedCravingLevel = level;
+                if (_cravingLevelError != null) _validate();
+              }),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
@@ -682,6 +975,14 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
             );
           }).toList(),
         ),
+        if (_cravingLevelError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 4),
+            child: CommonText(
+              _cravingLevelError!,
+              style: TextStyle(color: appColors.red, fontSize: 12),
+            ),
+          ),
         const SizedBox(height: 10),
         CommonTextField(
           label: '',
@@ -731,6 +1032,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         _buildTextArea(
           controller: _weeklyWinsController,
           hint: "e.g., Honored my morning hydration ritual every single day, took 15-minute post-dinner walks without skipping",
+          error: _weeklyWinsError,
+          onChanged: (v) {
+            if (_weeklyWinsError != null) _validate();
+          },
         ),
       ],
     );
@@ -747,6 +1052,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         _buildTextArea(
           controller: _proudMomentsController,
           hint: "e.g., Paused before eating during a hectic team lunch and ate mindfully without guilt or rush...",
+          error: _proudMomentsError,
+          onChanged: (v) {
+            if (_proudMomentsError != null) _validate();
+          },
         ),
       ],
     );
@@ -763,6 +1072,10 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
         _buildTextArea(
           controller: _obstaclesController,
           hint: "e.g., Late client call pushed dinner past 9:30 PM, making digestion feel slightly sluggish the next morning...",
+          error: _obstaclesError,
+          onChanged: (v) {
+            if (_obstaclesError != null) _validate();
+          },
         ),
       ],
     );
