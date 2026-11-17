@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,12 +7,18 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/utils.dart';
 import '../../../../main.dart';
 import '../../../core/blocs/auth/logout/logout_bloc.dart';
+import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
+import '../../../core/blocs/home/health_sync/health_sync_bloc.dart';
+import '../../../core/blocs/profile/chapter_two/chapter_two_bloc.dart';
 import '../../../core/blocs/profile/onboarding_masters/onboarding_masters_bloc.dart';
 import '../../../core/blocs/profile/onboarding_masters_status/onboarding_masters_status_bloc.dart';
 import '../../../core/constants/urls.dart';
+import '../../../core/models/home/dashboard_model.dart';
+import '../../../core/models/profile/chapter_two_model.dart';
 import '../../../core/models/profile/onboarding_master_status_model.dart';
 import '../../../core/models/profile/onboarding_masters_model.dart';
 import '../../../core/services/auth_services.dart';
+import '../../../core/services/health_service.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../core/services/preference_service.dart';
 import '../../widgets/common_button.dart';
@@ -19,6 +26,11 @@ import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
 import '../check-in/daily_wellness_log_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
+import '../coach/gut_reset_protocol_screen.dart';
+import '../coach/healthy_weight_gain_screen.dart';
+import '../coach/maintenance_lifestyle_screen.dart';
+import '../coach/reproductive_life_stage_screen.dart';
+import '../coach/rooted_recovery_screen.dart';
 import '../progress/baseline_progress_screen.dart';
 import 'blood_report_upload_screen.dart';
 import '../progress/three_day_food_diary_screen.dart';
@@ -43,12 +55,28 @@ class ClientOnboardingScreen extends StatefulWidget {
 class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
   ValueNotifier<OnboardingMasterStatusModel?> onboardingMasterStatus = ValueNotifier(null);
   ValueNotifier<OnboardingMastersModel?> onboardingMastersModel = ValueNotifier(null);
+  DashboardModel? dashboardModel;
+  ChapterTwoModel? chapterTwoModel;
 
   @override
   void initState() {
     super.initState();
     callOnboardingMasterStatusAPI();
     callOnboardingMastersAPI();
+
+    final dashState = BlocProvider.of<DashboardBloc>(context).state;
+    if (dashState is DashboardSuccess) {
+      dashboardModel = dashState.model;
+    }
+    final ch2State = BlocProvider.of<ChapterTwoBloc>(context).state;
+    if (ch2State is ChapterTwoSuccess) {
+      chapterTwoModel = ch2State.model;
+    }
+
+    if (!widget.isLogin) {
+      callDashboardAPI();
+      callChapterTwoAPI();
+    }
   }
 
   void _onBack(BuildContext context) {
@@ -89,6 +117,138 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
     BlocProvider.of<OnboardingMastersBloc>(context).add(
       UserOnboardingMastersEvent(url: Urls.onboardingMasters),
     );
+  }
+
+  void callDashboardAPI() {
+    BlocProvider.of<DashboardBloc>(context).add(
+      const UserDashboardEvent(url: Urls.dashboard),
+    );
+  }
+
+  void callChapterTwoAPI() {
+    BlocProvider.of<ChapterTwoBloc>(context).add(
+      UserChapterTwoEvent(url: Urls.onboardingChapter(chapterId: "2")),
+    );
+  }
+
+  Future<void> _handleHealthSync() async {
+    LoaderService.show(context);
+    final payload = await HealthService.getTodayHealthSyncPayload();
+    if (!mounted) return;
+
+    if (payload == null) {
+      LoaderService.hide();
+      showSnackBar(
+        context: context,
+        isError: true,
+        message:
+            "Unable to read health data. Please grant permissions in ${Platform.isAndroid ? 'Health Connect' : 'Apple Health'}.",
+      );
+      return;
+    }
+
+    BlocProvider.of<HealthSyncBloc>(context).add(
+      UserHealthSyncEvent(
+        url: Urls.healthSync,
+        body: payload,
+      ),
+    );
+  }
+
+  String get _activeProgramTitle {
+    final planTitle = dashboardModel?.data?.plan?.pathway?.title ?? dashboardModel?.data?.plan?.title;
+    if (planTitle != null && planTitle.trim().isNotEmpty) {
+      return planTitle.trim();
+    }
+
+    final pathway = onboardingMasterStatus.value?.data?.pathway;
+    if (pathway is Map) {
+      final title = pathway['title']?.toString();
+      if (title != null && title.trim().isNotEmpty) return title.trim();
+    } else if (pathway is String && pathway.trim().isNotEmpty) {
+      return pathway.trim();
+    }
+
+    return "Fat Loss & Inch Loss";
+  }
+
+  String get _activeProgramUuid {
+    final planUuid = dashboardModel?.data?.plan?.pathway?.uuid ?? dashboardModel?.data?.plan?.uuid;
+    if (planUuid != null && planUuid.trim().isNotEmpty) {
+      return planUuid.trim();
+    }
+    final pathway = onboardingMasterStatus.value?.data?.pathway;
+    if (pathway is Map) {
+      final uuid = pathway['uuid']?.toString();
+      if (uuid != null && uuid.trim().isNotEmpty) return uuid.trim();
+    }
+    return "";
+  }
+
+  void _navigateToActiveProgram(BuildContext context) {
+    final title = _activeProgramTitle.toLowerCase();
+    final uuid = _activeProgramUuid;
+
+    if (title.contains("gut reset")) {
+      navigation.pushSlideAnimation(context, GutResetProtocolScreen(pathwayUuid: uuid));
+    } else if (title.contains("fat loss") || title.contains("inch loss")) {
+      navigation.pushSlideAnimation(context, FatLossInchLossScreen(pathwayUuid: uuid));
+    } else if (title.contains("weight gain")) {
+      navigation.pushSlideAnimation(context, HealthyWeightGainScreen(pathwayUuid: uuid));
+    } else if (title.contains("rooted recovery") || title.contains("new moms")) {
+      navigation.pushSlideAnimation(context, RootedRecoveryScreen(pathwayUuid: uuid));
+    } else if (title.contains("maintenance")) {
+      navigation.pushSlideAnimation(context, MaintenanceLifestyleScreen(pathwayUuid: uuid));
+    } else if (title.contains("reproductive")) {
+      navigation.pushSlideAnimation(context, ReproductiveLifeStageScreen(pathwayUuid: uuid));
+    } else {
+      navigation.pushSlideAnimation(context, FatLossInchLossScreen(pathwayUuid: uuid));
+    }
+  }
+
+  String get _heightText {
+    final h = chapterTwoModel?.data?.answers?.height;
+    if (h != null && h.toString().isNotEmpty) {
+      final unit = chapterTwoModel?.data?.answers?.heightUnit ?? "cm";
+      return "$h $unit";
+    }
+    return "--";
+  }
+
+  String get _weightText {
+    final w = dashboardModel?.data?.todayOverview?.weight?.current ?? chapterTwoModel?.data?.answers?.weight;
+    if (w != null && w.toString().isNotEmpty) {
+      final unit = dashboardModel?.data?.todayOverview?.weight?.unit ?? chapterTwoModel?.data?.answers?.weightUnit ?? "kg";
+      return "$w $unit";
+    }
+    return "--";
+  }
+
+  String get _stepsText {
+    final steps = dashboardModel?.data?.todayOverview?.steps;
+    if (steps != null && steps.toString().isNotEmpty) {
+      final intVal = int.tryParse(steps.toString());
+      if (intVal != null) {
+        return "${NumberFormat('#,###').format(intVal)} steps tracked today";
+      }
+      return "$steps steps tracked today";
+    }
+    return "-- steps tracked today";
+  }
+
+  String get _wearablesSubtitle {
+    final source = dashboardModel?.data?.todayOverview?.healthSource;
+    if (source != null && source.isNotEmpty) {
+      return source;
+    }
+    return Platform.isAndroid
+        ? "Google Fit & Health Connect Active Sync"
+        : "Apple Health Active Sync";
+  }
+
+  bool get _isHealthConnected {
+    return dashboardModel?.data?.todayOverview?.isHealthConnected ??
+        (dashboardModel?.data?.todayOverview?.steps != null);
   }
 
   void callLogout() async {
@@ -187,6 +347,10 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
         onValue: (value) {
           if(value == true) {
             callOnboardingMasterStatusAPI();
+            if (!widget.isLogin) {
+              callDashboardAPI();
+              callChapterTwoAPI();
+            }
           }
         },
       );
@@ -229,6 +393,40 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
               LoaderService.hide();
               onboardingMastersModel.value = state.model;
             } else if (state is OnboardingMastersFailed) {
+              LoaderService.hide();
+              showSnackBar(context: context, isError: true, message: state.message);
+            }
+          },
+        ),
+        BlocListener<DashboardBloc, DashboardState>(
+          listener: (context, state) {
+            if (state is DashboardSuccess) {
+              setState(() {
+                dashboardModel = state.model;
+              });
+            }
+          },
+        ),
+        BlocListener<ChapterTwoBloc, ChapterTwoState>(
+          listener: (context, state) {
+            if (state is ChapterTwoSuccess) {
+              setState(() {
+                chapterTwoModel = state.model;
+              });
+            }
+          },
+        ),
+        BlocListener<HealthSyncBloc, HealthSyncState>(
+          listener: (context, state) {
+            if (state is HealthSyncSuccess) {
+              LoaderService.hide();
+              showSnackBar(
+                context: context,
+                isError: false,
+                message: state.model.message ?? "Health data synced successfully!",
+              );
+              callDashboardAPI();
+            } else if (state is HealthSyncFailed) {
               LoaderService.hide();
               showSnackBar(context: context, isError: true, message: state.message);
             }
@@ -747,6 +945,18 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
   }
 
   Widget _buildActiveProgramSection(BuildContext context) {
+    final planStatus = dashboardModel?.data?.plan?.status;
+    final statusText = (planStatus != null && planStatus.isNotEmpty)
+        ? "${planStatus[0].toUpperCase()}${planStatus.substring(1).toLowerCase()} Program"
+        : "Active Program";
+
+    final programTitle = _activeProgramTitle;
+    final heightText = _heightText;
+    final weightText = _weightText;
+    final stepsText = _stepsText;
+    final wearablesSubtitle = _wearablesSubtitle;
+    final isHealthConnected = _isHealthConnected;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -776,9 +986,9 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                const CommonText(
-                  "Active Program",
-                  style: TextStyle(
+                CommonText(
+                  statusText,
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF404A2F),
@@ -792,13 +1002,10 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
 
           // Program Title
           GestureDetector(
-            onTap: () => navigation.pushSlideAnimation(
-              context,
-              const FatLossInchLossScreen(),
-            ),
-            child: const CommonText(
-              "Fat Loss & Inch Loss",
-              style: TextStyle(
+            onTap: () => _navigateToActiveProgram(context),
+            child: CommonText(
+              programTitle,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1D1B1A),
@@ -830,17 +1037,19 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          CommonText("Height",
+                        children: [
+                          const CommonText(
+                            "Height",
                             style: TextStyle(
                               fontSize: 11,
                               color: Color(0xFF6D615C),
                             ),
                             fontFamily: fontFamilyPlusJakartaSans,
                           ),
-                          SizedBox(height: 2),
-                          CommonText("165 cm",
-                            style: TextStyle(
+                          const SizedBox(height: 2),
+                          CommonText(
+                            heightText,
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF1D1B1A),
@@ -873,17 +1082,19 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          CommonText("Weight",
+                        children: [
+                          const CommonText(
+                            "Weight",
                             style: TextStyle(
                               fontSize: 11,
                               color: Color(0xFF6D615C),
                             ),
                             fontFamily: fontFamilyPlusJakartaSans,
                           ),
-                          SizedBox(height: 2),
-                          CommonText("64.5 kg",
-                            style: TextStyle(
+                          const SizedBox(height: 2),
+                          CommonText(
+                            weightText,
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF1D1B1A),
@@ -922,8 +1133,8 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          CommonText(
+                        children: [
+                          const CommonText(
                             "Connected Health & Wearables",
                             style: TextStyle(
                               fontSize: 14,
@@ -932,10 +1143,10 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             ),
                             fontFamily: fontFamilyPlusJakartaSans,
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           CommonText(
-                            "Apple Health & Google Fit Active Sync",
-                            style: TextStyle(
+                            wearablesSubtitle,
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF6D615C),
                             ),
@@ -955,15 +1166,17 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                         Container(
                           width: 6,
                           height: 6,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF404A2F),
+                          decoration: BoxDecoration(
+                            color: isHealthConnected
+                                ? const Color(0xFF404A2F)
+                                : const Color(0xFF9E9E9E),
                             shape: BoxShape.circle,
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const CommonText(
-                          "6,850 steps tracked today",
-                          style: TextStyle(
+                        CommonText(
+                          stepsText,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF534343),
                           ),
@@ -972,7 +1185,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                       ],
                     ),
                     InkWell(
-                      onTap: () => appLog("Sync Now tapped"),
+                      onTap: _handleHealthSync,
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -980,7 +1193,8 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                           color: const Color(0xFFF2EDEB),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const CommonText("Sync Now",
+                        child: const CommonText(
+                          "Sync Now",
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,

@@ -61,8 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
       showSnackBar(
         context: context,
         isError: true,
-        message:
-            "Unable to read health data. Please grant permissions in ${Platform.isAndroid ? 'Health Connect' : 'Apple Health'}.",
+        message: "Unable to read health data. Please grant permissions in ${Platform.isAndroid ? 'Health Connect' : 'Apple Health'}.",
       );
       return;
     }
@@ -219,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onStepsTap: () => appLog("Daily steps card tapped"),
             onSyncTap: _handleHealthSync,
             onWeightTap: () => appLog("Weight card tapped"),
-            onAddWeightTap: () => appLog("Add weight tapped"),
+            onAddWeightTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
             onMicroCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.checkIn),
             onWeeklyCheckinTap: () => bottomPageController.jumpToPage(BottomBarScreenIndex.progress),
           ),

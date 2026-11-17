@@ -7,6 +7,7 @@ import '../../../core/services/preference_service.dart';
 import '../../widgets/common_app_bar.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
+import '../bottom_bar_screen.dart';
 import 'client_onboarding_screen.dart';
 
 class ClientOnboardingIntroductionScreen extends StatelessWidget {
@@ -149,14 +150,20 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  CommonText(
-                    "Welcome, Ananya",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: appColors.primary,
-                      letterSpacing: 0,
-                    ),
+                  ValueListenableBuilder(
+                    valueListenable: userData,
+                    builder: (context, user, _) {
+                      final name = user?.name?.split(" ").first ?? "Ananya";
+                      return CommonText(
+                        "Welcome, $name",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: appColors.primary,
+                          letterSpacing: 0,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   RichText(
