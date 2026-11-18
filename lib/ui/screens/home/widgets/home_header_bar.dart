@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/utils.dart';
 import '../../../../main.dart';
 import '../../../widgets/show_user_avatar.dart';
 import '../../bottom_bar_screen.dart';
 
 class HomeHeaderBar extends StatelessWidget {
-  final VoidCallback? onProfileTap;
-  final VoidCallback? onNotificationTap;
+  final VoidCallback onProfileTap;
+  final VoidCallback onNotificationTap;
   final bool hasUnreadNotifications;
 
   const HomeHeaderBar({
     super.key,
-    this.onProfileTap,
-    this.onNotificationTap,
+    required this.onProfileTap,
+    required this.onNotificationTap,
     this.hasUnreadNotifications = true,
   });
 
@@ -24,14 +25,19 @@ class HomeHeaderBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Profile Avatar
-          ValueListenableBuilder(
-            valueListenable: userData,
-            builder: (context, user, _) {
-              return ShowUserAvatar(
-                size: 38,
-                name: user?.name,
-              );
-            }
+          buildInkWell(
+            onTap: onProfileTap,
+            borderRadius: BorderRadius.circular(50),
+            child: ValueListenableBuilder(
+              valueListenable: userData,
+              builder: (context, user, _) {
+                return ShowUserAvatar(
+                  size: 38,
+                  name: user?.name,
+                  image: user?.profileImage?.toString(),
+                );
+              },
+            ),
           ),
           
           

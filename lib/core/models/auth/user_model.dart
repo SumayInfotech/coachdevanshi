@@ -11,7 +11,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json){
     return UserModel(
-      success: json["success"],
+      success: json["success"] ?? json["status"],
       message: json["message"],
       data: json["data"] == null ? null : Data.fromJson(json["data"]),
     );
@@ -43,7 +43,11 @@ class Data {
       token: json["token"],
       uuid: json["uuid"],
       type: json["type"],
-      user: json["user"] == null ? null : UserData.fromJson(json["user"]),
+      user: json["user"] == null
+          ? (json.containsKey("name") || json.containsKey("email") || json.containsKey("mobile")
+              ? UserData.fromJson(json)
+              : null)
+          : UserData.fromJson(json["user"]),
     );
   }
 

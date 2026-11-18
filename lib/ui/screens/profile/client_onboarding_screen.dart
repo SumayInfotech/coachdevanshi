@@ -476,11 +476,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                                   onTap: () => _onBack(context),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
-                                    child: Icon(
-                                      Icons.arrow_back,
-                                      size: 24,
-                                      color: appColors.neutral,
-                                    ),
+                                    child: Icon(Icons.arrow_back, size: 24, color: appColors.neutral),
                                   ),
                                 ),
                               ),
@@ -513,7 +509,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                           valueListenable: userData,
                           builder: (context, user, _) {
                             return CommonText(
-                              "Good morning, ${user?.name?.split(" ").first ?? "Ananya"}",
+                              "Good morning, ${user?.name?.split(" ").first ?? "-"}",
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w600,

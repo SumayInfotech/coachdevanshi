@@ -40,33 +40,24 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle,
       title: title,
       bottom: bottom,
-      titleTextStyle: titleTextStyle ??
-        TextStyle(
-          fontSize: 20,
-          color: appColors.black,
-          fontWeight: .bold,
-          fontFamily: fontFamilyPlusJakartaSans,
-        ),
+      titleTextStyle: titleTextStyle ?? TextStyle(
+        fontSize: 20,
+        color: appColors.black,
+        fontWeight: .bold,
+        fontFamily: fontFamilyPlusJakartaSans,
+      ),
       automaticallyImplyLeading: false,
-      leading: isLeading
-          ? leading ?? buildInkWell(
-            onTap: onBack ?? () => navigation.pop(context),
-            child: Container(
-              width: 50,
-              height: 50,
-              margin: EdgeInsets.only(left: 10),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFF3F3FA),
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                size: 24,
-                color: Colors.black,
-              ),
-            ),
-          )
-          : null,
+      leading: isLeading ? leading ?? buildInkWell(
+        onTap: onBack ?? () => navigation.pop(context),
+        child: Container(
+          width: 50, height: 50,
+          margin: EdgeInsets.only(left: 10),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.arrow_back, size: 24, color: appColors.neutral),
+        ),
+      ) : null,
       actions: actions,
     );
   }

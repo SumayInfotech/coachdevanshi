@@ -456,6 +456,7 @@ class _FatLossInchLossScreenState extends State<FatLossInchLossScreen> {
                   controller: weightController,
                   isRequired: false,
                   isDense: true,
+                  hint: "0",
                   borderColor: error != null ? appColors.red : Colors.transparent,
                   fillColor: appColors.white,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),

@@ -153,7 +153,7 @@ class ClientOnboardingIntroductionScreen extends StatelessWidget {
                   ValueListenableBuilder(
                     valueListenable: userData,
                     builder: (context, user, _) {
-                      final name = user?.name?.split(" ").first ?? "Ananya";
+                      final name = user?.name?.split(" ").first ?? "-";
                       return CommonText(
                         "Welcome, $name",
                         style: TextStyle(

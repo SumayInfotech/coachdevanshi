@@ -13,6 +13,7 @@ import 'auth/profile/profile_bloc.dart';
 import 'auth/resend_sign_up_otp/resend_sign_up_otp_bloc.dart';
 import 'auth/sign_up/sign_up_bloc.dart';
 import 'auth/social_login/social_login_bloc.dart';
+import 'auth/update_profile/update_profile_bloc.dart';
 import 'auth/verify_otp/verify_otp_bloc.dart';
 import 'coach/fat_loss_inch_loss/fat_loss_inch_loss_bloc.dart';
 import 'coach/gut_reset/gut_reset_bloc.dart';
@@ -75,6 +76,9 @@ List<SingleChildWidget> blocProviders() {
       ),
       BlocProvider(
         create: (context) => ProfileBloc(authRepo: authRepo),
+      ),
+      BlocProvider(
+        create: (context) => UpdateProfileBloc(authRepo: authRepo),
       ),
       BlocProvider(
         create: (context) => LogoutBloc(authRepo: authRepo),

@@ -158,6 +158,37 @@ class AuthRepo extends BaseRepository {
     }
   }
 
+  Future<ApiResponse<dynamic>> updateProfile ({
+    required String url,
+    required Map<String, dynamic> body,
+    bool isMultipart = false,
+  }) async {
+    final response = await networkService.request(
+      url: url,
+      requestType: RequestType.post,
+      body: body,
+      isMultipart: isMultipart,
+    );
+
+    if (response.data == null) {
+      return ApiResponse.failure(message: response.message);
+    }
+
+    try {
+      /// Convert JSON -> Model
+      UserModel model = UserModel.fromJson(response.data);
+
+      if (model.success == true) {
+        return ApiResponse.success(data: model, message: model.message ?? "");
+      } else {
+        return ApiResponse.failure(message: model.message ?? "");
+      }
+    } catch (e) {
+      appLog(name: "AuthRepo updateProfile Exception", e.toString());
+      return ApiResponse.failure(message: e.toString());
+    }
+  }
+
   Future<ApiResponse<dynamic>> logout ({
     required String url,
     required Map<String, dynamic> body,

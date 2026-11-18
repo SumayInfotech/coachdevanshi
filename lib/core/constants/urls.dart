@@ -11,6 +11,7 @@ class Urls {
   static const loginVerifyOTP = "$baseUrl/auth/login-signup-verify-otp";
 
   static const profile = "$baseUrl/get-profile";
+  static const updateProfile = "$baseUrl/update-profile";
   static const logout = "$baseUrl/logout";
 
   static const getLocation = "$baseUrl/get-location";
