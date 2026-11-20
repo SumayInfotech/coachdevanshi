@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
 import '../../../core/blocs/home/daily_checkin/daily_checkin_bloc.dart';
+import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
 import '../../../core/blocs/home/save_daily_checkin/save_daily_checkin_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
@@ -350,9 +351,9 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
           "meditation_notes": _meditationNotesController.text.trim(),
         "journaling_done": _isJournalingDone ?? false,
         "meals": meals,
-        "notes": _journalingNotesController.text.trim().isNotEmpty
-            ? _journalingNotesController.text.trim()
-            : "Felt energetic",
+        "notes": _journalingNotesController.text.trim(),
+        if (_journalingNotesController.text.trim().isNotEmpty)
+          "journaling_notes": _journalingNotesController.text.trim(),
       };
 
       BlocProvider.of<SaveDailyCheckinBloc>(context).add(
@@ -467,6 +468,9 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
             if (state is SaveDailyCheckinSuccess) {
               LoaderService.hide();
               showSnackBar(context: context, isError: false, message: state.model.message ?? "Check-in saved successfully");
+              BlocProvider.of<DashboardBloc>(context).add(
+                const UserDashboardEvent(url: Urls.dashboard),
+              );
               _onBack();
             } else if (state is SaveDailyCheckinFailed) {
               LoaderService.hide();

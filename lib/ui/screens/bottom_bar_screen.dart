@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/blocs/auth/profile/profile_bloc.dart';
+import '../../core/blocs/home/dashboard/dashboard_bloc.dart';
 import '../../core/blocs/home/health_sync/health_sync_bloc.dart';
 import '../../core/constants/urls.dart';
 import '../../core/models/auth/user_model.dart';
@@ -152,6 +153,11 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
           ],
           onPageChanged: (value) {
             selectedBottomIndex.value = value;
+            if (value == BottomBarScreenIndex.profile || value == BottomBarScreenIndex.home) {
+              BlocProvider.of<DashboardBloc>(context).add(
+                const UserDashboardEvent(url: Urls.dashboard),
+              );
+            }
             setState(() {});
           },
         ),

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../main.dart';
+import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
 import '../../../core/blocs/progress/save_weekly_checkin/save_weekly_checkin_bloc.dart';
 import '../../../core/blocs/progress/weekly_checkin/weekly_checkin_bloc.dart';
 import '../../../core/constants/urls.dart';
@@ -393,6 +394,9 @@ class _BaselineProgressScreenState extends State<BaselineProgressScreen> {
                 context: context,
                 isError: false,
                 message: state.model.message ?? "Weekly check-in saved successfully",
+              );
+              BlocProvider.of<DashboardBloc>(context).add(
+                const UserDashboardEvent(url: Urls.dashboard),
               );
               navigation.pushSlideAnimation(context, const TrackWeeklyProgressScreen());
             } else if (state is SaveWeeklyCheckinFailed) {

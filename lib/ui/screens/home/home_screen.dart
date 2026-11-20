@@ -3,10 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/blocs/coach/pathways/pathways_bloc.dart';
+import '../../../core/blocs/coach/pathways/pathways_event.dart';
+import '../../../core/blocs/coach/pathways/pathways_state.dart';
 import '../../../core/blocs/home/dashboard/dashboard_bloc.dart';
 import '../../../core/blocs/home/health_sync/health_sync_bloc.dart';
 import '../../../core/constants/urls.dart';
 import '../../../core/constants/utils.dart';
+import '../../../core/models/coach/pathways_model.dart';
 import '../../../core/models/home/dashboard_model.dart';
 import '../../../core/services/health_service.dart';
 import '../../../core/services/loader_service.dart';
@@ -15,6 +19,12 @@ import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
+import '../coach/gut_reset_protocol_screen.dart';
+import '../coach/healthy_weight_gain_screen.dart';
+import '../coach/maintenance_lifestyle_screen.dart';
+import '../coach/reproductive_life_stage_screen.dart';
+import '../coach/rooted_recovery_screen.dart';
+import '../coach/select_pathway_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../profile/blood_report_upload_screen.dart';
 import '../profile/update_profile_screen.dart';
@@ -39,11 +49,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DashboardModel? dashboardModel;
+  PathwaysModel? _pathwaysModel;
 
   @override
   void initState() {
     super.initState();
     callDashboardAPI();
+    callGetPathwaysAPI();
   }
 
   void callDashboardAPI() {
@@ -52,6 +64,145 @@ class _HomeScreenState extends State<HomeScreen> {
         const UserDashboardEvent(url: Urls.dashboard),
       );
     });
+  }
+
+  void callGetPathwaysAPI() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = BlocProvider.of<PathwaysBloc>(context).state;
+      if (state is PathwaysSuccess) {
+        _pathwaysModel = state.model;
+      } else {
+        BlocProvider.of<PathwaysBloc>(context).add(
+          const UserGetPathwaysEvent(url: Urls.pathways),
+        );
+      }
+    });
+  }
+
+  PathwayItem? _findPathwayItem(PathwaysModel? pathwaysModel, String targetUuid, String targetTitle) {
+    if (pathwaysModel?.data?.groups == null) return null;
+
+    final lowerTitle = targetTitle.toLowerCase().trim();
+
+    // 1. Search dynamically across all groups from API response by UUID
+    if (targetUuid.isNotEmpty) {
+      for (final group in pathwaysModel!.data!.groups!) {
+        final pathways = group.pathways ?? [];
+        for (final item in pathways) {
+          if (item.uuid != null && item.uuid!.trim().toLowerCase() == targetUuid.toLowerCase()) {
+            return item;
+          }
+        }
+      }
+    }
+
+    // 2. If not matched by UUID, search by title or slug from API response
+    if (lowerTitle.isNotEmpty) {
+      for (final group in pathwaysModel!.data!.groups!) {
+        final pathways = group.pathways ?? [];
+        for (final item in pathways) {
+          final itemTitle = (item.title ?? '').toLowerCase().trim();
+          final itemSlug = (item.slug ?? '').toLowerCase().trim();
+          if (itemTitle == lowerTitle ||
+              itemSlug == lowerTitle ||
+              (itemTitle.isNotEmpty && lowerTitle.contains(itemTitle)) ||
+              (itemTitle.isNotEmpty && itemTitle.contains(lowerTitle))) {
+            return item;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Widget _resolveScreenForPathway({
+    required PathwayItem? item,
+    required String fallbackUuid,
+    required String fallbackTitle,
+  }) {
+    final String uuid = (item?.uuid ?? fallbackUuid).trim();
+    final String slug = (item?.slug ?? '').toLowerCase().trim();
+    final String title = (item?.title ?? fallbackTitle).toLowerCase().trim();
+
+    // Dynamically route based on matched pathway slug / title from API
+    if (slug == "gut-reset" || title.contains("gut reset")) {
+      return GutResetProtocolScreen(pathwayUuid: uuid);
+    } else if (slug == "fat-loss-inch-loss" || title.contains("fat loss") || title.contains("inch loss")) {
+      return FatLossInchLossScreen(pathwayUuid: uuid);
+    } else if (slug == "healthy-weight-gain" || title.contains("weight gain")) {
+      return HealthyWeightGainScreen(pathwayUuid: uuid);
+    } else if (slug == "rooted-recovery-new-moms" || title.contains("rooted recovery") || title.contains("new moms")) {
+      return RootedRecoveryScreen(pathwayUuid: uuid);
+    } else if (slug == "maintenance-lifestyle" || title.contains("maintenance")) {
+      return MaintenanceLifestyleScreen(pathwayUuid: uuid);
+    } else if (slug == "reproductive-life-stage" || title.contains("reproductive")) {
+      return ReproductiveLifeStageScreen(pathwayUuid: uuid);
+    }
+
+    // If pathway has no protocol or is not applicable
+    if (slug == "not-applicable" || (item != null && item.hasProtocol == false)) {
+      return const SelectPathwayScreen();
+    }
+
+    if (uuid.isEmpty && title.isEmpty) {
+      return const SelectPathwayScreen();
+    }
+
+    return const SelectPathwayScreen();
+  }
+
+  Future<void> _navigateToPathway(PlanPathway? pathway) async {
+    final String targetUuid = (pathway?.uuid ?? "").trim();
+    final String targetTitle = (pathway?.title ?? pathway?.value ?? "").trim();
+
+    if (targetUuid.isEmpty && targetTitle.isEmpty) {
+      navigation.pushSlideAnimation(
+        context,
+        const SelectPathwayScreen(),
+        onValue: (_) => callDashboardAPI(),
+      );
+      return;
+    }
+
+    PathwaysModel? model = _pathwaysModel;
+
+    // If pathways haven't loaded yet, check current Bloc state or fetch dynamically
+    if (model == null) {
+      final pathwaysBloc = BlocProvider.of<PathwaysBloc>(context);
+      if (pathwaysBloc.state is PathwaysSuccess) {
+        model = (pathwaysBloc.state as PathwaysSuccess).model;
+        _pathwaysModel = model;
+      } else {
+        LoaderService.show(context);
+        pathwaysBloc.add(const UserGetPathwaysEvent(url: Urls.pathways));
+        try {
+          final nextState = await pathwaysBloc.stream
+              .firstWhere((s) => s is PathwaysSuccess || s is PathwaysFailed)
+              .timeout(const Duration(seconds: 10));
+          if (nextState is PathwaysSuccess) {
+            model = nextState.model;
+            _pathwaysModel = model;
+          }
+        } catch (_) {}
+        LoaderService.hide();
+      }
+    }
+
+    // Find pathway dynamically from API response by matching UUID
+    final matchedItem = _findPathwayItem(model, targetUuid, targetTitle);
+    final targetScreen = _resolveScreenForPathway(
+      item: matchedItem,
+      fallbackUuid: targetUuid,
+      fallbackTitle: targetTitle,
+    );
+
+    if (!mounted) return;
+    navigation.pushSlideAnimation(
+      context,
+      targetScreen,
+      onValue: (_) => callDashboardAPI(),
+    );
   }
 
   Future<void> _handleHealthSync() async {
@@ -122,6 +273,13 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           },
         ),
+        BlocListener<PathwaysBloc, PathwaysState>(
+          listener: (context, state) {
+            if (state is PathwaysSuccess) {
+              _pathwaysModel = state.model;
+            }
+          },
+        ),
       ],
       child: Scaffold(
         backgroundColor: appColors.bgColor,
@@ -140,6 +298,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   onRefresh: () async {
                     BlocProvider.of<DashboardBloc>(context).add(
                       const UserDashboardEvent(url: Urls.dashboard),
+                    );
+                    BlocProvider.of<PathwaysBloc>(context).add(
+                      const UserGetPathwaysEvent(url: Urls.pathways),
                     );
                   },
                   child: SingleChildScrollView(
@@ -244,10 +405,11 @@ class _HomeScreenState extends State<HomeScreen> {
             planTitle: plan.title ?? "",
             durationSubtitle: "${plan.daysLeft ?? 0} days left • Ends on ${plan.endDateLabel ?? ""}",
             progressPercent: ((plan.progressPercent ?? 0) / 100.0).clamp(0.0, 1.0),
-            showPhaseStatus: plan.pathway?.title != null && plan.pathway!.title!.isNotEmpty,
-            phaseTitle: plan.pathway?.title ?? "",
+            showPhaseStatus: (plan.pathway?.title != null && plan.pathway!.title!.isNotEmpty) ||
+                (plan.pathway?.value != null && plan.pathway!.value!.isNotEmpty),
+            phaseTitle: plan.pathway?.title ?? plan.pathway?.value ?? "",
             statusText: plan.status ?? "Active",
-            onTap: () => navigation.push(context, const FatLossInchLossScreen()),
+            onTap: () => _navigateToPathway(plan.pathway),
           ),
           const SizedBox(height: 16),
         ],

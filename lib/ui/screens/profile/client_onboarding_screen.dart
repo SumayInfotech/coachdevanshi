@@ -251,6 +251,45 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
         (dashboardModel?.data?.todayOverview?.steps != null);
   }
 
+  bool get _isMicroDone {
+    final micro = dashboardModel?.data?.checkins?.micro;
+    return micro?.isDone == true ||
+        micro?.status?.toLowerCase() == "done" ||
+        micro?.status?.toLowerCase() == "completed" ||
+        micro?.status?.toLowerCase() == "submitted";
+  }
+
+  String get _microBadgeText {
+    final status = dashboardModel?.data?.checkins?.micro?.status;
+    if (_isMicroDone) return "Done";
+    if (status != null && status.trim().isNotEmpty) {
+      return status[0].toUpperCase() + status.substring(1);
+    }
+    return "Due";
+  }
+
+  bool get _isBaselineDone {
+    final weekly = dashboardModel?.data?.checkins?.weekly;
+    final baseline = dashboardModel?.data?.checkins?.baseline;
+    return (weekly?.isSubmitted == true) ||
+        (weekly?.submittedUuid?.isNotEmpty == true) ||
+        (weekly?.status?.toLowerCase() == "done") ||
+        (weekly?.status?.toLowerCase() == "submitted") ||
+        (weekly?.status?.toLowerCase() == "completed") ||
+        (baseline?.isCompleted == true) ||
+        ((baseline?.completed ?? 0) > 0);
+  }
+
+  String get _baselineBadgeText {
+    final status = dashboardModel?.data?.checkins?.weekly?.status;
+    if (status != null &&
+        status.trim().isNotEmpty &&
+        status.toLowerCase() != "due") {
+      return status[0].toUpperCase() + status.substring(1);
+    }
+    return _isBaselineDone ? "Done" : "Due";
+  }
+
   void callLogout() async {
     await AuthServices.signOut();
     AppPreferences.clearPreferences();
@@ -588,6 +627,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             onTapButton: () => navigation.pushSlideAnimation(
                               context,
                               const ThreeDayFoodDiaryScreen(),
+                              onValue: (value) => callDashboardAPI(),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -598,7 +638,9 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                               height: 36,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                                color: _isMicroDone
+                                    ? const Color(0xFFD8E5BF).withValues(alpha: 0.6)
+                                    : const Color(0xFFFFDADB).withValues(alpha: 0.6),
                               ),
                               child: Center(
                                 child: Image.asset(
@@ -610,12 +652,16 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                               ),
                             ),
                             title: "Micro Check-in",
-                            subtitle: "First seven days of steps, sleep and water baseline",
-                            badgeText: "Due",
-                            buttonText: "Add Data",
-                            isPrimaryButton: true,
-                            onTapButton: () => navigation.pushSlideAnimation(context,
+                            subtitle: "Daily mood, meals, steps and sleep",
+                            badgeText: _microBadgeText,
+                            badgeBgColor: _isMicroDone ? const Color(0xFFD8E5BF) : const Color(0xFFFFDADB),
+                            badgeTextColor: _isMicroDone ? const Color(0xFF404A2F) : const Color(0xFF713439),
+                            buttonText: _isMicroDone ? "Edit" : "Add Data",
+                            isPrimaryButton: !_isMicroDone,
+                            onTapButton: () => navigation.pushSlideAnimation(
+                              context,
                               const DailyWellnessLogScreen(isBack: true),
+                              onValue: (value) => callDashboardAPI(),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -626,26 +672,31 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                               height: 36,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFFFFDADB).withValues(alpha: 0.6),
+                                color: _isBaselineDone
+                                    ? const Color(0xFFD8E5BF).withValues(alpha: 0.6)
+                                    : const Color(0xFFFFDADB).withValues(alpha: 0.6),
                               ),
                               child: Center(
                                 child: Image.asset(
                                   appIcons.progress,
                                   width: 18,
                                   height: 18,
-                                  color: appColors.primary,
+                                  color: _isBaselineDone ? const Color(0xFF404A2F) : appColors.primary,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                             ),
                             title: "Baseline and Progress Measurements",
                             subtitle: "First seven days of steps, sleep and water baseline",
-                            badgeText: "Due",
-                            buttonText: "Add Data",
-                            isPrimaryButton: true,
+                            badgeText: _baselineBadgeText,
+                            badgeBgColor: _isBaselineDone ? const Color(0xFFD8E5BF) : const Color(0xFFFFDADB),
+                            badgeTextColor: _isBaselineDone ? const Color(0xFF404A2F) : const Color(0xFF713439),
+                            buttonText: _isBaselineDone ? "Edit" : "Add Data",
+                            isPrimaryButton: !_isBaselineDone,
                             onTapButton: () => navigation.pushSlideAnimation(
                               context,
                               const BaselineProgressScreen(),
+                              onValue: (value) => callDashboardAPI(),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -674,6 +725,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             isPrimaryButton: true,
                             onTapButton: () => navigation.pushSlideAnimation(context,
                               const TrackWeeklyProgressScreen(isBack: true),
+                              onValue: (value) => callDashboardAPI(),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -703,6 +755,7 @@ class _ClientOnboardingScreenState extends State<ClientOnboardingScreen> {
                             onTapButton: () => navigation.pushSlideAnimation(
                               context,
                               const BloodReportUploadScreen(isBack: true),
+                              onValue: (value) => callDashboardAPI(),
                             ),
                           ),
                         ],
@@ -1359,6 +1412,8 @@ class _ActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? badgeText;
+  final Color? badgeBgColor;
+  final Color? badgeTextColor;
   final String buttonText;
   final bool isPrimaryButton;
   final VoidCallback onTapButton;
@@ -1368,6 +1423,8 @@ class _ActionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.badgeText,
+    this.badgeBgColor,
+    this.badgeTextColor,
     required this.buttonText,
     required this.isPrimaryButton,
     required this.onTapButton,
@@ -1441,22 +1498,28 @@ class _ActionCard extends StatelessWidget {
             ),
           ),
           if (badgeText != null) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFDADB),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: CommonText(
-                badgeText!,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF713439),
-                ),
-                fontFamily: fontFamilyPlusJakartaSans,
-              ),
+            Builder(
+              builder: (context) {
+                final bool isDone = badgeText!.toLowerCase() == "done" ||
+                    badgeText!.toLowerCase() == "completed" ||
+                    badgeText!.toLowerCase() == "submitted";
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: badgeBgColor ?? (isDone ? const Color(0xFFD8E5BF) : const Color(0xFFFFDADB)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: CommonText(
+                    badgeText!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: badgeTextColor ?? (isDone ? const Color(0xFF404A2F) : const Color(0xFF713439)),
+                    ),
+                    fontFamily: fontFamilyPlusJakartaSans,
+                  ),
+                );
+              },
             ),
           ],
         ],

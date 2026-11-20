@@ -170,21 +170,29 @@ class PlanPathway {
   PlanPathway({
     required this.uuid,
     required this.title,
+    this.value,
+    this.slug,
   });
 
   final String? uuid;
   final String? title;
+  final String? value;
+  final String? slug;
 
   factory PlanPathway.fromJson(Map<String, dynamic> json) {
     return PlanPathway(
-      uuid: json["uuid"],
-      title: json["title"],
+      uuid: json["uuid"]?.toString(),
+      title: json["title"]?.toString() ?? json["value"]?.toString(),
+      value: json["value"]?.toString() ?? json["title"]?.toString(),
+      slug: json["slug"]?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() => {
     "uuid": uuid,
     "title": title,
+    if (value != null) "value": value,
+    if (slug != null) "slug": slug,
   };
 }
 
