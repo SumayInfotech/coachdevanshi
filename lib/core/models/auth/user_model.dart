@@ -11,7 +11,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json){
     return UserModel(
-      success: json["success"] ?? json["status"],
+      success: json["success"],
       message: json["message"],
       data: json["data"] == null ? null : Data.fromJson(json["data"]),
     );
@@ -28,33 +28,21 @@ class UserModel {
 class Data {
   Data({
     required this.token,
-    required this.uuid,
-    required this.type,
     required this.user,
   });
 
-  final String? token;
-  final String? uuid;
-  final String? type;
+  final dynamic token;
   final UserData? user;
 
   factory Data.fromJson(Map<String, dynamic> json){
     return Data(
       token: json["token"],
-      uuid: json["uuid"],
-      type: json["type"],
-      user: json["user"] == null
-          ? (json.containsKey("name") || json.containsKey("email") || json.containsKey("mobile")
-              ? UserData.fromJson(json)
-              : null)
-          : UserData.fromJson(json["user"]),
+      user: json["user"] == null ? null : UserData.fromJson(json["user"]),
     );
   }
 
   Map<String, dynamic> toJson() => {
     "token": token,
-    "uuid": uuid,
-    "type": type,
     "user": user?.toJson(),
   };
 
@@ -85,6 +73,18 @@ class UserData {
     required this.smsNotification,
     required this.whatsappNotification,
     required this.language,
+    required this.nickname,
+    required this.dob,
+    required this.gender,
+    required this.countryName,
+    required this.timezone,
+    required this.weeklyCheckinDay,
+    required this.pushNotification,
+    required this.healthSource,
+    required this.isHealthConnected,
+    required this.isHomeTourCompleted,
+    required this.isOnboardingCompleted,
+    required this.pathwayUuid,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -92,26 +92,38 @@ class UserData {
   final int? id;
   final String? uuid;
   final String? name;
-  final dynamic lastName;
+  final String? lastName;
   final String? email;
   final String? phoneCode;
   final String? mobile;
   final bool? isEmailVerified;
   final String? emailVerifiedAt;
-  final dynamic profileImage;
+  final String? profileImage;
   final bool? isProfileCompleted;
   final String? signUpThrough;
   final String? signUpType;
   final bool? isSignup;
   final bool? isSocial;
-  final dynamic stateId;
-  final dynamic stateName;
-  final dynamic cityId;
-  final dynamic cityName;
+  final int? stateId;
+  final String? stateName;
+  final int? cityId;
+  final String? cityName;
   final bool? emailNotification;
   final bool? smsNotification;
   final bool? whatsappNotification;
   final String? language;
+  final String? nickname;
+  final DateTime? dob;
+  final String? gender;
+  final String? countryName;
+  final String? timezone;
+  final String? weeklyCheckinDay;
+  final bool? pushNotification;
+  final String? healthSource;
+  final bool? isHealthConnected;
+  final bool? isHomeTourCompleted;
+  final bool? isOnboardingCompleted;
+  final String? pathwayUuid;
   final String? createdAt;
   final String? updatedAt;
 
@@ -140,6 +152,18 @@ class UserData {
       smsNotification: json["sms_notification"],
       whatsappNotification: json["whatsapp_notification"],
       language: json["language"],
+      nickname: json["nickname"],
+      dob: DateTime.tryParse(json["dob"] ?? ""),
+      gender: json["gender"],
+      countryName: json["country_name"],
+      timezone: json["timezone"],
+      weeklyCheckinDay: json["weekly_checkin_day"],
+      pushNotification: json["push_notification"],
+      healthSource: json["health_source"],
+      isHealthConnected: json["is_health_connected"],
+      isHomeTourCompleted: json["is_home_tour_completed"],
+      isOnboardingCompleted: json["is_onboarding_completed"],
+      pathwayUuid: json["pathway_uuid"],
       createdAt: json["created_at"],
       updatedAt: json["updated_at"],
     );
@@ -169,6 +193,18 @@ class UserData {
     "sms_notification": smsNotification,
     "whatsapp_notification": whatsappNotification,
     "language": language,
+    "nickname": nickname,
+    "dob": "${dob?.year.toString().padLeft(4,'0')}-${dob?.month.toString().padLeft(2,'0')}-${dob?.day.toString().padLeft(2,'0')}",
+    "gender": gender,
+    "country_name": countryName,
+    "timezone": timezone,
+    "weekly_checkin_day": weeklyCheckinDay,
+    "push_notification": pushNotification,
+    "health_source": healthSource,
+    "is_health_connected": isHealthConnected,
+    "is_home_tour_completed": isHomeTourCompleted,
+    "is_onboarding_completed": isOnboardingCompleted,
+    "pathway_uuid": pathwayUuid,
     "created_at": createdAt,
     "updated_at": updatedAt,
   };

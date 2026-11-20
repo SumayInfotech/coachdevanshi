@@ -11,6 +11,8 @@ import '../../../core/models/home/dashboard_model.dart';
 import '../../../core/services/health_service.dart';
 import '../../../core/services/loader_service.dart';
 import '../../../main.dart';
+import '../../widgets/common_button.dart';
+import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -20,6 +22,7 @@ import '../progress/three_day_food_diary_screen.dart';
 import '../progress/track_weekly_progress_screen.dart';
 import 'widgets/greeting_banner.dart';
 import 'widgets/home_header_bar.dart';
+import 'widgets/home_shimmer_loading.dart';
 import 'widgets/note_from_coach_card.dart';
 import 'widgets/quick_access_grid.dart';
 import 'widgets/restorative_quote_card.dart';
@@ -45,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void callDashboardAPI() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      LoaderService.show(context);
       BlocProvider.of<DashboardBloc>(context).add(
         const UserDashboardEvent(url: Urls.dashboard),
       );
@@ -89,6 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
             } else if (state is DashboardFailed) {
               LoaderService.hide();
               appLog(state.message);
+              if (dashboardModel == null) {
+                showSnackBar(
+                  context: context,
+                  isError: true,
+                  message: state.message.isNotEmpty ? state.message : "Failed to load dashboard data.",
+                );
+              }
             }
           },
         ),
@@ -136,12 +145,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-                    child: _buildContent(),
+                    child: BlocBuilder<DashboardBloc, DashboardState>(
+                      builder: (context, state) {
+                        if (state is DashboardLoading || (dashboardModel == null && state is! DashboardFailed)) {
+                          return const HomeShimmerLoading();
+                        } else if (state is DashboardFailed && dashboardModel == null) {
+                          return _buildErrorState(state.message);
+                        }
+                        return _buildContent();
+                      },
+                    ),
                   ),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60.0, horizontal: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: appColors.primary,
+            ),
+            const SizedBox(height: 16),
+            CommonText(
+              message.isNotEmpty ? message : "Failed to load dashboard data",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: appColors.neutral,
+              ),
+            ),
+            const SizedBox(height: 20),
+            CommonButton(
+              name: "Retry",
+              width: 120,
+              height: 42,
+              btnColor: appColors.primary,
+              fontColor: appColors.white,
+              onTap: callDashboardAPI,
+            ),
+          ],
         ),
       ),
     );
@@ -237,7 +291,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Quick Access Grid (Food Diary, Progress Photos, Upload Reports)
         QuickAccessGrid(
-          onFoodDiaryTap: () => navigation.push(context, const ThreeDayFoodDiaryScreen()),
+          onFoodDiaryTap: () => navigation.push(context,
+            const ThreeDayFoodDiaryScreen()
+          ),
           onProgressPhotosTap: () => navigation.push(context,
             const TrackWeeklyProgressScreen(isBack: true),
           ),

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/blocs/auth/profile/profile_bloc.dart';
+import '../../core/blocs/home/health_sync/health_sync_bloc.dart';
 import '../../core/constants/urls.dart';
 import '../../core/models/auth/user_model.dart';
+import '../../core/services/health_service.dart';
 import '../../core/services/loader_service.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
@@ -33,14 +35,17 @@ class BottomBarScreen extends StatefulWidget {
 PageController bottomPageController = PageController();
 ValueNotifier<UserData?> userData = ValueNotifier(null);
 
-void callUserAPI({required BuildContext context}) {
-  LoaderService.show(context);
+void callUserAPI({required BuildContext context, bool showLoader = true}) {
+  if (showLoader) {
+    LoaderService.show(context);
+  }
   BlocProvider.of<ProfileBloc>(context).add(UserProfileEvent(url: Urls.profile));
 }
 
 class _BottomBarScreenState extends State<BottomBarScreen> {
 
   ValueNotifier<int> selectedBottomIndex = ValueNotifier(0);
+  bool _isHealthSyncing = false;
 
   List<BottomBarItemData> currentMenu = [
     BottomBarItemData(label: "Home", icon: appIcons.home),
@@ -50,6 +55,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     BottomBarItemData(label: "Profile", icon: appIcons.profile),
   ];
 
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +63,39 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
       callUserAPI(context: context);
     });
   }
+
+
+  Future<void> _autoSyncHealthData() async {
+    if (_isHealthSyncing) return;
+    _isHealthSyncing = true;
+    try {
+      final payload = await HealthService.getTodayHealthSyncPayload();
+      if (!mounted) return;
+
+      if (payload != null) {
+        BlocProvider.of<HealthSyncBloc>(context).add(
+          UserHealthSyncEvent(
+            url: Urls.healthSync,
+            body: payload,
+          ),
+        );
+      } else {
+        appLog(name: "Auto HealthSync", "Health payload was null or permissions not available");
+      }
+    } catch (e) {
+      appLog(name: "Auto HealthSync Exception", e.toString());
+    } finally {
+      _isHealthSyncing = false;
+    }
+  }
+
+
+  @override
+  void dispose() {
+    selectedBottomIndex.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +111,29 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                 navigation.pushAndRemoveUntilSlideAnimation(context,
                   ClientOnboardingScreen(isLogin: true)
                 );
+                return;
+              }
+
+              // Check if health_source != null from get-profile API
+              final dynamic rawHealthSource = state.model.data?.user?.healthSource ??
+                  state.model.data?.user?.healthSource;
+              if (rawHealthSource != null) {
+                final sourceStr = rawHealthSource.toString().trim();
+                if (sourceStr.isNotEmpty && sourceStr.toLowerCase() != "null") {
+                  _autoSyncHealthData();
+                }
               }
             } else if(state is ProfileFailed) {
               LoaderService.hide();
+            }
+          },
+        ),
+        BlocListener<HealthSyncBloc, HealthSyncState>(
+          listener: (context, state) {
+            if (state is HealthSyncSuccess) {
+              appPrint("Health data auto-synced successfully in BottomBarScreen");
+            } else if (state is HealthSyncFailed) {
+              appLog(name: "Health data auto-sync failed in BottomBarScreen", state.message);
             }
           },
         ),
