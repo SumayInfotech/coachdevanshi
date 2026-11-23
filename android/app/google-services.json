@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:43351019791:android:954a256baac151d98dee7a",
+        "mobilesdk_app_id": "1:43351019791:android:fd70b6c8ac7f85dd8dee7a",
         "android_client_info": {
-          "package_name": "com.coach_devanshi_doshi"
+          "package_name": "com.coach.devanshi.doshi"
         }
       },
       "oauth_client": [
         {
-          "client_id": "43351019791-65j5r7r3ali9g4ib8tefpfnjbgqfohvc.apps.googleusercontent.com",
+          "client_id": "43351019791-n0jm9o4vabrkrdtac2isstejvdf7terc.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.coach_devanshi_doshi",
+            "package_name": "com.coach.devanshi.doshi",
             "certificate_hash": "78842a99676fd9ae5a018f90d3ec506eedd8c380"
           }
         },

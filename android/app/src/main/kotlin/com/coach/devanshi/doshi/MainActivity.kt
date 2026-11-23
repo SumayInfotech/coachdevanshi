@@ -1,4 +1,4 @@
-package com.coach_devanshi_doshi
+package com.coach.devanshi.doshi
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

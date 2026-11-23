@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB6mO5WeQHC8wMfgYR8Sl4f7HNxJUvVrig',
-    appId: '1:43351019791:android:954a256baac151d98dee7a',
+    appId: '1:43351019791:android:fd70b6c8ac7f85dd8dee7a',
     messagingSenderId: '43351019791',
     projectId: 'coach-devanshi',
     storageBucket: 'coach-devanshi.firebasestorage.app',
@@ -59,10 +59,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDdkGgJyLrdoCz4JBW3G4iHWy7KIpEsF1o',
-    appId: '1:43351019791:ios:e4931ff90029f1fb8dee7a',
+    appId: '1:43351019791:ios:4d5ba161dac958348dee7a',
     messagingSenderId: '43351019791',
     projectId: 'coach-devanshi',
     storageBucket: 'coach-devanshi.firebasestorage.app',
-    iosBundleId: 'com.example.coachDevanshiDoshi',
+    androidClientId: '43351019791-65j5r7r3ali9g4ib8tefpfnjbgqfohvc.apps.googleusercontent.com',
+    iosClientId: '43351019791-qgf9m9c283g0n0bchr9nq0bj41mqllv7.apps.googleusercontent.com',
+    iosBundleId: 'com.coach.devanshi.doshi',
   );
 }
