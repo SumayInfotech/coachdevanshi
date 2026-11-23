@@ -75,6 +75,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedDay = _selectedDate.weekday;
     _dateController.text = DateFormat('MMMM dd, yyyy').format(_selectedDate);
     callDailyCheckinAPI();
   }
@@ -103,7 +104,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
       } catch (_) {}
     }
 
-    _selectedDay = data.baselineDay;
+    _selectedDay = _selectedDate.weekday;
 
     if (data.weight != null) {
       _weightController.text = data.weight.toString();
@@ -582,7 +583,28 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
     );
   }
 
+  DateTime _getStartOfWeek(DateTime date) {
+    return DateTime(date.year, date.month, date.day - (date.weekday - 1));
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  String _formatWeekRange(DateTime start, DateTime end) {
+    if (start.year != end.year) {
+      return "${DateFormat('d MMM yyyy').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
+    } else if (start.month != end.month) {
+      return "${DateFormat('d MMM').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
+    } else {
+      return "${DateFormat('d').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
+    }
+  }
+
   Widget _buildDateSelection() {
+    final DateTime startOfWeek = _getStartOfWeek(_selectedDate);
+    final DateTime endOfWeek = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + 6);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -599,38 +621,80 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildRequiredLabel("Select Day to Log", color: const Color(0xFF534343)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              buildRequiredLabel("Select Day to Log", color: const Color(0xFF534343)),
+              // CommonText(
+              //   _formatWeekRange(startOfWeek, endOfWeek),
+              //   style: const TextStyle(
+              //     fontSize: 12,
+              //     fontWeight: FontWeight.w600,
+              //     color: Color(0xFF8B484D),
+              //   ),
+              // ),
+            ],
+          ),
           const SizedBox(height: 12),
           Row(
             spacing: 5,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
               int day = index + 1;
-              bool isSelected = _selectedDay == day;
+              DateTime buttonDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + index);
+              bool isSelected = _isSameDay(_selectedDate, buttonDate);
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => setState(() => _selectedDay = day),
+                  onTap: () {
+                    setState(() {
+                      _selectedDay = day;
+                      _selectedDate = buttonDate;
+                      _dateController.text = DateFormat('MMMM dd, yyyy').format(buttonDate);
+                      if (_dateError != null) _validate();
+                    });
+                    callDailyCheckinAPI();
+                  },
                   child: Container(
-                    height: 45,
+                    height: 50,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected ? const Color(0xFF8B484D) : const Color(0xFFF8F2F0),
                       borderRadius: BorderRadius.circular(8),
-                      border: isSelected ? null : Border.all(color: const Color(0xFF576245).withValues(alpha: 0.3)),
+                      border: isSelected ? null
+                        : Border.all(color: const Color(0xFF576245).withValues(alpha: 0.3)),
                       boxShadow: isSelected ? [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.05),
-                          offset: const Offset(0, 1), blurRadius: 1
+                          offset: const Offset(0, 1),
+                          blurRadius: 1,
                         )
                       ] : null,
                     ),
-                    child: CommonText(
-                      "D$day",
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? appColors.white : (day > 5 ? const Color(0xFF713439) : const Color(0xFF534343)),
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CommonText(
+                          "D$day",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? appColors.white
+                                : (day > 5 ? const Color(0xFF713439) : const Color(0xFF534343)),
+                          ),
+                        ),
+                        // const SizedBox(height: 2),
+                        // CommonText(
+                        //   DateFormat('d/M').format(buttonDate),
+                        //   style: TextStyle(
+                        //     fontSize: 10,
+                        //     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        //     color: isSelected
+                        //         ? appColors.white.withValues(alpha: 0.9)
+                        //         : const Color(0xFF777777),
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ),
                 ),
@@ -658,6 +722,7 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
               if (picked != null) {
                 setState(() {
                   _selectedDate = picked;
+                  _selectedDay = picked.weekday;
                   _dateController.text = DateFormat('MMMM dd, yyyy').format(picked);
                   if (_dateError != null) _validate();
                 });
