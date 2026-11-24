@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:coach_devanshi_doshi/core/services/preference_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,6 +13,7 @@ import '../../core/services/device_info_service.dart';
 import '../../core/services/health_service.dart';
 import '../../core/services/loader_service.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/preference_service.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
