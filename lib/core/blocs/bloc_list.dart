@@ -7,6 +7,7 @@ import '../repository/home_repo.dart';
 import '../repository/profile_repo.dart';
 import '../repository/progress_repo.dart';
 
+import 'auth/fcm_token/fcm_token_bloc.dart';
 import 'auth/login/login_bloc.dart';
 import 'auth/logout/logout_bloc.dart';
 import 'auth/profile/profile_bloc.dart';
@@ -40,6 +41,8 @@ import 'profile/delete_file_blood_reports/delete_file_blood_reports_bloc.dart';
 import 'home/daily_checkin/daily_checkin_bloc.dart';
 import 'home/save_daily_checkin/save_daily_checkin_bloc.dart';
 import 'home/health_sync/health_sync_bloc.dart';
+import 'notifications/notifications_bloc.dart';
+import 'notifications/mark_read/mark_notification_read_bloc.dart';
 import 'progress/save_weekly_checkin/save_weekly_checkin_bloc.dart';
 import 'progress/upload_progress_photos/upload_progress_photos_bloc.dart';
 import 'progress/save_food_diary/save_food_diary_bloc.dart';
@@ -82,6 +85,9 @@ List<SingleChildWidget> blocProviders() {
       ),
       BlocProvider(
         create: (context) => LogoutBloc(authRepo: authRepo),
+      ),
+      BlocProvider(
+        create: (context) => FcmTokenBloc(authRepo: authRepo),
       ),
     ],
 
@@ -141,6 +147,12 @@ List<SingleChildWidget> blocProviders() {
       ),
       BlocProvider(
         create: (context) => HealthSyncBloc(homeRepo: homeRepo),
+      ),
+      BlocProvider(
+        create: (context) => NotificationsBloc(homeRepo: homeRepo),
+      ),
+      BlocProvider(
+        create: (context) => MarkNotificationReadBloc(homeRepo: homeRepo),
       ),
     ],
 

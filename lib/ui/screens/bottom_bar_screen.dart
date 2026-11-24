@@ -1,15 +1,19 @@
 import 'dart:io';
 
+import 'package:coach_devanshi_doshi/core/services/preference_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/blocs/auth/fcm_token/fcm_token_bloc.dart';
 import '../../core/blocs/auth/profile/profile_bloc.dart';
 import '../../core/blocs/home/dashboard/dashboard_bloc.dart';
 import '../../core/blocs/home/health_sync/health_sync_bloc.dart';
 import '../../core/constants/urls.dart';
 import '../../core/models/auth/user_model.dart';
+import '../../core/services/device_info_service.dart';
 import '../../core/services/health_service.dart';
 import '../../core/services/loader_service.dart';
+import '../../core/services/notification_service.dart';
 import '../../main.dart';
 import '../widgets/common_text.dart';
 import 'check-in/daily_wellness_log_screen.dart';
@@ -60,11 +64,31 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
   @override
   void initState() {
     super.initState();
+    askNotification();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       callUserAPI(context: context);
     });
   }
 
+  void askNotification() async {
+    await NotificationService.askNotificationPermission();
+    final fcmToken = AppPreferences.getString(AppPreferences.fcmToken);
+    if (fcmToken.isNotEmpty) {
+      if (!mounted) return;
+      final deviceName = await DeviceInfoService.getDeviceName();
+      if (!mounted) return;
+      BlocProvider.of<FcmTokenBloc>(context).add(
+        UserFcmTokenEvent(
+          url: Urls.fcmToken,
+          body: {
+            "fcm_token": fcmToken,
+            "device_type": DeviceInfoService.deviceType,
+            "device_name": deviceName,
+          },
+        ),
+      );
+    }
+  }
 
   Future<void> _autoSyncHealthData() async {
     if (_isHealthSyncing) return;
@@ -135,6 +159,15 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
               appPrint("Health data auto-synced successfully in BottomBarScreen");
             } else if (state is HealthSyncFailed) {
               appLog(name: "Health data auto-sync failed in BottomBarScreen", state.message);
+            }
+          },
+        ),
+        BlocListener<FcmTokenBloc, FcmTokenState>(
+          listener: (context, state) {
+            if (state is FcmTokenSuccess) {
+              appPrint("FCM token updated successfully: ${state.model.message}");
+            } else if (state is FcmTokenFailed) {
+              appLog(name: "FCM token update failed in BottomBarScreen", state.message);
             }
           },
         ),

@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.coach.devanshi.doshi"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37  // flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

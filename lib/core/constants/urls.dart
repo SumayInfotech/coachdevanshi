@@ -43,4 +43,9 @@ class Urls {
   static String pathwaysProtocol({required String pathwayUuid}) => "$baseUrl/pathways/$pathwayUuid/protocol";
 
   static const healthSync = "$baseUrl/health/sync";
+
+
+  static const fcmToken = "$baseUrl/fcm-token";
+  static const notifications = "$baseUrl/notifications";
+  static String markNotificationRead({required String notificationUuid}) => "$baseUrl/notifications/$notificationUuid/read";
 }

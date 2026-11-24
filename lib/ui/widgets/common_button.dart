@@ -23,13 +23,15 @@ class CommonButton extends StatefulWidget {
   final VoidCallback onTap;
   final double? fontSize;
   final FontWeight? fontWeight;
+  final EdgeInsets? padding;
 
   const CommonButton({
     super.key,
     this.name,
     required this.onTap,
     this.width, this.height, this.textAlign, this.fontSize, this.btnColor, this.borderColor,
-    this.fontColor, this.image, this.imageSize, this.fontWeight, this.icon, this.radius, this.mainAxisAlignment, this.colors, this.boxShadow, this.isIconFirst = true,
+    this.fontColor, this.image, this.imageSize, this.fontWeight, this.icon, this.radius,
+    this.mainAxisAlignment, this.colors, this.boxShadow, this.isIconFirst = true, this.padding,
   });
 
   @override
@@ -74,6 +76,7 @@ class _CommonButtonState extends State<CommonButton> with SingleTickerProviderSt
         child: Container(
           width: widget.width,
           height: widget.height ?? 48,
+          padding: widget.padding,
           decoration: BoxDecoration(
             color: widget.btnColor ?? appColors.primary,
             // gradient: widget.btnColor == null ? LinearGradient(

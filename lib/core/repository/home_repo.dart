@@ -2,6 +2,7 @@ import '../../main.dart';
 import '../models/common_model.dart';
 import '../models/home/daily_checkin_model.dart';
 import '../models/home/dashboard_model.dart';
+import '../models/notifications/notifications_model.dart';
 import '../network/base/base_repository.dart';
 import '../network/enums/request_type.dart';
 import '../network/models/api_response.dart';
@@ -101,6 +102,55 @@ class HomeRepo extends BaseRepository {
       }
     } catch (e) {
       appLog(name: "HomeRepo syncHealthData Exception", e.toString());
+      return ApiResponse.failure(message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> getNotifications({required String url}) async {
+    final response = await networkService.request(url: url, requestType: RequestType.get);
+
+    if (response.data == null) {
+      return ApiResponse.failure(message: response.message);
+    }
+
+    try {
+      NotificationsModel model = NotificationsModel.fromJson(response.data);
+
+      if (model.success == true) {
+        return ApiResponse.success(data: model, message: model.message ?? "");
+      } else {
+        return ApiResponse.failure(message: model.message ?? "");
+      }
+    } catch (e) {
+      appLog(name: "HomeRepo getNotifications Exception", e.toString());
+      return ApiResponse.failure(message: e.toString());
+    }
+  }
+
+  Future<ApiResponse<dynamic>> markNotificationRead({
+    required String url,
+    Map<String, dynamic>? body,
+  }) async {
+    final response = await networkService.request(
+      url: url,
+      requestType: RequestType.post,
+      body: body ?? {},
+    );
+
+    if (response.data == null) {
+      return ApiResponse.failure(message: response.message);
+    }
+
+    try {
+      CommonModel model = CommonModel.fromJson(response.data);
+
+      if (model.success == true) {
+        return ApiResponse.success(data: model, message: model.message ?? "");
+      } else {
+        return ApiResponse.failure(message: model.message ?? "");
+      }
+    } catch (e) {
+      appLog(name: "HomeRepo markNotificationRead Exception", e.toString());
       return ApiResponse.failure(message: e.toString());
     }
   }

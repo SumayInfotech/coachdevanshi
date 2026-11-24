@@ -22,7 +22,8 @@ import 'rooted_recovery_screen.dart';
 import 'widget/pathway_card.dart';
 
 class SelectPathwayScreen extends StatefulWidget {
-  const SelectPathwayScreen({super.key});
+  final bool isBack;
+  const SelectPathwayScreen({super.key, this.isBack = false});
 
   @override
   State<SelectPathwayScreen> createState() => _SelectPathwayScreenState();
@@ -151,7 +152,12 @@ class _SelectPathwayScreenState extends State<SelectPathwayScreen> {
 
   void _onBack() {
     LoaderService.hide();
-    bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    if(widget.isBack){
+      if (!mounted) return;
+      navigation.pop(context);
+    } else {
+      bottomPageController.jumpToPage(BottomBarScreenIndex.home);
+    }
   }
 
   @override
