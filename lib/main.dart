@@ -58,12 +58,12 @@ void appPrint(String msg) {
   if (kDebugMode) {
     debugPrint(msg);
   }
-  // print(msg);
+  print(msg);
 }
 
 void appLog(String msg, {String? name}) {
   if (kDebugMode) {
     log(name: name ?? "", msg);
   }
-  // print("$name ::: $msg");
+  print("$name ::: $msg");
 }

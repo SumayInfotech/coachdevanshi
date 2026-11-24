@@ -22,10 +22,27 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.43351019791-qgf9m9c283g0n0bchr9nq0bj41mqllv7</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
+	<string>We use your health and fitness data, including daily steps, walking and running distance, active energy burned, and active minutes, to display your daily activity progress and help you track your fitness goals. Your data is accessed only with your permission.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We need access to your health data to sync your daily steps, distance, and calories.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>We need access to your health data to sync your daily activity progress.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -66,9 +83,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSHealthShareUsageDescription</key>
-	<string>We need access to your health data to sync your daily steps, distance, and calories.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>We need access to your health data to sync your daily activity progress.</string>
 </dict>
 </plist>
