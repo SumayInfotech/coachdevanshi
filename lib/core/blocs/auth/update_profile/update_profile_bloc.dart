@@ -12,8 +12,8 @@ class UpdateProfileBloc extends Bloc<UpdateProfileEvent, UpdateProfileState> {
   final AuthRepo _authRepo;
 
   UpdateProfileBloc({
-    required AuthRepo authRepo,
-  }) : _authRepo = authRepo, super(UpdateProfileInitial()) {
+    required this._authRepo,
+  }) : super(UpdateProfileInitial()) {
     on<UserUpdateProfileEvent>(_onUpdateProfileEvent);
   }
 

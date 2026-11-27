@@ -11,8 +11,8 @@ class ChapterFourBloc extends Bloc<ChapterFourEvent, ChapterFourState> {
   final ProfileRepo _profileRepo;
 
   ChapterFourBloc({
-    required ProfileRepo profileRepo,
-  }) : _profileRepo = profileRepo, super(ChapterFourInitial()) {
+    required this._profileRepo,
+  }) : super(ChapterFourInitial()) {
     on<UserChapterFourEvent>(_onChapterFourEvent);
   }
 

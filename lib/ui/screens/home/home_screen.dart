@@ -18,6 +18,7 @@ import '../../../main.dart';
 import '../../widgets/common_button.dart';
 import '../../widgets/common_text.dart';
 import '../bottom_bar_screen.dart';
+import '../chat/chat_screen.dart';
 import '../coach/fat_loss_inch_loss_screen.dart';
 import '../coach/gut_reset_protocol_screen.dart';
 import '../coach/healthy_weight_gain_screen.dart';
@@ -461,6 +462,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           onUploadReportsTap: () => navigation.push(context,
             const BloodReportUploadScreen(isBack: true),
+          ),
+          onChatTap: () => navigation.pushSlideAnimation(context,
+            const ChatScreen(),
           ),
         ),
         const SizedBox(height: 28),

@@ -11,9 +11,8 @@ class SaveDailyCheckinBloc extends Bloc<SaveDailyCheckinEvent, SaveDailyCheckinS
   final HomeRepo _homeRepo;
 
   SaveDailyCheckinBloc({
-    required HomeRepo homeRepo,
-  })  : _homeRepo = homeRepo,
-        super(SaveDailyCheckinInitial()) {
+    required this._homeRepo,
+  })  : super(SaveDailyCheckinInitial()) {
     on<UserSaveDailyCheckinEvent>(_onSaveDailyCheckinEvent);
   }
 

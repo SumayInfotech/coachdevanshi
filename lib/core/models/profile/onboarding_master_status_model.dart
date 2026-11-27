@@ -60,7 +60,7 @@ class Data {
     "is_onboarding_completed": isOnboardingCompleted,
     "completed_chapters": completedChapters,
     "total_chapters": totalChapters,
-    "chapters": chapters.map((x) => x?.toJson()).toList(),
+    "chapters": chapters.map((x) => x.toJson()).toList(),
     "consent": consent?.toJson(),
     "pathway": pathway,
     "protocol_status": protocolStatus,
@@ -125,7 +125,7 @@ class Consent {
   Map<String, dynamic> toJson() => {
     "is_accepted": isAccepted,
     "accepted_at": acceptedAt,
-    "items": items.map((x) => x?.toJson()).toList(),
+    "items": items.map((x) => x.toJson()).toList(),
   };
 
 }

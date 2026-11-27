@@ -11,8 +11,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final HomeRepo _homeRepo;
 
   DashboardBloc({
-    required HomeRepo homeRepo,
-  }) : _homeRepo = homeRepo, super(DashboardInitial()) {
+    required this._homeRepo,
+  }) : super(DashboardInitial()) {
     on<UserDashboardEvent>(_onDashboardEvent);
   }
 

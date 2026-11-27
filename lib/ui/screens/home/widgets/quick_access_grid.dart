@@ -29,6 +29,7 @@ class QuickAccessGrid extends StatelessWidget {
   final VoidCallback? onFoodDiaryTap;
   final VoidCallback? onProgressPhotosTap;
   final VoidCallback? onUploadReportsTap;
+  final VoidCallback? onChatTap;
 
   const QuickAccessGrid({
     super.key,
@@ -38,6 +39,7 @@ class QuickAccessGrid extends StatelessWidget {
     this.onFoodDiaryTap,
     this.onProgressPhotosTap,
     this.onUploadReportsTap,
+    this.onChatTap,
   });
 
   @override
@@ -65,6 +67,14 @@ class QuickAccessGrid extends StatelessWidget {
         fallbackIcon: Icons.cloud_upload_outlined,
         iconColor: const Color(0xFF404A2F),
         onTap: onUploadReportsTap,
+      ),
+      QuickAccessItem(
+        title: "Chat",
+        iconPath: appIcons.homeTileChat,
+        iconBgColor: const Color(0xFFFFDADB).withValues(alpha: 0.5),
+        fallbackIcon: Icons.chat,
+        iconColor: appColors.primary,
+        onTap: onChatTap,
       ),
     ];
 
@@ -98,81 +108,84 @@ class QuickAccessGrid extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         // Shortcut Tiles Row
-        Row(
-          children: List.generate(list.length, (index) {
-            final item = list[index];
+        IntrinsicHeight(
+          child: Row(
+            children: List.generate(list.length, (index) {
+              final item = list[index];
 
-            return Expanded(
-              child: Container(
-                margin: EdgeInsets.only(
-                  right: index == list.length - 1 ? 0 : 10,
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: item.onTap,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: appColors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 42, height: 42,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: item.iconBgColor,
+              return Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    right: index == list.length - 1 ? 0 : 10,
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: item.onTap,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: appColors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
                             ),
-                            child: Center(
-                              child: item.iconPath != null ? Image.asset(
-                                item.iconPath!,
-                                width: 20, height: 20,
-                                color: item.iconColor,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    item.fallbackIcon,
-                                    color: item.iconColor,
-                                    size: 20,
-                                  );
-                                },
-                              ) : Icon(
-                                item.fallbackIcon,
-                                color: item.iconColor,
-                                size: 20,
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 42, height: 42,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: item.iconBgColor,
+                              ),
+                              child: Center(
+                                child: item.iconPath != null ? Image.asset(
+                                  item.iconPath!,
+                                  width: 20, height: 20,
+                                  color: item.iconColor,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      item.fallbackIcon,
+                                      color: item.iconColor,
+                                      size: 20,
+                                    );
+                                  },
+                                ) : Icon(
+                                  item.fallbackIcon,
+                                  color: item.iconColor,
+                                  size: 20,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          CommonText(item.title,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF1D1B1A),
+                            const SizedBox(height: 10),
+                            CommonText(item.title,
+                              maxLines: 2,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1D1B1A),
+                              ),
+                              fontFamily: fontFamilyPlusJakartaSans,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            fontFamily: fontFamilyPlusJakartaSans,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ],
     );

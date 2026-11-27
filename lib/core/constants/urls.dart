@@ -48,4 +48,8 @@ class Urls {
   static const fcmToken = "$baseUrl/fcm-token";
   static const notifications = "$baseUrl/notifications";
   static String markNotificationRead({required String notificationUuid}) => "$baseUrl/notifications/$notificationUuid/read";
+
+
+  static const sendTextMessage = "$baseUrl/chat/messages";
+  static const getMessage = "$baseUrl/chat/messages";
 }

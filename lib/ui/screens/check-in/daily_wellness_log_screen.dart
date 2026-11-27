@@ -591,19 +591,8 @@ class _DailyWellnessLogScreenState extends State<DailyWellnessLogScreen> {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  String _formatWeekRange(DateTime start, DateTime end) {
-    if (start.year != end.year) {
-      return "${DateFormat('d MMM yyyy').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
-    } else if (start.month != end.month) {
-      return "${DateFormat('d MMM').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
-    } else {
-      return "${DateFormat('d').format(start)} - ${DateFormat('d MMM yyyy').format(end)}";
-    }
-  }
-
   Widget _buildDateSelection() {
     final DateTime startOfWeek = _getStartOfWeek(_selectedDate);
-    final DateTime endOfWeek = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day + 6);
 
     return Container(
       padding: const EdgeInsets.all(16),
